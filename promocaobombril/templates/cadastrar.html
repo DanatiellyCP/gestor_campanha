@@ -1,0 +1,151 @@
+{% extends 'base_index.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* Ajustes no formulário gerado pelo Django */
+  form p {
+    margin-bottom: 1rem;
+  }
+
+  form p label {
+    display: block;
+    margin-bottom: .5rem;
+    font-weight: 500;
+    color: #495057;
+  }
+
+  form p input[type="text"],
+  form p input[type="email"],
+  form p input[type="password"],
+  form p input[type="number"],
+  form p select {
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+  }
+
+  form p input:focus, form p select:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+  }
+
+  /* Estilo para a lista de erros do formulário */
+  .errorlist {
+    list-style-type: none;
+    padding: 0;
+    margin: 0 0 1rem 0;
+    color: #dc3545;
+    font-size: .875em;
+  }
+
+  /* Estilo para o botão de cadastro */
+  .btn-success {
+      width: 100%;
+      background-color: #5cb85c;
+      border-color: #4cae4c;
+      padding: 10px;
+      font-size: 16px;
+  }
+
+  .btn-success:hover {
+      background-color: #4cae4c;
+      border-color: #4cae4c;
+  }
+
+  /* Estilo para o card do formulário */
+  .form-card {
+    background-color: #fff;
+    padding: 2rem;
+    border: 1px solid #dee2e6;
+    border-radius: .5rem;
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15);
+  }
+
+  /* Estilo para o container flexbox */
+  .flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+  }
+
+  /* Estilo para a coluna do formulário */
+  .form-column {
+    flex-basis: 60%;
+    padding: 2rem;
+    min-width: 450px;
+  }
+
+  /* Estilo para a coluna da imagem */
+  .image-column {
+    flex-basis: 40%;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
+
+<section class="page-content embed-section section-up-interna">
+  <div class="container">
+      <div id="external-form-container">
+        <div class="flex-container">
+          <!-- Coluna do Formulário (Esquerda) -->
+          <div class="form-column">
+            <div class="form-card">
+              <h3 class="text-center">Cadastrar</h3>
+
+              {% if form.errors %}
+                <div class="alert alert-danger">
+                  {{ form.errors }}
+                </div>
+              {% endif %}
+
+              {% if erro %}
+                <div class="alert alert-danger">
+                  {{ erro }}
+                </div>
+              {% endif %}
+
+              <form method="post" action="{% url 'cadastrar' %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="form-group">
+                  <button type="submit" class="btn btn-success" name="cadastro">Cadastrar</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Coluna da Imagem (Direita) -->
+          <div class="image-column">
+            <div class="align-center">
+              <img src="{% static 'assets/images/ROBOM-BRIL REGULAMENTO.png' %}" 
+              alt="Mascote Robom-Bril apontando para o regulamento"
+                class="mascote-regulamento">
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_js %}
+  <!-- Bootstrap 5 JS Bundle (Popper + Bootstrap) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{% static 'js/forms.js' %}"></script>
+  <script src="{% static 'js/cep-autofill.js' %}"></script>
+  <script src="{% static 'js/validar_cpf.js' %}"></script>
+{% endblock %}

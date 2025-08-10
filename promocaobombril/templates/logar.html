@@ -1,0 +1,109 @@
+{% extends 'base_index.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="page-content embed-section section-up-interna">
+  <div class="container">
+      <h1 class="custom-title text-bombril-red text-center">CADASTRE SEU CUPOM</h1>
+      <div id="external-form-container">
+        <div class="row">
+          <style>
+            #external-form-container .form-card {
+              background-color: #ffffff;
+              border-radius: 16px;
+              padding: 40px;
+              box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+              min-width: 450px; /* Ajuste a largura máxima conforme necessário */
+              margin: 40px auto; /* Centraliza o card e adiciona margem */
+            }
+          
+            #external-form-container .form-card h3 {
+              color: #263a7c; /* Azul escuro do título */
+              font-weight: bold;
+              text-align: center;
+              margin-bottom: 30px;
+              font-size: 24px;
+            }
+          
+            #external-form-container .form-group {
+              margin-bottom: 20px;
+            }
+          
+            #external-form-container .form-group label {
+              color: #263a7c; /* Azul escuro dos labels */
+              font-weight: 500;
+              margin-bottom: 8px;
+              display: block;
+            }
+          
+            #external-form-container .form-control {
+              background-color: #f0f4f8; /* Fundo azul claro para os inputs */
+              border: 1px solid #d9e2ec;
+              border-radius: 8px;
+              height: 48px;
+              padding: 10px 15px;
+              width: 100%;
+            }
+          
+            #external-form-container .form-control:focus {
+              background-color: #ffffff;
+              border-color: #263a7c;
+              box-shadow: none;
+            }
+          
+            #external-form-container .btn {
+              background-color: #263a7c; /* Azul escuro do botão */
+              border-color: #263a7c;
+              color: #ffffff;
+              border-radius: 8px;
+              padding: 12px;
+              width: 100%;
+              font-weight: bold;
+              text-transform: uppercase;
+              margin-top: 15px;
+              transition: background-color 0.3s ease;
+            }
+          
+            #external-form-container .btn:hover {
+              background-color: #1a2b5e; /* Um tom mais escuro para o hover */
+              border-color: #1a2b5e;
+            }
+          </style>
+          <!-- Login -->
+          <div class="col-md-6 col-sm-12">
+            <div class="form-card">
+              <h3>Login</h3>
+              <form method="POST" action="{% url 'logar' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="email-login">E-mail:</label>
+                  <input type="email" name="email" id="email-login" class="form-control" required>
+                </div>
+    
+                <div class="form-group">
+                  <label for="senha-login">Senha:</label>
+                  <input type="password" name="senha" id="senha-login" class="form-control" required>
+                </div>
+    
+                <button type="submit" class="btn btn-success" name="login">Entrar</button>
+    
+                {% if erro %}
+                  <div class="alert alert-danger" style="margin-top: 10px;">{{ erro }}</div>
+                {% endif %}
+              </form>
+            </div>
+          </div>  
+        </div>
+      </div>
+  </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_js %}
+  <!-- Bootstrap 5 JS Bundle (Popper + Bootstrap) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+

@@ -1,0 +1,37 @@
+{% load static %}
+<head>
+ {% block head %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Promoção Bombril</title>
+  
+  <meta name="Participe da promoção Bombril e concorra a prêmios incríveis. Cadastre seus cupons e dê um brilho no seu futuro!">
+   
+  
+  <link rel="icon"  type="image/png" href="{% static 'assets/images/favicon.png' %}">
+
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+  <!--link rel="stylesheet" href="{% static 'assets/css/estilos_cabecalho.css' %}"-->
+
+  {% endblock %}
+</head>
+
+<body  style="background-image: url('{% static 'assets/images/background-amarelo.jpg' %}'); background-size: cover; background-repeat: no-repeat;">
+     <main>
+            {% block content %}
+            
+            {% endblock %}
+    </main>
+ 
+
+
+    
+
+    
+    <script src="{% static 'assets/js/main.js' %}"></script>
+    
+     
+    
+    
+
+</body>
