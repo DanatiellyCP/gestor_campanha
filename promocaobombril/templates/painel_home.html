@@ -1,0 +1,172 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Promoção Bombril - Home</title>
+    <meta name="description"
+        content="Participe da promoção Bombril e concorra a prêmios incríveis. Cadastre seus cupons e dê um brilho no seu futuro!">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://kit.fontawesome.com/f0d3945d17.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
+
+    <link rel="icon" type="image/png" href="{% static 'responsive/images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+</head>
+<body>
+  <div class="wrap">
+    <header class="menu" role="navigation" aria-label="Principal">
+      <div class="bar">
+        <a class="brand" href="#" aria-label="Página inicial">
+          <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+        </a>
+        <nav aria-label="Seções">
+          <ul class="links">
+            <li><a href="/">Sorteios</a></li>
+            <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
+            <li><a href="/editar-perfil/">Editar perfil</a></li>
+          </ul>
+        </nav>
+        <div class="actions">
+          <button class="btn btn-participe" id="ctaParticipar">SAIR</button>
+        </div>
+        <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div class="drawer" id="drawer">
+        <ul class="links">
+          <br/>
+          <li><a href="/">Sorteios</a></li>
+          <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
+          <li><a href="/editar-perfil/">Editar perfil</a></li>
+        </ul>
+        <div class="actions">
+          <button class="btn btn-participe" id="mParticipar">SAIR</button>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <div class="topo panel-hero" role="img" aria-label="Topo do site">
+    <img src="{% static 'responsive/images/background_topo.png' %}" alt="" class="topo-measure" aria-hidden="true" />
+    <div class="inner">
+      <h1 class="sr-only">Painel</h1>
+      <div class="panel-duo" aria-hidden="true">
+        <img src="{% static 'responsive/images/PRODUTOS.png' %}" alt="" class="panel-logo" />
+        <img src="{% static 'responsive/images/painel_promocao.png' %}" alt="" class="panel-side" />
+      </div>
+      <img src="{% static 'responsive/images/ROBOM-BRIL_NAVE.png' %}" alt="" class="topo-robot" aria-hidden="true" />
+    </div>
+  </div>
+  <div id="content">
+    <section class="participant-panel" aria-label="Painel do participante">
+      <div class="inner">
+        <header class="panel-header">
+          <h2 class="panel-title">Painel do participante</h2>
+          <p class="panel-sub">Bem-vindo de volta, Rodrigo</p>
+        </header>
+
+        <section class="panel-coupons" aria-label="Seus cupons cadastrados">
+          <h3 class="section-title">Seus cupons cadastrados</h3>
+          <div class="table-responsive">
+            <table class="coupons-table" role="table">
+              <thead>
+                <tr>
+                  <th scope="col">Status</th>
+                  <th scope="col">Data</th>
+                  <th scope="col">Hora</th>
+                  <th scope="col">Detalhar</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Status"><span class="badge status-ok">Aprovado</span></td>
+                  <td data-label="Data">07/08/2025</td>
+                  <td data-label="Hora">12:00</td>
+                  <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="#">Exibir</a></td>
+                </tr>
+                <tr>
+                  <td data-label="Status"><span class="badge status-wait">Aguardando</span></td>
+                  <td data-label="Data">07/08/2025</td>
+                  <td data-label="Hora">12:00</td>
+                  <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="#">Exibir</a></td>
+                </tr>
+                <tr>
+                  <td data-label="Status"><span class="badge status-bad">Reprovado</span></td>
+                  <td data-label="Data">07/08/2025</td>
+                  <td data-label="Hora">12:00</td>
+                  <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="#">Exibir</a></td>
+                </tr>
+                <tr>
+                  <td data-label="Status"><span class="badge status-ok">Aprovado</span></td>
+                  <td data-label="Data">07/08/2025</td>
+                  <td data-label="Hora">12:00</td>
+                  <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="#">Exibir</a></td>
+                </tr>
+                <tr>
+                  <td data-label="Status"><span class="badge status-ok">Aprovado</span></td>
+                  <td data-label="Data">07/08/2025</td>
+                  <td data-label="Hora">12:00</td>
+                  <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="#">Exibir</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel-data" aria-label="Seus dados">
+          <h3 class="band-title">Seus dados</h3>
+          <form class="panel-form" action="#" method="post">
+            <label class="field">
+              <span class="label">Nome:</span>
+              <input type="text" name="nome" value="Rodrigo Castanho" />
+            </label>
+            <label class="field">
+              <span class="label">CPF:</span>
+              <input type="text" name="cpf" value="222.333.444-56" />
+            </label>
+            <label class="field">
+              <span class="label">e-mail:</span>
+              <input type="email" name="email" value="rodrigo@rodrigocastanho.com" />
+            </label>
+            <label class="field">
+              <span class="label">Celular:</span>
+              <input type="text" name="celular" value="(11) 98877-6655" />
+            </label>
+            <div class="form-actions">
+              <button type="submit" class="btn-save">Salvar alterações</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+  </div>
+  <footer class="footer">
+    <div class="inner">
+      <div class="footer-top">
+        <h2 class="footer-title">É mais do que bom. É da</h2>
+        <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+      </div>
+      <ul class="footer-links">
+        <li><a href="/termos">Termos de uso</a></li>
+        <li><a href="/privacidade">Política de privacidade</a></li>
+        <li><a href="/lgpd">LGPD</a></li>
+      </ul>
+      <p class="footer-legal">
+        PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Privacy/Cookie banner -->
+  <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Aviso de cookies e privacidade">
+    <div class="cookie-inner">
+      <p class="cookie-text">Utilizamos cookies para otimizar sua experiência em nosso site. Ao continuar a navegação, você concorda com a nossa <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
+      <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
+    </div>
+   </div>
+  <script src="{% static 'responsive/menu.js' %}"></script>
+</body>
+</html>

@@ -9,4 +9,6 @@ urlpatterns = [
     path('cadastrar/', views.cadastrar, name='cadastrar'),
     path('duvidas/', views.duvidas, name='duvidas'),
     path('logar/', views.logar, name='logar'),
+    path('painel-home/', views.painel_home, name='painel_home'),
+    path('painel-cadastrar-cupom/', views.painel_cadastrar_cupom, name='painel_cadastrar_cupom'),
 ]

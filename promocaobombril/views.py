@@ -30,3 +30,10 @@ def cadastrar(request):
 
 def logar(request):
     return render(request, 'logar.html')
+
+def painel_home(request):
+    return render(request, 'painel_home.html')
+
+def painel_cadastrar_cupom(request):
+    return render(request, 'painel_cadastrar_cupom.html')
+
