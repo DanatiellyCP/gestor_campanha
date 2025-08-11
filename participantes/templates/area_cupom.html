@@ -1,57 +1,204 @@
 {% extends 'base_2.html' %}
-{% load static %}
+{% load static extras %}
 
 {% block title %}Detalhes do Cupom{% endblock %}
 
 {% block content %}
 {% include 'includes/header_3.html' %}
 
-<div class="container" style="margin: 5%; padding: 5%;">
-  <div class="row mb-4">
-    <div class="col-md-6">
-      <h5>Dados do Cupom:</h5>
-      <ul class="list-group">
-        {% if dados_cupom.emitente %}
-          <li class="list-group-item"><strong>Loja:</strong> {{ dados_cupom.emitente.nome_razao_social|default:"-" }}</li>
-          <li class="list-group-item"><strong>CNPJ:</strong> {{ dados_cupom.emitente.cnpj|default:"-" }}</li>
-          <li class="list-group-item"><strong>Endereço:</strong> {{ dados_cupom.emitente.endereco|default:"-" }}</li>
-          <li class="list-group-item"><strong>Bairro:</strong> {{ dados_cupom.emitente.bairro|default:"-" }}</li>
-          <li class="list-group-item"><strong>Município:</strong> {{ dados_cupom.emitente.municipio|default:"-" }}</li>
-        {% else %}
-          <li class="list-group-item text-danger">Dados do emitente não disponíveis.</li>
-        {% endif %}
-        <li class="list-group-item"><strong>Data:</strong> {{ dados_cupom.data_hora_emissao|default:"-" }}</li>
-        <li class="list-group-item"><strong>Total:</strong> R$ {{ dados_cupom.valor_total|floatformat:2|default:"0,00" }}</li>
-        <li class="list-group-item"><strong>Forma de Pagamento:</strong> {{ dados_cupom.forma_pagamento|default:"-" }}</li>
-        <li class="list-group-item"><strong>SAT:</strong> {{ dados_cupom.sat_numero_serie|default:"-" }}</li>
-        <li class="list-group-item"><strong>Chave QR:</strong> {{ dados_cupom.chave_acesso|default:"-" }}</li>
-      </ul>
+<div class="container my-5">
+
+  {% if cupom.tipo_documento == 'NFC-e' %}
+    <div class="row mb-4">
+      <!-- Dados do Cupom -->
+      <div class="col-md-6">
+        <h5>Dados do Cupom:</h5>
+        <ul class="list-group">
+          {% if dados_json.emitente %}
+            <li class="list-group-item"><strong>Loja:</strong> {{ dados_json.emitente.nome|default:"-" }}</li>
+            <li class="list-group-item"><strong>CNPJ:</strong> {{ dados_json.emitente.cnpj|default:"-" }}</li>
+            <li class="list-group-item"><strong>Endereço:</strong> {{ dados_json.emitente.endereco|default:"-" }}</li>
+            <li class="list-group-item"><strong>Bairro:</strong> {{ dados_json.emitente.bairro|default:"-" }}</li>
+            <li class="list-group-item"><strong>Município:</strong> {{ dados_json.emitente.municipio|default:"-" }}</li>
+          {% else %}
+            <li class="list-group-item text-danger">Dados do emitente não disponíveis.</li>
+          {% endif %}
+          <li class="list-group-item"><strong>Data:</strong> {{ dados_json.infos.data_emissao|default:"-" }}</li>
+          <li class="list-group-item"><strong>Total:</strong> R$ {{ dados_json.infos.valor_total|default:"0.00"|floatformat:2 }}</li>
+          <li class="list-group-item"><strong>Forma de Pagamento:</strong> {{ dados_json.infos.forma_pagamento|default:"-" }}</li>
+          <li class="list-group-item"><strong>Número de Série:</strong> {{ dados_json.infos.numero_serie|default:"-" }}</li>
+          <li class="list-group-item"><strong>Chave de Acesso:</strong> {{ dados_json.chave_acesso|default:"-" }}</li>
+        </ul>
+      </div>
+
+      <!-- Produtos -->
+      <div class="col-md-6">
+        <h5>Produtos</h5>
+        <ul class="list-group">
+          {% if dados_json.produtos %}
+            {% for produto in dados_json.produtos %}
+              <li class="list-group-item">
+                <strong>{{ produto.num|default:forloop.counter }}. {{ produto.descricao|default:"-" }}</strong><br>
+                {{ produto.qtd|default:"1" }} × R$ {{ produto.valor_unitario|default:"0.00"|floatformat:2 }}
+                = R$ {{ produto.valor_total_item|default:"0.00"|floatformat:2 }}
+                <br>
+                <small class="text-muted">
+                  Código: {{ produto.codigo|default:"-" }} | EAN: {{ produto.ean|default:"-" }}
+                </small>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li class="list-group-item">Nenhum produto encontrado.</li>
+          {% endif %}
+        </ul>
+      </div>
     </div>
 
-    <div class="col-md-6">
-      <h5 class="mt-4">Produtos</h5>
-      <ul class="list-group">
-        {% if dados_cupom.produtos %}
-          {% for produto in dados_cupom.produtos %}
-            <li class="list-group-item">
-              <strong>{{ produto.item|default:"" }}. {{ produto.descricao|default:"-" }}</strong><br>
-              {{ produto.quantidade|default:"1" }} × 
-              R$ {{ produto.valor_unitario|floatformat:2|default:"0,00" }} = 
-              R$ {{ produto.valor_total_item|floatformat:2|default:"0,00" }}
-            </li>
-          {% endfor %}
-        {% else %}
-          <li class="list-group-item">Nenhum produto encontrado.</li>
-        {% endif %}
-      </ul>
-    </div>
-  </div>
+  {% elif cupom.tipo_documento == 'SAT-cfe' %}
+    <div class="row mb-4">
+      <!-- Dados do Cupom SAT -->
+      <div class="col-md-6">
+        <h5>Dados do Cupom SAT-CFe:</h5>
+        <ul class="list-group">
+          {% if dados_json.emitente %}
+            <li class="list-group-item"><strong>Loja:</strong> {{ dados_json.emitente.nome|default:"-" }}</li>
+            <li class="list-group-item"><strong>CNPJ:</strong> {{ dados_json.emitente.cnpj|default:"-" }}</li>
+            <li class="list-group-item"><strong>Endereço:</strong> {{ dados_json.emitente.endereco|default:"-" }}</li>
+            <li class="list-group-item"><strong>Bairro:</strong> {{ dados_json.emitente.bairro|default:"-" }}</li>
+            <li class="list-group-item"><strong>Município:</strong> {{ dados_json.emitente.municipio|default:"-" }}</li>
+          {% else %}
+            <li class="list-group-item text-danger">Dados do emitente não disponíveis.</li>
+          {% endif %}
+          <li class="list-group-item"><strong>Data:</strong> {{ dados_json.infos.data_emissao|default:"-" }}</li>
+          <li class="list-group-item"><strong>Total:</strong> R$ {{ dados_json.infos.valor_total|default:"0.00"|floatformat:2 }}</li>
+          <li class="list-group-item"><strong>Forma de Pagamento:</strong> {{ dados_json.cobranca.forma_pagamento|default:"-" }}</li>
+          <li class="list-group-item"><strong>Número de Série SAT:</strong> {{ dados_json.infos.numero_serie|default:"-" }}</li>
+          <li class="list-group-item"><strong>Chave de Consulta:</strong> {{ dados_json.chave_acesso|default:"-" }}</li>
+        </ul>
+      </div>
 
-  {% if cupom.dados_cupom %}
+      <!-- Produtos -->
+      <div class="col-md-6">
+        <h5>Produtos</h5>
+        <ul class="list-group">
+          {% if dados_json.produtos %}
+            {% for produto in dados_json.produtos %}
+              <li class="list-group-item">
+                <strong>{{ produto.num|default:forloop.counter }}. {{ produto.descricao|default:"-" }}</strong><br>
+                {{ produto.qtd|default:"1" }} × R$ {{ produto.valor_unitario|default:"0.00"|floatformat:2 }}
+                = R$ {{ produto.valor_total_item|default:"0.00"|floatformat:2 }}
+                <br>
+                <small class="text-muted">
+                  Código: {{ produto.codigo|default:"-" }} | EAN: {{ produto.ean|default:"-" }}
+                </small>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li class="list-group-item">Nenhum produto encontrado.</li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+  {% elif cupom.tipo_documento == 'NF-e' %}
+    <div class="row mb-4">
+      <!-- Dados NF-e -->
+      <div class="col-md-6">
+        <h5>Dados da NF-e:</h5>
+        <ul class="list-group">
+          {% if dados_json.emitente %}
+            <li class="list-group-item"><strong>Empresa:</strong> {{ dados_json.emitente.nome|default:"-" }}</li>
+            <li class="list-group-item"><strong>CNPJ:</strong> {{ dados_json.emitente.cnpj|default:"-" }}</li>
+            <li class="list-group-item"><strong>Endereço:</strong> {{ dados_json.emitente.endereco|default:"-" }}</li>
+            <li class="list-group-item"><strong>Bairro:</strong> {{ dados_json.emitente.bairro|default:"-" }}</li>
+            <li class="list-group-item"><strong>Município:</strong> {{ dados_json.emitente.municipio|default:"-" }}</li>
+          {% else %}
+            <li class="list-group-item text-danger">Dados do emitente não disponíveis.</li>
+          {% endif %}
+          {% if dados_json.nfe %}
+            <li class="list-group-item"><strong>Data de Emissão:</strong> {{ dados_json.nfe.data_emissao|default:"-" }}</li>
+            <li class="list-group-item"><strong>Total da Nota:</strong> R$ {{ dados_json.nfe.valor_total|default:"0.00"|floatformat:2 }}</li>
+          {% endif %}
+          {% if dados_json.cobranca %}
+            <li class="list-group-item"><strong>Forma de Pagamento:</strong> {{ dados_json.cobranca.forma_pagamento|default:"-" }}</li>
+          {% endif %}
+          <li class="list-group-item"><strong>Chave de Acesso:</strong> {{ dados_json.chave_acesso|default:"-" }}</li>
+        </ul>
+      </div>
+
+      <!-- Itens NF-e -->
+      <div class="col-md-6">
+        <h5>Itens da NF-e</h5>
+        <ul class="list-group">
+          {% if dados_json.produtos %}
+            {% for produto in dados_json.produtos %}
+              <li class="list-group-item">
+                <strong>{{ produto.num|default:forloop.counter }}. {{ produto.descricao|default:"-" }}</strong><br>
+                {{ produto.qtd|default:"1" }} × R$ {{ produto.valor_unitario|default:"0.00"|floatformat:2 }}
+                = R$ {{ produto.valor_total_item|default:"0.00"|floatformat:2 }}
+                <br>
+                <small class="text-muted">
+                  Código: {{ produto.codigo|default:"-" }} | EAN: {{ produto.ean|default:"-" }}
+                </small>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li class="list-group-item">Nenhum produto encontrado.</li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if cupom.ocr_text %}
     <div class="mb-4">
-      <h5>Texto completo extraído do cupom (OCR):</h5>
+      <h5>Texto extraído do cupom (OCR):</h5>
       <pre class="bg-light p-3 border rounded" style="white-space: pre-wrap;">{{ cupom.ocr_text|default:"-" }}</pre>
     </div>
   {% endif %}
+
+  {% if dados_cupom %}
+    <div class="mb-4">
+      <h5>Dados Extraídos do Cupom:</h5>
+      <ul class="list-group">
+        {% for key, value in dados_cupom.items %}
+          <li class="list-group-item"><strong>{{ key }}:</strong> {{ value }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% else %}
+    <p>Nenhum dado do cupom disponível.</p>
+  {% endif %}
+
+  <div class="mb-4">
+    <h5>Produtos Validados:</h5>
+    {% if produtos_validos %}
+      <table class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nome</th>
+            <th>Quantidade</th>
+            <th>Valor Unitário</th>
+            <th>Número da Sorte</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for produto in produtos_validos %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ produto.nome }}</td>
+              <td>{{ produto.quantidade }}</td>
+              <td>R$ {{ produto.valor_unitario|floatformat:2 }}</td>
+              <td>{{ produto.num_sorte }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Não há produtos para esse cupom.</p>
+    {% endif %}
+  </div>
+
 </div>
 {% endblock %}

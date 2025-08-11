@@ -94,6 +94,7 @@
                     <th>Status</th>
                     <th>Data</th>
                     <th>Hora</th>
+                    <th>Tipo</th>
                     <th>Detalhar</th>
                   </tr>
                 </thead>
@@ -103,6 +104,7 @@
                     <td>{{ cupom.status }}</td>
                     <td>{{ cupom.data_cadastro|date:"d/m/Y" }}</td>
                     <td>{{ cupom.hora_cadastro }}</td>
+                    <td>{{ cupom.tipo_documento }}</td>
                     <td>  
                       <a href="{% url 'area_cupom' cupom.id %}" class="btn btn-light">
                         <img src="{% static 'imgs_sistema/detalhe2.ico' %}" alt="Detalhar cupom {{ cupom.id }}" style="width:30px; height:30px;">

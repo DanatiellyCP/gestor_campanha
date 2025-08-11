@@ -12,7 +12,8 @@ from participantes.api_views import ParticipantesViewSet
 # --- Configuração do Router da API ---
 # O router é ótimo para criar rapidamente os endpoints de CRUD (Create, Read, Update, Delete)
 router = DefaultRouter()
-router.register(r'participantes', ParticipantesViewSet)
+#router.register(r'participantes', ParticipantesViewSet)
+router.register(r'participantes', ParticipantesViewSet, basename='participantes')
 
 # --- Padrões de URL do Projeto ---
 urlpatterns = [

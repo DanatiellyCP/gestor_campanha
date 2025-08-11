@@ -7,8 +7,8 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-def gerar_link_sefaz(chave: str) -> str | None:
-    """
+""" def gerar_link_sefaz(chave: str) -> str | None:
+    
     Retorna o endpoint de consulta NFCe na API InfoSimples com base na UF extraída da chave.
     
     Parâmetros:
@@ -16,7 +16,7 @@ def gerar_link_sefaz(chave: str) -> str | None:
     
     Retorna:
         str | None: URL de consulta ou None se inválida.
-    """
+    
     if not isinstance(chave, str) or len(chave) != 44 or not chave.isdigit():
         return None  # Chave inválida
 
@@ -40,24 +40,75 @@ def gerar_link_sefaz(chave: str) -> str | None:
     uf_codigo = chave[:2]
     uf_sigla = codigos_uf.get(uf_codigo)
 
-    return links_infosimples.get(uf_sigla)
-
-
-
-def consulta_api_sefaz(chave: str) -> dict | None:
+    return links_infosimples.get(uf_sigla)"""
+#---------------------------------------------------------------------------------------
+def gerar_link_sefaz(chave: str, tipo: str = "nfce") -> str | None:
     """
-    Consulta a chave de um cupom fiscal na API do InfoSimples.
-
-    Esta função encapsula a chamada à API, tratando a autenticação,
-    a formatação da requisição e os possíveis erros de comunicação ou da API.
-
-    Args:
-        chave: A chave de 44 dígitos do cupom fiscal.
-
-    Returns:
-        Um dicionário com os dados da consulta em caso de sucesso.
-        Retorna None em caso de qualquer falha.
+    Retorna o endpoint de consulta na API InfoSimples com base na UF extraída da chave e no tipo do documento.
+    
+    Parâmetros:
+        chave (str): Chave com 44 caracteres numéricos.
+        tipo (str): Tipo do documento, "nfce" ou "cfe". Default é "nfce".
+    
+    Retorna:
+        str | None: URL de consulta ou None se inválida.
     """
+    if not isinstance(chave, str) or len(chave) != 44 or not chave.isdigit():
+        return None  # Chave inválida
+
+    tipo = tipo.lower()
+    if tipo not in ("nfce", "cfe"):
+        return None  # Tipo inválido
+
+    # Mapeamento código -> sigla UF
+    codigos_uf = {
+        "11": "ro", "12": "ac", "13": "am", "14": "rr", "15": "pa",
+        "16": "ap", "17": "to", "21": "ma", "22": "pi", "23": "ce",
+        "24": "rn", "25": "pb", "26": "pe", "27": "al", "28": "se",
+        "29": "ba", "31": "mg", "32": "es", "33": "rj", "35": "sp",
+        "41": "pr", "42": "sc", "43": "rs", "50": "ms", "51": "mt",
+        "52": "go", "53": "df"
+    }
+
+    # Código numérico da UF (primeiros dois dígitos da chave)
+    uf_codigo = chave[:2]
+    uf_sigla = codigos_uf.get(uf_codigo)
+    if uf_sigla is None:
+        return None  # UF inválida
+
+    url = f"https://api.infosimples.com/api/v2/consultas/sefaz/{uf_sigla}/{tipo}"
+    return url
+
+
+def consulta_api_CFeSat(chave):
+    api_key = settings.API_KEY_SEFAZ
+    url = gerar_link_sefaz(chave, 'cfe')    #'https://api.infosimples.com/api/v2/consultas/sefaz/ce/cfe'
+    args = {
+      "chave": chave,
+      "token": api_key,  
+      "timeout": 60
+    }
+
+    response = requests.post(url, args)
+    response_json = response.json()
+    response.close()
+
+    if response_json['code'] == 200:
+      print("Retorno com sucesso: ", response_json['data'])
+      
+    elif response_json['code'] in range(600, 799):
+      mensagem = "Resultado sem sucesso. Leia para saber mais: \n"
+      mensagem += "Código: {} ({})\n".format(response_json['code'], response_json['code_message'])
+      mensagem += "; ".join(response_json['errors'])
+      print(mensagem)
+    
+    return response_json
+
+    #print("Cabeçalho da consulta: ", response_json['header'])
+    #print("URLs com arquivos de visualização (HTML/PDF): ", response_json['site_receipts'])
+
+
+def consulta_api_nfce(chave: str) -> dict | None:
     try:
         api_key = settings.API_KEY_SEFAZ
         if not api_key:
@@ -68,18 +119,13 @@ def consulta_api_sefaz(chave: str) -> dict | None:
         return None
 
     print('chave:' + chave)
-    url = gerar_link_sefaz(chave)    #'https://api.infosimples.com/api/v2/consultas/sefaz/sp/cfe'
+    url = gerar_link_sefaz(chave, 'nfce')    
     
-    '''payload = {
-        "chave": chave,
-        "token": api_key,
-        "timeout": 60
-    }'''
 
     args = {
             "nfce": chave,
             "token": api_key,
-            "timeout": 300
+            "timeout": 60
         }
 
     try:
@@ -124,4 +170,20 @@ def consulta_api_sefaz(chave: str) -> dict | None:
         logger.error(f"Erro de decodificação: A resposta da API da Sefaz (chave {chave[:10]}...) não é um JSON válido.")
         return None
 
+#-----------------------------------------
+def consulta_nfe(chave):
+    api_key = settings.API_KEY_SEFAZ
+    url = 'https://api.infosimples.com/api/v2/consultas/receita-federal/nfe'
+    args = {
+      "nfe":  chave,       #"VALOR_DO_PARAMETRO_NFE",
+      "token": api_key,      #"INFORME_AQUI_O_TOKEN_DA_CHAVE_DE_ACESSO",
+      "timeout": 60
+    }
 
+    response = requests.post(url, args)
+    return response.json()
+
+    
+
+    
+   

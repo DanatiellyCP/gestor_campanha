@@ -4,6 +4,8 @@ import json
 import os
 import re
 
+from utils.get_modelo import identificar_chave_detalhada
+
 def extrair_texto_ocr(imagem_path):
     """
     Recebe o caminho da imagem e retorna o texto extraído via OCR.
@@ -98,3 +100,83 @@ def validar_produto(lista_produtos_cupom):
 # extrair produtos do cupom
 def extrair_produtos(cupom):
     ...
+
+def validar_documento(codigo_documento):
+    "função para validar notas enviadas, separar o tipo da nota, "
+    "verificar se é autentica e extrair informações pelo codigo informado"
+    dados = identificar_chave_detalhada(codigo_documento)
+    return dados
+
+
+def get_dados_json(dados_json, tipo_cupom):
+    import json
+
+    # Converte string JSON para dict
+    if isinstance(dados_json, str):
+        dados = json.loads(dados_json)
+    else:
+        dados = dados_json
+
+    if tipo_cupom == 'SAT-cfe':
+        cupom = dados["data"][0]
+        emitente = cupom["emitente"]
+        produtos = cupom.get("produtos", [])
+        nfe = None
+        cobranca = {
+            "forma_pagamento": cupom.get("forma_pagamento")
+        }
+        chave_acesso = cupom.get("chave_acesso")
+
+    elif tipo_cupom == 'NFC-e':
+        cupom = dados[0]
+        emitente = cupom["emitente"]
+        produtos = cupom.get("produtos", [])
+        nfe = None
+        cobranca = {
+            "forma_pagamento": cupom.get("forma_pagamento")
+        }
+        chave_acesso = cupom.get("chave_acesso")
+
+    elif tipo_cupom == 'NF-e':
+        cupom = dados["data"][0]
+        emitente = cupom["emitente"]
+        produtos = cupom.get("produtos", [])
+        nfe = cupom.get("nfe", {})
+        cobranca = cupom.get("cobranca", {})
+        chave_acesso = nfe.get("chave_acesso") or cupom.get("chave_acesso")
+
+    else:
+        raise ValueError(f"Tipo de cupom desconhecido: {tipo_cupom}")
+
+    lista_produtos = []
+    for i, p in enumerate(produtos, start=1):
+        lista_produtos.append({
+            "num": p.get("num") or i,
+            "descricao": p.get("descricao"),
+            "qtd": p.get("quantidade") or p.get("qtd"),
+            "valor_unitario": p.get("valor_unitario") or p.get("valor_unitario_comercial"),
+            "valor_total_item": p.get("valor_total_item") or p.get("valor"),
+            "codigo": p.get("codigo") or p.get("ean_tributavel") or p.get("ean_comercial"),
+            "ean": p.get("ean_tributavel") or p.get("ean_comercial")
+
+        })
+
+    emitente_formatado = {
+        "nome": emitente.get("nome_razao_social") or emitente.get("nome"),
+        "cnpj": emitente.get("cnpj"),
+        "endereco": emitente.get("endereco"),
+        "bairro": emitente.get("bairro"),
+        "municipio": emitente.get("municipio"),
+        "cep": emitente.get("cep")
+    }
+
+    resultado = {
+        "emitente": emitente_formatado,
+        "nfe": nfe,
+        "cobranca": cobranca,
+        "chave_acesso": chave_acesso,
+        "produtos": lista_produtos
+    }
+
+    return resultado
+

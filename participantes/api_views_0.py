@@ -10,6 +10,7 @@ from rest_framework import status
 class ParticipantesViewSet(viewsets.ModelViewSet):
     queryset = Participantes.objects.all()
     serializer_class = ParticipantesSerializer
+    permission_classes = [IsAuthenticated]
 
 class BuscarParticipantePorCelularView(APIView):
     permission_classes = [IsAuthenticated]
@@ -47,3 +48,5 @@ class BuscarParticipantePorCelularView(APIView):
                 },
                 status=status.HTTP_200_OK
             )
+        
+# PARA CRIAR PARTICIPANTE VIA API - danny - 08-08-2025

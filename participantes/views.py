@@ -3,6 +3,8 @@ import json
 import os
 from django.http import HttpResponse
 from django.template import loader
+
+from cupons.models.produto import Produto
 from .models import Participantes
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
@@ -13,9 +15,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 import re
 
-from utils.funcoes_cupom import parse_dados_cupom
+from utils.funcoes_cupom import parse_dados_cupom, get_dados_json
 
 from datetime import datetime
+
+import ast
 
 def login_participante(request):
     if request.method == 'POST':
@@ -195,18 +199,47 @@ def iframe_login(request):
 
 #--------- PARTE DE EXTRAÇÃO DE VALIDAÇÃO DOS DADOS DO CUPOM --------------------------------
 
+
 def area_cupom(request, id):
     cupom = get_object_or_404(Cupom, id=id)
 
-    # pega o primeiro cupom da lista de dados retornados pela API
-    dados_lista = cupom.dados_json if isinstance(cupom.dados_json, list) else []
-    dados = dados_lista[0] if dados_lista else {}
+    # Tenta processar os dados_json com tratamento de exceções
+    try:
+        dados_cupom = get_dados_json(cupom.dados_json, cupom.tipo_documento)
+    except Exception as e:
+        print(f"[ERRO] Falha ao processar dados_json do cupom {cupom.id}: {e}")
+        dados_cupom = {}
 
-    context = {
+    # Tenta converter dados_cupom do banco para dict Python
+    try:
+        if cupom.dados_cupom and isinstance(cupom.dados_cupom, str):
+            dados_cupom_dict = ast.literal_eval(cupom.dados_cupom)
+        elif isinstance(cupom.dados_cupom, dict):
+            dados_cupom_dict = cupom.dados_cupom
+        else:
+            dados_cupom_dict = {}
+    except Exception as e:
+        print(f"[ERRO] Falha ao interpretar dados_cupom do cupom {cupom.id}: {e}")
+        dados_cupom_dict = {}
+    
+    produtos_validos = Produto.objects.filter(cupom=id)
+
+    contexto = {
         'cupom': cupom,
-        'dados_cupom': dados
+        'dados_cupom': dados_cupom_dict,
+        'dados_json': dados_cupom,
+        'produtos_validos': produtos_validos
     }
-    return render(request, 'area_cupom.html', context)
+
+    return render(request, 'area_cupom.html', contexto)
+
+
+
+
+
+
+
+    
 
 
     
