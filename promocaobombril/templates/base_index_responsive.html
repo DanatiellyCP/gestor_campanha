@@ -10,10 +10,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://kit.fontawesome.com/f0d3945d17.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
+
     <link rel="icon" type="image/png" href="{% static 'responsive/images/favicon.png' %}">
     <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
 </head>
-<body class="login-page">
+<body>
   <div class="wrap">
     <header class="menu" role="navigation" aria-label="Principal">
       <div class="bar">
@@ -53,40 +54,9 @@
       </div>
     </header>
   </div>
-
-  <div class="topo topo-login" role="img" aria-label="Topo do site">
-    <div class="inner">
-      <h1 class="topo-title">FAÇA SEU LOGIN</h1>
-      <img src="{% static 'responsive/images/ROBOM-BRIL_NAVE.png' %}" alt="" class="topo-robot" aria-hidden="true" />
-    </div>
-  </div>
-  <div id="content">
-    <div class="content-inner">
-      <div class="row">
-        <div class="robot" aria-hidden="true">
-          <img src="{% static 'responsive/images/mascote_login.png' %}" alt="" />
-        </div>
-        <form id="login" class="login" novalidate>
-          <div class="field">
-            <label for="cpf">Login:</label>
-            <input id="cpf" name="cpf" inputmode="numeric" placeholder="Informe seu CPF" maxlength="14" required />
-          </div>
-          <div class="field">
-            <label for="senha">Senha</label>
-            <input id="senha" name="senha" class="pass" type="password" placeholder="********" minlength="8" required />
-            <button type="button" class="toggle-pass" data-target="senha" aria-label="Mostrar/ocultar senha">👁️</button>
-            <div class="forgot"><a href="#">Esqueci minha senha.</a></div>
-          </div>
-
-          <div class="login-actions">
-            <button type="submit" class="btn btn-red">Fazer meu login</button>
-            <button type="button" class="btn btn-yellow" id="goRegister">Quero me cadastrar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-  
+  {% block content %}
+  Content here
+  {% endblock %}
   <footer class="footer">
     <div class="inner">
       <div class="footer-top">
@@ -104,14 +74,17 @@
     </div>
   </footer>
 
-<script src="{% static 'responsive/menu.js' %}"></script>
-<!-- Privacy/Cookie banner -->
-<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Aviso de cookies e privacidade">
-  <div class="cookie-inner">
-    <p class="cookie-text">Utilizamos cookies para otimizar sua experiência em nosso site. Ao continuar a navegação, você concorda com a nossa <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
-    <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
-  </div>
- </div>
- 
+  <!-- Privacy/Cookie banner -->
+  <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Aviso de cookies e privacidade">
+    <div class="cookie-inner">
+      <p class="cookie-text">Utilizamos cookies para otimizar sua experiência em nosso site. Ao continuar a navegação, você concorda com a nossa <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
+      <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
+    </div>
+   </div>
+  <script src="{% static 'responsive/menu.js' %}"></script>
+  <!-- Floating robot button -->
+  <a href="/cadastrar/" class="floating-bot" aria-label="Assistente da promoção">
+    <img src="{% static 'responsive/images/Banner - Robo - Direita.gif' %}" alt="" />
+  </a>
 </body>
 </html>

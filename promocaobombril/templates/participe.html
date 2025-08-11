@@ -1,222 +1,27 @@
+{% extends 'base_index.html' %}
 {% load static %}
 
-<!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Promoção Bombril - Home</title>
-    <meta name="description"
-        content="Participe da promoção Bombril e concorra a prêmios incríveis. Cadastre seus cupons e dê um brilho no seu futuro!">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <script src="https://kit.fontawesome.com/f0d3945d17.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
+{% block title %}Início{% endblock %}
 
-    <link rel="icon" type="image/png" href="{% static 'responsive/images/favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
-</head>
-<body>
-  <div class="wrap">
-    <header class="menu" role="navigation" aria-label="Principal">
-      <div class="bar">
-        <a class="brand" href="/" aria-label="Página inicial">
-          <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
-        </a>
-        <nav aria-label="Seções">
-          <ul class="links">
-            <li><a href="/">Início</a></li>
-            <li><a href="/como-participar/">Como participar</a></li>
-            <li><a href="/produtos/">Produtos</a></li>
-            <li><a href="/resultados/">Resultados</a></li>
-            <li><a href="/duvidas/">Dúvidas</a></li>
-          </ul>
-        </nav>
-        <div class="actions">
-          <a href="/cadastrar/" class="btn btn-participe" id="ctaParticipar">CADASTRAR</a>
-          <a href="/logar/" class="btn btn-login" id="ctaLogin">LOGIN</a>
-        </div>
-        <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
-      <div class="drawer" id="drawer">
-        <ul class="links">
-          <br/>
-          <li><a href="/">Início</a></li>
-          <li><a href="/como-participar/">Como participar</a></li>
-          <li><a href="/produtos/">Produtos</a></li>
-          <li><a href="/resultados/">Resultados</a></li>
-          <li><a href="/duvidas/">Dúvidas</a></li>
-        </ul>
-        <div class="actions">
-          <a href="/cadastrar/" class="btn btn-participe" id="mParticipar">CADASTRAR</a>
-          <a href="/logar/" class="btn btn-login" id="mLogin">LOGIN</a>
-        </div>
-      </div>
-    </header>
-  </div>
 
-  <div class="topo home-hero" role="img" aria-label="Topo do site">
-    <video autoplay loop muted playsinline class="background-video" aria-hidden="true">
-      <source src="{% static 'responsive/images/Banner-Hero-Amarelo.mp4' %}" type="video/mp4">
-      Seu navegador não suporta o vídeo de fundo.
-    </video>
-    <div class="inner">
-      <div class="hero-duo">
-        <img class="promo-logo" src="{% static 'responsive/images/Logo-promo.png' %}" alt="Promoção Dê um Brilho no seu Futuro" />
-        <img class="hero-left" src="images/Banner-IMG-ESQUERDA.png" alt="" aria-hidden="true" />
-      </div>
+
+{% block content %}
+
+    <section id="home" class="hero-banner" style="background-image: url('{% static 'assets/images/background_amarelov2.jpg' %}');">
+    <div class="container hero-container banner-desktop-wrapper">
+        <div class="hero-image-front">
+            <img src="{% static 'assets/images/img_index.jpg' %} " alt="Promoção de um brilho no seu futuro">
+        </div>
     </div>
-  </div>
-  <div id="content">
-    <section class="prizes-band" aria-label="Prêmios da promoção">
-      <div class="band-inner">
-        <img src="{% static 'responsive/images/Round1V3.png' %}" class="prize-img left" alt="Prêmios diários e semanais" />
-        <img src="{% static 'responsive/images/PlusIcon.png' %}" class="plus" alt="" aria-hidden="true" />
-        <img src="{% static 'responsive/images/Round2V3.png' %}" class="prize-img right" alt="Prêmio final" />
-      </div>
-    </section>
+    
+    
+  <img src="{% static 'assets/images/ROBOM-BRIL_NAVE.png' %}" alt="Promoção Bombril - Versão Mobile" class="banner-mobile">
 
-    <section class="how-video" aria-label="Entenda como funciona a promoção">
-      <div class="how-inner">
-        <h2 class="how-title">ENTENDA COMO FUNCIONA A PROMOÇÃO</h2>
-        <div class="video-responsive">
-          <iframe
-            id="promoVideoHome"
-            src="https://www.youtube.com/embed/ZoC9W-87YNQ?mute=1&playsinline=1&rel=0"
-            title="BomBril - Dê um Brilho no seu Futuro"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen
-          ></iframe>
-        </div>
-      </div>
-    </section>
+  </section>
 
-    <section class="cta-products" aria-label="Compre 3 produtos e turbine suas chances">
-      <div class="cta-inner">
-        <div class="cta-top">
-          <img src="{% static 'responsive/images/COMPRE 3 PRODUTOS.png' %}" alt="Compre 3 produtos da família Bombril" class="cta-buy" />
-          <img src="{% static 'responsive/images/PRODUTOS.png' %}" alt="Produtos participantes" class="cta-lineup" />
-        </div>
-        <div class="cta-bottom">
-          <img src="{% static 'responsive/images/TURBINE SUAS CHANCES.png' %}" alt="Turbine suas chances de ganhar comprando - Produtos aceleradores" class="cta-boost" />
-        </div>
-      </div>
-    </section>
+{% endblock %}
 
-    <section class="whats-cta" aria-label="Cadastre pelo WhatsApp">
-      <div class="whats-inner">
-        <div class="whats-left">
-          <img src="{% static 'responsive/images/ROBOM-BRIL WHATSAPP.png' %}" alt="Robô Bombril WhatsApp" class="whats-robot" />
-        </div>
-        <div class="whats-right">
-          <h2 class="whats-title">CADASTRE PELO WHATSAPP</h2>
-          <p class="whats-desc">Você também pode se cadastrar pelo WhatsApp, fale com o Robombril.</p>
-          <a class="whats-button" href="https://wa.me/551155551607" target="_blank" rel="noopener noreferrer" aria-label="Cadastrar pelo WhatsApp">
-            <img src="{% static 'responsive/images/Button - Whatsapp V2.png' %}" alt="Cadastrar" />
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <section class="results-cta" aria-label="Resultados dos sorteios">
-      <div class="results-inner">
-        <div class="results-text">
-          <h2 class="results-title">RESULTADOS</h2>
-          <p class="results-desc">Acompanhe aqui os resultados dos sorteios!</p>
-          <a class="results-button" href="/resultados/" aria-label="Confira os resultados">
-            <img src="{% static 'responsive/images/Button - Confira os resultados.png' %}" alt="Confira os resultados" />
-          </a>
-        </div>
-        <div class="results-art">
-          <img src="{% static 'responsive/images/ROBOM-BRIL_NAVE.png' %}" alt="Robô Bombril na nave" class="results-robot" />
-        </div>
-      </div>
-    </section>
-
-    <section class="faq-cta" aria-label="Ainda tem dúvidas? Confira nosso FAQ">
-      <div class="faq-inner">
-        <div class="faq-left">
-          <img src="{% static 'responsive/images/mascote_teclando.png' %}" alt="Robô Bombril teclando" class="faq-mascot" />
-        </div>
-        <div class="faq-right">
-          <h2 class="faq-title">AINDA TEM DÚVIDAS?</h2>
-          <p class="faq-desc">Acompanhe aqui os resultados dos sorteios!</p>
-          <a class="faq-button" href="/duvidas/" aria-label="Confira nosso FAQ">
-            <img src="{% static 'responsive/images/Button-FAQ.png' %}" alt="Confira nosso FAQ" />
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <section class="rules-cta" aria-label="Regulamento da promoção">
-      <div class="rules-inner">
-        <div class="rules-text">
-          <h2 class="rules-title">REGULAMENTO</h2>
-          <p class="rules-desc">Confira o regulamento completo da promoção "Dê um Brilho no seu Futuro Bom Bril"! Clique aqui para acessar todas as informações, datas de sorteio e detalhes de participação. Boa sorte!</p>
-          <a class="rules-button" href="/regulamento/" aria-label="Confira o regulamento">
-            <img src="{% static 'responsive/images/Button - Confira o regulamento.png' %}" alt="Confira o regulamento" />
-          </a>
-        </div>
-        <div class="rules-art">
-          <img src="{% static 'responsive/images/Mascot - Regulamento.gif' %}" alt="Robô Bombril acenando" class="rules-mascot" />
-        </div>
-      </div>
-    </section>
-  </div>
-  <script>
-    (function(){
-      function syncVideoWidth(){
-        try{
-          var title = document.querySelector('.how-video .how-title');
-          var box = document.querySelector('.how-video .video-responsive');
-          if(!title || !box) return;
-          var w = Math.ceil(title.getBoundingClientRect().width);
-          var min = 280; // min practical width
-          var max = 900; // same as previous max
-          w = Math.max(min, Math.min(max, w));
-          box.style.width = w + 'px';
-        }catch(e){ /* noop */ }
-      }
-      window.addEventListener('load', syncVideoWidth);
-      window.addEventListener('resize', function(){
-        clearTimeout(window.__syncVW);
-        window.__syncVW = setTimeout(syncVideoWidth, 80);
-      });
-    })();
-  </script>
-  <footer class="footer">
-    <div class="inner">
-      <div class="footer-top">
-        <h2 class="footer-title">É mais do que bom. É da</h2>
-        <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
-      </div>
-      <ul class="footer-links">
-        <li><a href="/termos">Termos de uso</a></li>
-        <li><a href="/privacidade">Política de privacidade</a></li>
-        <li><a href="/lgpd">LGPD</a></li>
-      </ul>
-      <p class="footer-legal">
-        PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
-      </p>
-    </div>
-  </footer>
-
-  <!-- Privacy/Cookie banner -->
-  <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Aviso de cookies e privacidade">
-    <div class="cookie-inner">
-      <p class="cookie-text">Utilizamos cookies para otimizar sua experiência em nosso site. Ao continuar a navegação, você concorda com a nossa <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
-      <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
-    </div>
-   </div>
-  <script src="menu.js"></script>
-  <!-- Floating robot button -->
-  <a href="/cadastrar/" class="floating-bot" aria-label="Assistente da promoção">
-    <img src="{% static 'responsive/images/Banner - Robo - Direita.gif' %}" alt="" />
-  </a>
-</body>
-</html>
-
-
+{% block extra_js %}
+  <!-- Bootstrap 5 JS Bundle (Popper + Bootstrap) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

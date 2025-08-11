@@ -12,6 +12,8 @@ def participe(request):
     return render(request, 'participe.html')
 
 
+def home_responsive(request):    
+    return render(request, 'home_responsive.html')
 
 def como_participar(request):    
     return render(request, 'como-participar.html')
