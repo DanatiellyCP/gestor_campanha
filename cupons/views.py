@@ -35,28 +35,37 @@ import json
 from dataclasses import asdict
 from django.shortcuts import render, get_object_or_404
 
+from django.shortcuts import render, get_object_or_404
+from django.core.files.storage import default_storage
+import cv2
+import json
+from dataclasses import asdict
+
 def cadastrar_cupom(request, id_participante):
-    contexto = {'id_participante': id_participante}
     participante = get_object_or_404(Participantes, id=id_participante)
+    contexto = {'id_participante': id_participante}
 
     if request.method == 'POST':
         chave_acesso = None
-        imagem_path = None
         dados_ocr = ""
+        imagem_path = None
+        erro = None
 
-        if 'submit_codigo' in request.POST:
-            chave_acesso = request.POST.get('cod_cupom')
+        try:
+            if 'submit_codigo' in request.POST:
+                # Captura código digitado manualmente
+                chave_acesso = request.POST.get('cod_cupom')
 
-        if 'submit_imagem' in request.POST:
-            arquivo = request.FILES.get('img_cupom')
-            if not arquivo:
-                contexto['msg_erro'] = 'Nenhum arquivo de imagem foi selecionado.'
-            else:
-                try:
+            elif 'submit_imagem' in request.POST:
+                arquivo = request.FILES.get('img_cupom')
+                if not arquivo:
+                    erro = 'Nenhum arquivo de imagem foi selecionado.'
+                else:
+                    # Salva arquivo e obtém caminho local
                     imagem_path = guardar_cupom(arquivo)
                     imagem_local_path = default_storage.path(imagem_path)
 
-                    # Processamento de Imagem (OCR e QR Code)
+                    # Lê imagem para processar OCR e QR Code
                     imagem_cv = cv2.imread(imagem_local_path)
                     if imagem_cv is None:
                         raise ValueError("Não foi possível carregar a imagem para processamento.")
@@ -64,46 +73,53 @@ def cadastrar_cupom(request, id_participante):
                     gray = cv2.cvtColor(imagem_cv, cv2.COLOR_BGR2GRAY)
                     detector = cv2.QRCodeDetector()
                     dados_qr, _, _ = detector.detectAndDecode(gray)
-                    
+
+                    # Extrai texto via OCR
                     dados_ocr = extrair_texto_ocr(imagem_local_path)
+                    # Prioriza QR, senão OCR para extrair chave
                     chave_acesso = extrair_numero_cupom(dados_qr or dados_ocr)
 
-                except Exception as e:
-                    contexto['msg_erro'] = f'Erro ao processar a imagem: {e}'
+            if erro:
+                contexto['msg_erro'] = erro
+                return render(request, 'cad_cupom.html', contexto)
 
-        if not chave_acesso:
-            contexto['msg_erro'] = "Informe o código do cupom."
-            return render(request, 'cad_cupom.html', contexto)
+            if not chave_acesso:
+                contexto['msg_erro'] = "Informe o código do cupom."
+                return render(request, 'cad_cupom.html', contexto)
 
-        dados_nota = identificar_chave_detalhada(chave_acesso)
+            # Validação da chave do cupom
+            dados_nota = identificar_chave_detalhada(chave_acesso)
+            if not dados_nota.valida:
+                contexto['msg_erro'] = f"Chave inválida: {dados_nota.mensagem}"
+                return render(request, 'cad_cupom.html', contexto)
 
-        if not dados_nota.valida:
-            contexto['msg_erro'] = f"Chave inválida: {dados_nota.mensagem}"
-            return render(request, 'cad_cupom.html', contexto)
+            # Status fixo pois já validado
+            status_nota = 'Aprovado'
 
-        status_nota = 'Aprovado'  # já validado acima
+            # Validação adicional (ex: consulta externa)
+            validar = validar_cupom(dados_nota.chave, dados_nota.tipo_documento)
 
-        validar = validar_cupom(dados_nota.chave, dados_nota.tipo_documento)
+            # Serializa dados para JSON (string) para armazenar
+            dados_cupom_json = json.dumps(asdict(dados_nota))
 
-        # Serializa dados_nota para string JSON, caso dados_cupom seja TextField
-        dados_cupom_json = json.dumps(asdict(dados_nota))
+            # Criação do cupom no banco
+            novo_cupom = Cupom.objects.create(
+                participante=participante,
+                dados_cupom=dados_cupom_json,
+                tipo_envio='Codigo' if 'submit_codigo' in request.POST else 'Imagem',
+                status=status_nota,
+                numero_documento=dados_nota.codigo_numerico,
+                cnpj_loja=dados_nota.cnpj_emitente,
+                dados_json=validar,
+                tipo_documento=dados_nota.tipo_documento
+            )
 
-        novo_cupom = Cupom.objects.create(
-            participante=participante,
-            dados_cupom=dados_cupom_json,  # string JSON
-            tipo_envio='Codigo',
-            status=status_nota,
-            numero_documento=dados_nota.codigo_numerico,
-            cnpj_loja=dados_nota.cnpj_emitente,
-            dados_json=validar,            # dict direto se for JSONField
-            tipo_documento=dados_nota.tipo_documento
-        )
-        
-        msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
-        print(msg_produto)
+            # Cadastro dos produtos vinculados ao cupom
+            msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
+            contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
 
-        contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
-        return render(request, 'cad_cupom.html', contexto)
+        except Exception as e:
+            contexto['msg_erro'] = f'Erro ao processar o cadastro: {e}'
 
     return render(request, 'cad_cupom.html', contexto)
 
