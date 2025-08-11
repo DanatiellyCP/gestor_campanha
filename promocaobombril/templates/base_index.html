@@ -1,297 +1,90 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="pt-br">
-
+<!doctype html>
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Promoção Bombril - Home</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Promoção Bombril - Home</title>
     <meta name="description"
         content="Participe da promoção Bombril e concorra a prêmios incríveis. Cadastre seus cupons e dê um brilho no seu futuro!">
-    {% block css %}
-      <link rel="stylesheet" href="{% static 'oficial/css/style.css' %}">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-      <script src="https://kit.fontawesome.com/f0d3945d17.js" crossorigin="anonymous"></script>
-      <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
-    <style>
-      /* --- Estilos do Rodapé --- */
-      footer.main-footer {
-        background: radial-gradient(circle at center, #C59230, #E3A42E); /* Gradiente radial da imagem */
-        color: white;
-        padding: 60px 20px;
-      }
-      .footer-slogan-container {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-        max-width: 700px; /* Define a largura máxima */
-        width: 100%;
-        margin: 0 auto 20px; /* Centraliza e mantém a margem inferior */
-      }
-      .footer-slogan-text {
-        font-size: 2.2rem;
-        font-weight: 700;
-        color: white;
-        margin: 0;
-      }
-      .footer-slogan-logo {
-        height: 70px;
-        width: auto;
-      }
-      .footer-separator {
-        border: 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.5);
-        width: 60%;
-        margin: 20px auto;
-      }
-      .footer-links {
-        display: flex;
-        justify-content: center;
-        gap: 40px; /* Espaço entre os links */
-        margin-bottom: 20px;
-      }
-      .footer-links a {
-        color: white;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: calc(1.1em + 2px); /* Aumentado em 2px */
-      }
-      .footer-text {
-        font-size: calc(0.75em + 2px); /* Aumentado em 2px */
-        line-height: 1.6;
-        max-width: 800px;
-        margin: 0 auto; /* Centraliza o texto */
-      }
-    </style>
-    {% endblock %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://kit.fontawesome.com/f0d3945d17.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
 
-    <link rel="icon" type="image/png" href="{% static 'oficial/images/favicon.png' %}">
-
+    <link rel="icon" type="image/png" href="{% static 'responsive/images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
 </head>
-
 <body>
-
-  <div id="header-placeholder"><header class="main-header">
-     <div class="container">
-        <div class="navbar-container">
-            <a href="." class="logo-link">
-                <img src="{% static 'oficial/images/LOGO_BOMBRIL.png' %}" alt="Logotipo Bombril" class="logo-img">
-            </a>
-            <div class="navbar-menu-bg"></div>
-            <div class="header-menu-wrapper">
-                <nav class="main-nav">
-                    <ul class="nav-links">
-                        <li><a href="/">INÍCIO</a></li>
-                        <li><a href="/como-participar/">COMO PARTICIPAR</a></li>
-                        <li><a href="/produtos/">PRODUTOS</a></li>
-                        <li><a href="/lista-resultado/">RESULTADOS</a></li>
-                        <li><a href="/regulamento/">REGULAMENTO</a></li>
-                        <li><a href="/duvidas/">DÚVIDAS</a></li>
-                    </ul>
-                </nav>
-                <div class="header-actions">
-                    <a href="/cadastrar/" class="btn btn-participate">PARTICIPE</a>
-                    <a href="/logar/" class="btn btn-login">LOGIN</a>
-                </div>
-            </div>
-
-            <button class="hamburger-menu">
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-                <span class="hamburger-bar"></span>
-            </button>
-        </div>
-     </div> 
-     </div>
- </header>
-    <main>
-        <section class="hero-banner hero-full-width">
-
-            <video autoplay loop muted playsinline class="background-video">
-                <source src="{% static 'oficial/images/Banner-Hero-Amarelo.mp4' %}" type="video/mp4">
-                Seu navegador não suporta o vídeo de fundo.
-            </video>
-
-            <div class="banner-desktop-wrapper">
-
-                <div class="hero-coluna-mensagem">
-                    <img src="{% static 'oficial/images/Logo-promo.png' %}" alt="Promoção Dê um Brilho no Seu Futuro">
-                </div>
-
-                <div class="hero-coluna-premios">
-                    <img src="{% static 'oficial/images/Banner-IMG-ESQUERDA.png' %}" alt="Prêmios da promoção: Carro, iPhone, e mais"
-                        class="premios-imagem-principal">
-                    
-                </div>
-
-            </div>
-
-            <img src="{% static 'oficial/images/banner_mobile.png' %}" alt="Promoção Bombril - Versão Mobile" class="banner-mobile">
-
-        </section>
-        {% block content %}
-          <section class="prizes-section">
-              <div class="container prizes-container">
-                  <img src="{% static 'oficial/images/Round1V3.png' %}" alt="Grande Prêmio: Carro Elétrico + iPhone e mais" class="prize-item">
-                  <img src="{% static 'oficial/images/PlusIcon.png' %}" alt="Mais" class="plus-icon">
-                  <img src="{% static 'oficial/images/Round2V3.png' %}" alt="8 Prêmios Semanais: 1 ano de supermercado grátis"
-                      class="prize-item2">
-              </div>
-          </section>
-
-          <section class="video-mask-section">
-              <div class="container">
-                  <h2 class="custom-title text-center text-bombril-red">Entenda como funciona a promoção</h2>
-
-                  <div class="video-mask-container">
-                      <iframe width="1150" height="650"
-                          src="https://www.youtube.com/embed/ZoC9W-87YNQ?si=jZSU7biUq-5iDlxk" title="YouTube video player"
-                          frameborder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowfullscreen>
-                      </iframe>
-
-                  </div>
-              </div>
-          </section>
-
-          <section class="buy-and-register-section">
-              <div class="container" align="center">
-
-                  <div class="image-grid-container">
-                      <div class="grid-item item-1">
-                          <a href="{% static 'oficial/cadastro.html' %}">
-                              <img src="{% static 'oficial/images/COMPRE 3 PRODUTOS.png' %}" alt="compre 3 produtos">
-                          </a>
-                      </div>
-
-                      <div class="grid-item item-2">
-                          <img src="{% static 'oficial/images/PRODUTOS.png' %}" alt="produtos bombril">
-                      </div>
-
-                      <div class="grid-item item-3">
-                          <img width="100%" src="{% static 'oficial/images/TURBINE SUAS CHANCES.png' %}" alt="TURBINE">
-                      </div>
-                  </div>
-
-              </div>
-          </section>
-
-          <section class="whatsapp-section" style="background-image: url('static/oficial/images/Background\ -\ Amarelov2.jpg');">
-              <div class="container whatsapp-container-new">
-
-                  <div class="whatsapp-col-mascot">
-                      <img src="{% static 'oficial/images/ROBOM-BRIL WHATSAPP.png' %}" alt="Mascote Robom-Bril com celular"
-                          class="mascote-com-cel">
-                  </div>
-
-                  <div class="whatsapp-col-content">
-                      <div class="content-text">
-                          <h3>Cadastre pelo Whatsapp.</h3>
-                          <p class="texto-destaque">Você também pode se cadastrar pelo WhatsApp, fale com o Robombril.</p>
-                      </div>
-                      <div class="content-button align-left-content-buttons s">
-                          <a href="/cadastrar/">
-                              <img src="{% static 'oficial/images/Button - Whatsapp V2.png' %}" alt="Botão Cadastrar via WhatsApp">
-                          </a>
-                      </div>
-                  </div>
-
-              </div>
-          </section>
-
-          <section id="sorteios" class="draws-section">
-              <div class="container">
-
-                  <div class="draws-header-new">
-                      <div class="draws-title-new">
-                          <h2>Resultados</h2>
-                          <p>Acompanhe aqui os resultados dos sorteios!</p>
-                          <div class="content-buttons align-center-content-buttons ">
-                              <a href="{% static 'oficial/Resultados.html' %}">
-                                  <img src="{% static 'oficial/images/Button - Confira os resultados.png' %}" alt="Confira os resultados"
-                                      class="cta-button-image">
-                              </a>
-
-                              <div class="draws-mascot-new">
-                                  <img src="{% static 'oficial/images/ROBOM-BRIL_NAVE.png' %}" alt="Mascote Robom-Bril no sorteio">
-                              </div>
-                          </div>
-                      </div>
-
-                  </div>
-
-
-              </div>
-          </section>
-
-          <section class="doubts-section">
-              <div class="container doubts-container">
-                  <div class="doubts-mascot">
-                      <img src="{% static 'oficial/images/mascote_teclando.png' %}" alt="Mascote Bombril com dúvidas">
-                  </div>
-                  <div class="doubts-content-wrapper" style="margin-bottom: 60px;">
-                      <h2 class="custom-title text-bombril-white">Ainda tem dúvidas?</h2>
-                      <p class="duvidas-content text-bombril-white">Acompanhe aqui os resultados dos sorteios!</p>
-                      <a href="/duvidas/"> <img src="{% static 'oficial/images/Button-FAQ.png' %}" alt="Fale Conosco" class="cta-button-image">
-                      </a>
-                  </div>
-              </div>
-          </section>
-
-          <section class="regulation-section" style="padding: 60px 0;">
-              <div class="container regulation-container">                  
-                  <div class="regulation-col-text">
-                      <h2 class="custom-title text-bombril-red">Regulamento</h2>
-                      <p>Confira o regulamento completo da promoção "Dê um Brilho no seu Futuro Bom Bril"! Clique aqui para acessar todas as informações, datas de sorteio e detalhes de participação. Boa sorte!</p>
-                      <a href="/regulamento/" >
-                          <img src="{% static 'oficial/images/Button - Confira o regulamento.png' %}" alt="Confira o Regulamento"
-                              class="cta-button-image" style="float: none;">
-                      </a>
-                  </div>
-                  <div class="regulation-col-image">
-                    <img src="{% static 'oficial/images/Mascot - Regulamento.gif' %}" alt="Mascote Robom-Bril apontando para o regulamento"
-                        class="mascote-regulamento">
-
-                </div>
-              </div>
-          </section>
-        {% endblock %}
-
-        <a href="/" class="floating-mascot-button">
-            <img src="{% static 'oficial/images/Banner - Robo - Direita.gif' %}" alt="Mascote Robom-Bril">
+  <div class="wrap">
+    <header class="menu" role="navigation" aria-label="Principal">
+      <div class="bar">
+        <a class="brand" href="#" aria-label="Página inicial">
+          <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
         </a>
-
-    </main>
-    
-    <footer class="main-footer">
-        <div class="container centered-content">
-            <div class="footer-slogan-container">
-                <h2 class="footer-slogan-text">É mais do que bom. É da</h2>
-                <img class="footer-slogan-logo" src="{% static 'oficial/images/LOGO_BOMBRIL.png' %}" alt="Logotipo Bombril">
-            </div>
-            <hr class="footer-separator">
-            <div class="footer-links">
-                <a href="/termos-de-uso/">Termos de uso</a>
-                <a href="https://www.bombril.com.br/politica-de-privacidade">Política de privacidade</a>
-                <a href="/lgpd/">LGPD</a>
-            </div>
-            <p class="footer-text"><strong>PARTICIPAÇÃO:</strong> DE 15/08/2025 ÀS 23H59 DE 15/10/2025.
-                <strong>SORTEIOS:</strong> 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025,
-                10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025,
-                08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. <strong>PROMOÇÃO
-                    VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO.</strong>
-                CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM
-                <strong>WWW.PROMOCAOBOMBRIL.COM.BR.</strong> *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA
-                DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
-            </p>
+        <nav aria-label="Seções">
+          <ul class="links">
+            <li><a href="/">Início</a></li>
+            <li><a href="/como-participar">Como participar</a></li>
+            <li><a href="/produtos/">Produtos</a></li>
+            <li><a href="/resultados">Resultados</a></li>
+            <li><a href="/duvidas">Dúvidas</a></li>
+          </ul>
+        </nav>
+        <div class="actions">
+          <a href="/cadastrar/" class="btn btn-participe" id="ctaParticipar">CADASTRAR</a>
+          <a href="/logar/" class="btn btn-login" id="ctaLogin">LOGIN</a>
         </div>
-    </footer>
+        <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div class="drawer" id="drawer">
+        <ul class="links">
+          <br/>
+          <li><a href="/">Início</a></li>
+          <li><a href="/como-participar">Como participar</a></li>
+          <li><a href="/produtos/">Produtos</a></li>
+          <li><a href="/resultados">Resultados</a></li>
+          <li><a href="/duvidas">Dúvidas</a></li>
+        </ul>
+        <div class="actions">
+          <a href="/cadastrar/" class="btn btn-participe" id="mParticipar">CADASTRAR</a>
+          <a href="/logar/" class="btn btn-login" id="mLogin">LOGIN</a>
+        </div>
+      </div>
+    </header>
+  </div>
+  {% block content %}
+  Content here
+  {% endblock %}
+  <footer class="footer">
+    <div class="inner">
+      <div class="footer-top">
+        <h2 class="footer-title">É mais do que bom. É da</h2>
+        <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+      </div>
+      <ul class="footer-links">
+        <li><a href="/termos">Termos de uso</a></li>
+        <li><a href="/privacidade">Política de privacidade</a></li>
+        <li><a href="/lgpd">LGPD</a></li>
+      </ul>
+      <p class="footer-legal">
+        PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
+      </p>
+    </div>
+  </footer>
 
-    {% block js %}
-    <script src="{% static 'oficial/js/main.js' %}"></script>
-    {% endblock %}
+  <!-- Privacy/Cookie banner -->
+  <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Aviso de cookies e privacidade">
+    <div class="cookie-inner">
+      <p class="cookie-text">Utilizamos cookies para otimizar sua experiência em nosso site. Ao continuar a navegação, você concorda com a nossa <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
+      <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
+    </div>
+   </div>
+  <script src="{% static 'responsive/menu.js' %}"></script>
+  <!-- Floating robot button -->
+  <a href="/cadastrar/" class="floating-bot" aria-label="Assistente da promoção">
+    <img src="{% static 'responsive/images/Banner - Robo - Direita.gif' %}" alt="" />
+  </a>
 </body>
-
 </html>

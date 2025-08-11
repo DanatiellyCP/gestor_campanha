@@ -1,109 +1,117 @@
-{% extends 'base_index.html' %}
 {% load static %}
-
-{% block content %}
-
-<section class="page-content embed-section section-up-interna">
-  <div class="container">
-      <h1 class="custom-title text-bombril-red text-center">CADASTRE SEU CUPOM</h1>
-      <div id="external-form-container">
-        <div class="row">
-          <style>
-            #external-form-container .form-card {
-              background-color: #ffffff;
-              border-radius: 16px;
-              padding: 40px;
-              box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-              min-width: 450px; /* Ajuste a largura máxima conforme necessário */
-              margin: 40px auto; /* Centraliza o card e adiciona margem */
-            }
-          
-            #external-form-container .form-card h3 {
-              color: #263a7c; /* Azul escuro do título */
-              font-weight: bold;
-              text-align: center;
-              margin-bottom: 30px;
-              font-size: 24px;
-            }
-          
-            #external-form-container .form-group {
-              margin-bottom: 20px;
-            }
-          
-            #external-form-container .form-group label {
-              color: #263a7c; /* Azul escuro dos labels */
-              font-weight: 500;
-              margin-bottom: 8px;
-              display: block;
-            }
-          
-            #external-form-container .form-control {
-              background-color: #f0f4f8; /* Fundo azul claro para os inputs */
-              border: 1px solid #d9e2ec;
-              border-radius: 8px;
-              height: 48px;
-              padding: 10px 15px;
-              width: 100%;
-            }
-          
-            #external-form-container .form-control:focus {
-              background-color: #ffffff;
-              border-color: #263a7c;
-              box-shadow: none;
-            }
-          
-            #external-form-container .btn {
-              background-color: #263a7c; /* Azul escuro do botão */
-              border-color: #263a7c;
-              color: #ffffff;
-              border-radius: 8px;
-              padding: 12px;
-              width: 100%;
-              font-weight: bold;
-              text-transform: uppercase;
-              margin-top: 15px;
-              transition: background-color 0.3s ease;
-            }
-          
-            #external-form-container .btn:hover {
-              background-color: #1a2b5e; /* Um tom mais escuro para o hover */
-              border-color: #1a2b5e;
-            }
-          </style>
-          <!-- Login -->
-          <div class="col-md-6 col-sm-12">
-            <div class="form-card">
-              <h3>Login</h3>
-              <form method="POST" action="{% url 'logar' %}">
-                {% csrf_token %}
-                <div class="form-group">
-                  <label for="email-login">E-mail:</label>
-                  <input type="email" name="email" id="email-login" class="form-control" required>
-                </div>
-    
-                <div class="form-group">
-                  <label for="senha-login">Senha:</label>
-                  <input type="password" name="senha" id="senha-login" class="form-control" required>
-                </div>
-    
-                <button type="submit" class="btn btn-success" name="login">Entrar</button>
-    
-                {% if erro %}
-                  <div class="alert alert-danger" style="margin-top: 10px;">{{ erro }}</div>
-                {% endif %}
-              </form>
-            </div>
-          </div>  
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Promoção Bombril - Home</title>
+    <meta name="description"
+        content="Participe da promoção Bombril e concorra a prêmios incríveis. Cadastre seus cupons e dê um brilho no seu futuro!">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://kit.fontawesome.com/f0d3945d17.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
+    <link rel="icon" type="image/png" href="{% static 'responsive/images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+</head>
+<body class="login-page">
+  <div class="wrap">
+    <header class="menu" role="navigation" aria-label="Principal">
+      <div class="bar">
+        <a class="brand" href="#" aria-label="Página inicial">
+          <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+        </a>
+        <nav aria-label="Seções">
+          <ul class="links">
+            <li><a href="/">Início</a></li>
+            <li><a href="/como-participar">Como participar</a></li>
+            <li><a href="/produtos/">Produtos</a></li>
+            <li><a href="/resultados">Resultados</a></li>
+            <li><a href="/duvidas">Dúvidas</a></li>
+          </ul>
+        </nav>
+        <div class="actions">
+          <a href="/cadastrar/" class="btn btn-participe" id="ctaParticipar">CADASTRAR</a>
+          <a href="/logar/" class="btn btn-login" id="ctaLogin">LOGIN</a>
+        </div>
+        <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div class="drawer" id="drawer">
+        <ul class="links">
+          <br/>
+          <li><a href="/">Início</a></li>
+          <li><a href="/como-participar">Como participar</a></li>
+          <li><a href="/produtos/">Produtos</a></li>
+          <li><a href="/resultados">Resultados</a></li>
+          <li><a href="/duvidas">Dúvidas</a></li>
+        </ul>
+        <div class="actions">
+          <a href="/cadastrar/" class="btn btn-participe" id="mParticipar">CADASTRAR</a>
+          <a href="/logar/" class="btn btn-login" id="mLogin">LOGIN</a>
         </div>
       </div>
+    </header>
   </div>
-</section>
 
-{% endblock %}
+  <div class="topo topo-login" role="img" aria-label="Topo do site">
+    <div class="inner">
+      <h1 class="topo-title">FAÇA SEU LOGIN</h1>
+      <img src="{% static 'responsive/images/ROBOM-BRIL_NAVE.png' %}" alt="" class="topo-robot" aria-hidden="true" />
+    </div>
+  </div>
+  <div id="content">
+    <div class="content-inner">
+      <div class="row">
+        <div class="robot" aria-hidden="true">
+          <img src="{% static 'responsive/images/mascote_login.png' %}" alt="" />
+        </div>
+        <form id="login" class="login" novalidate>
+          <div class="field">
+            <label for="cpf">Login:</label>
+            <input id="cpf" name="cpf" inputmode="numeric" placeholder="Informe seu CPF" maxlength="14" required />
+          </div>
+          <div class="field">
+            <label for="senha">Senha</label>
+            <input id="senha" name="senha" class="pass" type="password" placeholder="********" minlength="8" required />
+            <button type="button" class="toggle-pass" data-target="senha" aria-label="Mostrar/ocultar senha">👁️</button>
+            <div class="forgot"><a href="#">Esqueci minha senha.</a></div>
+          </div>
 
+          <div class="login-actions">
+            <button type="submit" class="btn btn-red">Fazer meu login</button>
+            <button type="button" class="btn btn-yellow" id="goRegister">Quero me cadastrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <footer class="footer">
+    <div class="inner">
+      <div class="footer-top">
+        <h2 class="footer-title">É mais do que bom. É da</h2>
+        <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+      </div>
+      <ul class="footer-links">
+        <li><a href="/termos">Termos de uso</a></li>
+        <li><a href="/privacidade">Política de privacidade</a></li>
+        <li><a href="/lgpd">LGPD</a></li>
+      </ul>
+      <p class="footer-legal">
+        PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
+      </p>
+    </div>
+  </footer>
 
-{% block extra_js %}
-  <!-- Bootstrap 5 JS Bundle (Popper + Bootstrap) -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-{% endblock %}
-
+<script src="{% static 'responsive/menu.js' %}"></script>
+<!-- Privacy/Cookie banner -->
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Aviso de cookies e privacidade">
+  <div class="cookie-inner">
+    <p class="cookie-text">Utilizamos cookies para otimizar sua experiência em nosso site. Ao continuar a navegação, você concorda com a nossa <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
+    <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
+  </div>
+ </div>
+ 
+</body>
+</html>
