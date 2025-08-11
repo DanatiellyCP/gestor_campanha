@@ -1,0 +1,52 @@
+{% extends 'base_index_responsive.html' %}
+{% load static %}
+
+{% block content %}
+<div class="topo" role="img" aria-label="Topo do site">
+  <div class="inner">
+    <h1 class="topo-title">COMO PARTICIPAR</h1>
+    <img src="{% static 'responsive/images/ROBOM-BRIL_NAVE.png' %}" alt="" class="topo-robot" aria-hidden="true" />
+  </div>
+</div>
+
+<div id="content">
+  <div class="content-inner">
+    <div class="video-wrap">
+      <iframe id="promoVideo" width="1150" height="650" src="https://www.youtube.com/embed/ZoC9W-87YNQ?autoplay=1&mute=1&playsinline=1&enablejsapi=1&rel=0" title="BomBril - Dê um Brilho no seu Futuro" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+      <button class="unmute-banner" id="unmuteBtn" aria-label="Ativar som do vídeo">Ativar som</button>
+    </div>
+
+    <hr class="content-sep" />
+
+    <section class="step">
+      <h3 class="step-title">1 - Compre os produtos participantes</h3>
+      <p class="step-text">Adquira, no mínimo, <strong>3 (três) produtos Bombril</strong> participantes em uma mesma compra, em qualquer loja do território nacional.</p>
+      <a class="btn-cta" href="/lista-produtos/">Confira a lista de produtos</a>
+    </section>
+    <br/>
+    <section class="step">
+      <h3 class="step-title">2 - Cadastre seu cupom</h3>
+      <p class="step-text">Acesse o site <strong>www.promocaobombril.com.br</strong> ou envie uma mensagem para o Whatsapp da promoção no número <strong>11 5555-1607</strong>.<br/>
+      Faça o seu cadastro pessoal, envie uma foto legível do seu cupom fiscal, escaneie o QR code ou digite o código do cupom.</p>
+      <a class="btn-cta" href="/como-escanear">Confira como escanear seu cupom</a>
+    </section>
+    <br/>
+    <section class="step">
+      <h3 class="step-title">3 - Concorra a prêmios</h3>
+      <p class="step-text">Após o cadastro, você receberá seus números da sorte para concorrer aos prêmios.</p>
+      <div class="awards">
+        <div class="award-card">
+          <h3>Prêmios semanais</h3>
+          <p>Vários prêmios de <strong>R$ 800,00</strong> sorteados toda semana para você e entregues como crédito na plataforma PicPay.</p>
+        </div>
+        <div class="award-card">
+          <h3>Grande prêmio final</h3>
+          <p>Concorra a <strong>R$ 170.000,00</strong>, para dar um brilho no seu futuro!</p>
+        </div>
+      </div>
+    </section>
+    <br/>
+  </div>
+</div>
+
+{% endblock %}

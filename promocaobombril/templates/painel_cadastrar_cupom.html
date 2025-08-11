@@ -1,0 +1,141 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Promoção Bombril - Home</title>
+    <meta name="description"
+        content="Participe da promoção Bombril e concorra a prêmios incríveis. Cadastre seus cupons e dê um brilho no seu futuro!">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://kit.fontawesome.com/f0d3945d17.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
+
+    <link rel="icon" type="image/png" href="{% static 'responsive/images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+</head>
+<body>
+  <div class="wrap">
+    <header class="menu" role="navigation" aria-label="Principal">
+      <div class="bar">
+        <a class="brand" href="#" aria-label="Página inicial">
+          <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+        </a>
+        <nav aria-label="Seções">
+          <ul class="links">
+            <li><a href="/">Sorteios</a></li>
+            <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
+            <li><a href="/editar-perfil/">Editar perfil</a></li>
+          </ul>
+        </nav>
+        <div class="actions">
+          <button class="btn btn-participe" id="ctaParticipar">SAIR</button>
+        </div>
+        <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div class="drawer" id="drawer">
+        <ul class="links">
+          <br/>
+          <li><a href="/">Sorteios</a></li>
+          <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
+          <li><a href="/editar-perfil/">Editar perfil</a></li>
+        </ul>
+        <div class="actions">
+          <button class="btn btn-participe" id="mParticipar">SAIR</button>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <div class="topo panel-hero" role="img" aria-label="Topo do site">
+    <img src="{% static 'responsive/images/background_topo.png' %}" alt="" class="topo-measure" aria-hidden="true" />
+    <div class="inner">
+      <h1 class="sr-only">Painel</h1>
+      <div class="panel-duo" aria-hidden="true">
+        <img src="{% static 'responsive/images/PRODUTOS.png' %}" alt="" class="panel-logo" />
+        <img src="{% static 'responsive/images/painel_promocao.png' %}" alt="" class="panel-side" />
+      </div>
+      <img src="{% static 'responsive/images/ROBOM-BRIL_NAVE.png' %}" alt="" class="topo-robot" aria-hidden="true" />
+    </div>
+  </div>
+  <div id="content">
+    <section class="coupon-register" aria-label="Cadastro de cupom">
+      <div class="inner">
+        <header class="panel-header">
+          <h2 class="panel-title">Cadastro de cupom</h2>
+          <p class="panel-sub">Escolha a forma de cadastro</p>
+        </header>
+        <section class="register-block" aria-label="01 - Envie a imagem do seu cupom">
+          <h3 class="register-step"><span class="num">01</span> - Envie a imagem do seu cupom</h3>
+          <form class="register-form" action="#" method="post" enctype="multipart/form-data">
+            <label class="file-field">
+              <input type="file" name="cupom_imagem" aria-label="Carregar imagem do cupom" />
+              <span class="placeholder">Carregar arquivo</span>
+            </label>
+            <div class="actions">
+              <button type="submit" class="btn-red">ENVIAR IMAGEM</button>
+            </div>
+          </form>
+        </section>
+
+        <hr class="register-sep" aria-hidden="true" />
+
+        <section class="register-block" aria-label="02 - Escaneie o QR Code do cupom com a sua câmera">
+          <h3 class="register-step"><span class="num">02</span> - Ou escaneie o QR Code do cupom com a sua câmera</h3>
+          <div class="register-row">
+            <button type="button" class="btn-red btn-red--sm">ATIVAR CÂMERA</button>
+            <a href="#" class="hint-link">Onde encontrar?</a>
+          </div>
+          <img src="{% static 'responsive/images/seta_cupom_qr.png' %}" alt="Seta apontando para o QR Code no cupom" class="reg-arrow reg-arrow--qr" aria-hidden="true" />
+          <img src="{% static 'responsive/images/cupom_qr.png' %}" alt="Exemplo de cupom destacando o QR Code" class="reg-art reg-art--qr" aria-hidden="true" />
+        </section>
+
+        <hr class="register-sep" aria-hidden="true" />
+
+        <section class="register-block" aria-label="03 - Digite o código do seu cupom">
+          <h3 class="register-step"><span class="num">03</span> - Ou digite o código do seu cupom</h3>
+          <form class="register-form" action="#" method="post">
+            <label class="text-field">
+              <input type="text" name="cupom_codigo" placeholder="" aria-label="Código do cupom" />
+            </label>
+            <div class="actions">
+              <button type="submit" class="btn-red btn-red--sm">ENVIAR CÓDIGO</button>
+              <a href="#" class="hint-link">Onde encontrar?</a>
+            </div>
+          </form>
+          <img src="{% static 'responsive/images/seta_cupom_code.png' %}" alt="Seta apontando para a chave de acesso no cupom" class="reg-arrow reg-arrow--code" aria-hidden="true" />
+          <img src="{% static 'responsive/images/cupom_code.png' %}" alt="Exemplo de cupom destacando a chave de acesso" class="reg-art reg-art--code" aria-hidden="true" />
+        </section>
+      </div>
+    </section>
+  </div>
+  <footer class="footer">
+    <div class="inner">
+      <div class="footer-top">
+        <h2 class="footer-title">É mais do que bom. É da</h2>
+        <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+      </div>
+      <ul class="footer-links">
+        <li><a href="/termos">Termos de uso</a></li>
+        <li><a href="/privacidade">Política de privacidade</a></li>
+        <li><a href="/lgpd">LGPD</a></li>
+      </ul>
+      <p class="footer-legal">
+        PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Privacy/Cookie banner -->
+  <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Aviso de cookies e privacidade">
+    <div class="cookie-inner">
+      <p class="cookie-text">Utilizamos cookies para otimizar sua experiência em nosso site. Ao continuar a navegação, você concorda com a nossa <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
+      <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
+    </div>
+   </div>
+  <script src="{% static 'responsive/menu.js' %}"></script>
+</body>
+</html>
+

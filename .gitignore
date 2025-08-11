@@ -12,3 +12,8 @@ staticfiles/
 
 # Virtualenv
 venv/
+
+
+docker-compose.yml
+Dockerfile
+celerybeat-schedule

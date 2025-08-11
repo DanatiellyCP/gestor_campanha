@@ -1,0 +1,255 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Promoção Bombril - Home</title>
+    <meta name="description"
+        content="Participe da promoção Bombril e concorra a prêmios incríveis. Cadastre seus cupons e dê um brilho no seu futuro!">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://kit.fontawesome.com/f0d3945d17.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
+
+    <link rel="icon" type="image/png" href="{% static 'responsive/images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+</head>
+<body class="wizard-page">
+  <div class="wrap">
+    <header class="menu" role="navigation" aria-label="Principal">
+      <div class="bar">
+        <a class="brand" href="#" aria-label="Página inicial">
+          <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+        </a>
+        <nav aria-label="Seções">
+          <ul class="links">
+            <li><a href="/home_responsive/">Início</a></li>
+            <li><a href="/como-participar">Como participar</a></li>
+            <li><a href="/produtos/">Produtos</a></li>
+            <li><a href="/lista-resultados">Resultados</a></li>
+            <li><a href="/duvidas">Dúvidas</a></li>
+          </ul>
+        </nav>
+        <div class="actions">
+          <a href="/cadastrar/" class="btn btn-participe" id="ctaParticipar">CADASTRAR</a>
+          <a href="/logar/" class="btn btn-login" id="ctaLogin">LOGIN</a>
+        </div>
+        <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div class="drawer" id="drawer">
+        <ul class="links">
+          <br/>
+          <li><a href="/home_responsive/">Início</a></li>
+          <li><a href="/como-participar">Como participar</a></li>
+          <li><a href="/produtos/">Produtos</a></li>
+          <li><a href="/lista-resultados">Resultados</a></li>
+          <li><a href="/duvidas">Dúvidas</a></li>
+        </ul>
+        <div class="actions">
+          <a href="/cadastrar/" class="btn btn-participe" id="mParticipar">CADASTRAR</a>
+          <a href="/logar/" class="btn btn-login" id="mLogin">LOGIN</a>
+        </div>
+      </div>
+    </header>
+  </div>
+
+  <div class="topo" role="img" aria-label="Topo do site">
+    <div class="inner">
+      <h1 class="topo-title">FAÇA SEU CADASTRO</h1>
+      <img src="{% static 'responsive/images/ROBOM-BRIL_NAVE.png' %}" alt="" class="topo-robot" aria-hidden="true" />
+    </div>
+  </div>
+  <div id="content">
+    <div class="content-inner">
+      <div class="container wizard-container">
+
+        <div id="stepper" class="stepper" aria-label="Progresso do cadastro" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1">
+          <div class="step">
+            <div class="dot active" data-step="1" title="Dados pessoais"></div>
+            <div class="line-bar"></div>
+            <div class="dot" data-step="2" title="Endereço"></div>
+            <div class="line-bar"></div>
+            <div class="dot" data-step="3" title="Termos"></div>
+          </div>
+        </div>
+
+        <form id="wizard" novalidate>
+          <section class="card step-pane active" data-step="1" aria-labelledby="step1-title">
+            <div class="grid">
+
+              <div class="col-12 field">
+                <label for="nome">Nome:</label>
+                <input id="nome" name="nome" placeholder="Seu nome completo" required />
+              </div>
+
+              <div class="col-6 field">
+                <label for="cpf">CPF:</label>
+                <input id="cpf" name="cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" required />
+              </div>
+
+              <div class="col-6 field">
+                <label for="email">e-mail:</label>
+                <input id="email" name="email" type="email" placeholder="voce@exemplo.com" required />
+              </div>
+
+              <div class="col-6 field">
+                <label for="celular">Celular:</label>
+                <input id="celular" name="celular" inputmode="tel" placeholder="(00) 00000-0000" maxlength="15" required />
+              </div>
+
+              <div class="col-6 field">
+                <label for="nasc">Data de Nascimento</label>
+                <input id="nasc" name="nasc" inputmode="numeric" placeholder="dd/mm/aaaa" maxlength="10" required />
+              </div>
+
+              <div class="col-6 field">
+                <label for="senha">senha</label>
+                <input id="senha" name="senha" class="pass" type="password" placeholder="********" minlength="8" required />
+                <button type="button" class="toggle-pass" data-target="senha" aria-label="Mostrar/ocultar senha" title="Mostrar/ocultar senha"></button>
+              </div>
+              <div class="col-6 field">
+                <label for="senha2">confirme sua senha</label>
+                <input id="senha2" name="senha2" class="pass" type="password" placeholder="********" minlength="8" required />
+                <button type="button" class="toggle-pass" data-target="senha2" aria-label="Mostrar/ocultar senha" title="Mostrar/ocultar senha"></button>
+              </div>
+
+              <div class="col-6">
+                <div class="rules" aria-live="polite">
+                  <div id="ruleUpper" class="rule"><span class="badge"></span> Letras maiúsculas</div>
+                  <div id="ruleLower" class="rule"><span class="badge"></span> Letras minúsculas</div>
+                  <div id="ruleNumber" class="rule"><span class="badge"></span> Números</div>
+                  <div id="ruleLen" class="rule"><span class="badge"></span> Tamanho mínimo (8)</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions">
+              <div class="btn-row">
+                <button type="button" class="btn btn-red" id="next1">Próximo ></button>
+              </div>
+            </div>
+          </section>
+
+          <section class="card step-pane" data-step="2" aria-labelledby="step2-title">
+            <div class="grid">
+              <div class="col-12"><label id="step2-title">Endereço</label></div>
+
+              <div class="col-4 field">
+                <label for="cep">CEP</label>
+                <input id="cep" name="cep" inputmode="numeric" placeholder="00000-000" maxlength="9" required />
+                <button type="button" class="clear-input" data-target="cep" aria-label="Limpar CEP" title="Limpar"></button>
+              </div>
+              <div class="col-8" style="align-self:end">
+                <div class="hint">Não lembra seu CEP? <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noreferrer noopener">Acesse aqui</a>.</div>
+              </div>
+
+              <div class="col-6 field">
+                <label for="estado">Estado</label>
+                <select id="estado" name="estado" required>
+                  <option value="" selected disabled>Selecione</option>
+                </select>
+              </div>
+              <div class="col-6 field">
+                <label for="cidade">Cidade</label>
+                <input id="cidade" name="cidade" placeholder="Cidade" required />
+              </div>
+
+              <div class="col-6 field">
+                <label for="logradouro">Logradouro</label>
+                <input id="logradouro" name="logradouro" placeholder="Rua / Avenida" required />
+              </div>
+              <div class="col-6 field">
+                <label for="bairro">Bairro</label>
+                <input id="bairro" name="bairro" placeholder="Bairro" required />
+              </div>
+
+              <div class="col-6 field">
+                <label for="numero">Número</label>
+                <input id="numero" name="numero" inputmode="numeric" placeholder="0" />
+              </div>
+              <div class="col-6 field">
+                <label for="compl">Complemento</label>
+                <input id="compl" name="compl" placeholder="Ap / Bloco" />
+              </div>
+            </div>
+
+            <div class="actions">
+              <div class="btn-row">
+                <button type="button" class="btn btn-yellow" id="back2">< Voltar</button>
+                <button type="button" class="btn btn-red" id="next2">Próximo ></button>
+              </div>
+            </div>
+          </section>
+
+          <section class="card step-pane terms" data-step="3" aria-labelledby="step3-title">
+            <div class="grid">
+              <div class="col-12"><label id="step3-title">Termos e preferências</label></div>
+
+              <div class="col-12">
+                <label class="row">
+                  <input type="checkbox" class="cb" id="c1" required />
+                  <span><strong>*</strong> Estou ciente e concedo permissão da utilização de meus dados para efeito da promoção, apuração e premiação.</span>
+                </label>
+                <div class="space-xs"></div>
+                <label class="row">
+                  <input type="checkbox" class="cb" id="c2" required />
+                  <span><strong>*</strong> Estou ciente que preciso guardar os cupons fiscais cadastrados.</span>
+                </label>
+                <div class="space-xs"></div>
+                <label class="row">
+                  <input type="checkbox" class="cb" id="c3" required />
+                  <span><strong>*</strong> Li e concordo com o <a href="#" onclick="return false">Regulamento</a>, bem como a <a href="#" onclick="return false">Política de Privacidade</a> da BomBril.</span>
+                </label>
+                <div class="space-sm"></div>
+                <label class="row">
+                  <input type="checkbox" class="cb" id="c4" />
+                  <span>Aceito receber informativos da BomBril.</span>
+                </label>
+                <div class="space-xs"></div>
+                <label class="row">
+                  <input type="checkbox" class="cb" id="c5" />
+                  <span>Aceito receber mensagens pelo WhatsApp (11) 5555-1607.</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="actions">
+              <div class="btn-row">
+                <button type="button" class="btn btn-yellow" id="back3">< Voltar</button>
+                <button type="submit" class="btn btn-red" id="finish">Concluir cadastro</button>
+              </div>
+            </div>
+          </section>
+        </form>
+      </div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="inner">
+      <div class="footer-top">
+        <h2 class="footer-title">É mais do que bom. É da</h2>
+        <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+      </div>
+      <ul class="footer-links">
+        <li><a href="/termos">Termos de uso</a></li>
+        <li><a href="/privacidade">Política de privacidade</a></li>
+        <li><a href="/lgpd">LGPD</a></li>
+      </ul>
+      <p class="footer-legal">
+        PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Privacy/Cookie banner -->
+  <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Aviso de cookies e privacidade">
+    <div class="cookie-inner">
+      <p class="cookie-text">Utilizamos cookies para otimizar sua experiência em nosso site. Ao continuar a navegação, você concorda com a nossa <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
+      <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
+    </div>
+   </div>
+  <script src="{% static 'responsive/menu.js' %}"></script>
+</body>
+</html>

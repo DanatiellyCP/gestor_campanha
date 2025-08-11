@@ -1,0 +1,1871 @@
+/* ==========================================================================
+   CSS de Padronização e Reset (Cross-browser)
+   ========================================================================== */
+
+/* * 1. Remove margens e paddings padrão inconsistentes dos navegadores.
+ * 2. Define o box-sizing para um modelo de caixa mais intuitivo.
+ */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* * Remove estilos padrão de listas.
+ */
+ol,
+ul {
+    list-style: none;
+}
+
+/* * Garante que imagens sejam responsivas por padrão.
+ */
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+}
+
+/* * Remove a aparência nativa de botões e inputs, permitindo
+ * que nosso estilo customizado seja aplicado de forma mais consistente.
+ * A propriedade -webkit-appearance é crucial para o Safari no iPhone.
+ */
+input,
+button,
+textarea,
+select {
+    font: inherit;
+    /* Herda a fonte do elemento pai */
+    -webkit-appearance: none;
+    /* Remove estilos do iOS */
+    appearance: none;
+    border-radius: 0;
+}
+
+/* * 3. Melhora a renderização de fontes no Safari (iPhone) e Chrome.
+ * Deixa as fontes mais nítidas e menos "gordas" no macOS/iOS.
+ */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================================
+   Fim do código de padronização
+   ========================================================================== */
+
+
+
+/*--------------------------------------------------
+  CONFIGURAÇÕES GERAIS E VARIÁVEIS
+--------------------------------------------------*/
+:root {
+    --primary-color: #F61A07;
+    --secondary-color: #E3A42E;
+    --light-bg-color: #FFFFFF;
+    --dark-text-color: #1f1e1e;
+    --light-text-color: #FFFFFF;
+    --accordion-content-bg: #f53928;
+    --font-family: futura-pt, sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    color: var(--dark-text-color);
+    background-color: var(--light-bg-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1366px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+}
+
+h1 {
+    font-size: 35px;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+h2 {
+    font-size: 25px;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+/* section {
+    padding: 60px 0;
+} */
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.centered-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Estilo para o título "Compre 3 produtos..." */
+.custom-title {
+    /* Cor azul retirada da imagem de referência */
+    font-family: var(--font-family);
+    font-weight: 900;
+    /* Super negrito para se aproximar da referência */
+    font-size: 48px;
+    /* Tamanho grande para destaque */
+    text-transform: uppercase;
+    line-height: 1.1;
+    /* Deixa as linhas mais próximas */
+}
+
+/* Aplica a cor vermelha principal da campanha na palavra "Bombril" */
+.text-bombril-red {
+    color: var(--primary-color);
+}
+
+.text-bombril-white {
+    color: #ffffff;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Ajuste para telas menores (celulares) */
+@media (max-width: 768px) {
+    .custom-title {
+        font-size: 32px;
+        /* Diminui a fonte em telas menores */
+    }
+}
+
+/*--------------------------------------------------
+  ESTILO PARA O BOTÃO FLUTUANTE DO WHATSAPP
+--------------------------------------------------*/
+
+.whatsapp-flutuante {
+    position: fixed;
+    /* Fixa o botão na tela */
+    bottom: 25px;
+    /* Distância da parte de baixo */
+    right: 25px;
+    /* Distância da parte da direita */
+    width: 80px;
+    height: 80px;
+    background-color: #25D366;
+    /* Cor oficial do WhatsApp */
+    color: #FFF;
+    border-radius: 50%;
+    /* Deixa o botão redondo */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    /* Garante que fique na frente de outros elementos */
+    transition: transform 0.2s ease-in-out;
+    text-decoration: none;
+}
+
+.whatsapp-flutuante img {
+    width: 40px;
+    /* Tamanho do ícone dentro do círculo */
+    height: auto;
+}
+
+/* Efeito ao passar o mouse */
+.whatsapp-flutuante:hover {
+    transform: scale(1.1);
+    /* Aumenta um pouco o tamanho */
+}
+
+/*--------------------------------------------------
+  BOTÕES
+--------------------------------------------------*/
+.btn {
+    padding: 10px 25px;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: transform 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+}
+
+.btn:hover {
+    transform: scale(1.05);
+}
+
+/*--------------------------------------------------
+  ESTILOS CORRIGIDOS PARA O CABEÇALHO (V2)
+--------------------------------------------------*/
+.main-header {
+    padding: 10px 0;
+    position: absolute;
+    width: 100%;
+    z-index: 1000;
+    top: 0;
+}
+
+.navbar-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    height: 100px; /* Aumentar a altura para acomodar o logo */
+}
+
+.navbar-menu-bg {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: calc(100% - 90px); /* Ajusta a largura para não cobrir o logo */
+    height: 70px; /* Altura da barra branca */
+    background-color: white;
+    right: 0; /* Alinha a barra à direita */
+    left: auto;
+    z-index: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 50px; /* Adiciona cantos arredondados */
+}
+
+.header-menu-wrapper {
+    display: flex;
+    align-items: center;
+    gap: -20px;
+    padding: 0 40px 0 120px; /* Adiciona padding para alinhar o conteúdo dentro da barra */
+    height: 100%;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    justify-content: flex-end;
+}
+
+.logo-link {
+    position: relative;
+    left: 120px;
+    z-index: 1; /* Garante que o logo fique na frente */
+}
+
+.navbar-menu {
+    display: flex;
+    align-items: center;
+    background-color: white;
+    width: 100%;
+    max-width: 1638px;
+    height: 85px;
+    padding: 0 10px 0 210px; /* T, R, B, L - Left padding makes room for logo */
+    border-radius: 50px; /* Pill shape */
+    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25); /* Sombra ajustada para 3px e mais sólida */
+    justify-content: space-between; /* Pushes nav and actions apart */
+}
+
+.main-nav {
+    flex-grow: 1;
+}
+
+.nav-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    gap: 25px; /* Spacing between links */
+}
+
+.nav-links li a {
+    padding: 0;
+    font-weight: 700; /* Bolder text */
+    color: var(--dark-text-color);
+    text-transform: uppercase;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Space between buttons */
+}
+
+/* General Button Styles */
+.btn {
+    padding: 10px 25px;
+    border-radius: 50px; /* Pill shape for buttons */
+    font-weight: 700;
+    text-transform: uppercase;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+/* Specific Button Styles */
+.btn-participate {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+}
+
+.btn-participate:hover {
+    background-color: #d41606; /* Darker red on hover */
+    transform: scale(1.05);
+}
+
+.btn-login {
+    background-color: var(--light-bg-color);
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-login:hover {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+    transform: scale(1.05);
+}
+
+/* Remove old styles */
+.logo {
+    display: none;
+}
+
+.logo-and-nav {
+    display: none;
+}
+
+/*--------------------------------------------------
+  AJUSTES RESPONSIVOS CORRIGIDOS PARA O CABEÇALHO
+--------------------------------------------------*/
+@media (max-width: 992px) { 
+    /* Esconde o menu e o login na versão desktop para telas menores */
+    .header-menu-wrapper {
+        display: none;
+    }
+
+    /* Mostra o botão hamburger */
+    .hamburger-menu {
+        display: block;
+        z-index: 1001;
+    }
+
+    /* ESTILO DO MENU QUANDO ABERTO (CLASSE .ACTIVE) */
+    body .header-menu-wrapper.active {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 225, 0, 0.98);
+        backdrop-filter: blur(5px);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 25px;
+        z-index: 1000;
+    }
+
+    /* Ajusta a lista de links para o modo coluna dentro do menu aberto */
+    .header-menu-wrapper.active .main-nav .nav-links {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Ajusta o botão de login dentro do menu aberto */
+    .header-menu-wrapper.active .header-login {
+        margin-top: 20px;
+    }
+
+    /* Animação para o ícone do hamburger virar um "X" */
+    .hamburger-menu.active span {
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
+    .hamburger-menu.active span:nth-child(1) {
+        transform: translateY(8px) rotate(45deg);
+    }
+    .hamburger-menu.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger-menu.active span:nth-child(3) {
+        transform: translateY(-8px) rotate(-45deg);
+    }
+}@media (max-width: 992px) { 
+    /* Esconde o menu e o login na versão desktop para telas menores */
+    .header-menu-wrapper {
+        display: none;
+    }
+
+    /* Mostra o botão hamburger */
+    .hamburger-menu {
+        display: block;
+        z-index: 1001;
+    }
+
+    /* ESTILO DO MENU QUANDO ABERTO (CLASSE .ACTIVE) */
+    .header-menu-wrapper.active {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 225, 0, 0.98);
+        backdrop-filter: blur(5px);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 25px;
+    }
+
+    /* Ajusta a lista de links para o modo coluna dentro do menu aberto */
+    .header-menu-wrapper.active .main-nav .nav-links {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Ajusta o botão de login dentro do menu aberto */
+    .header-menu-wrapper.active .header-login {
+        margin-top: 20px;
+    }
+}
+
+/*--------------------------------------------------
+  SEÇÃO 1: HERO BANNER (CÓDIGO FINAL E LIMPO V2)
+--------------------------------------------------*/
+
+/* Regra única e definitiva para a seção do banner */
+section.hero-banner.hero-full-width {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 20px;
+    width: 100%;
+
+    /* --- CONTROLE FINAL DA ALTURA --- */
+    min-height: 80vh;
+    /* Ocupará 80% da altura da tela */
+}
+
+/* 2. Estilo do Vídeo de Fundo */
+.background-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+/* 3. Container do Conteúdo Desktop (organiza as 2 colunas) */
+.banner-desktop-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    /*max-width: 1200px;*/
+    margin: 0 auto;
+    padding: 5% 10%;
+}
+
+/* 4. Coluna da Esquerda (Mensagem Principal) */
+.hero-coluna-mensagem {
+    flex-basis: 40%;
+    /* Ocupa 55% da largura */
+    text-align: center;
+}
+
+/* 5. Coluna da Direita (Prêmios e Mascote) */
+.hero-coluna-premios {
+    flex-basis: 45%;
+    /* Ocupa 45% da largura */
+    position: relative;
+    /* Serve como âncora para o mascote */
+}
+
+/* Imagem principal dos prêmios */
+.premios-imagem-principal {
+    width: 100%;
+}
+
+/* Mascote que fica sobreposto */
+.premios-mascote-sobreposto {
+    position: absolute;
+    bottom: -90px;
+    /* Posição vertical (para "vazar" um pouco para baixo) */
+    right: -30px;
+    /* Posição horizontal (para "vazar" um pouco para a direita) */
+    width: 50%;
+    max-width: 355px;
+}
+
+
+/*--------------------------------------------------
+  CONTROLE DE ALTURA DAS IMAGENS DO BANNER
+--------------------------------------------------*/
+
+/* Limita a altura das imagens principais dentro das colunas do banner */
+.banner-desktop-wrapper .hero-coluna-mensagem img,
+.banner-desktop-wrapper .premios-imagem-principal {
+    max-height: 65vh;
+    /* A imagem não pode ser mais alta que 65% da altura da tela */
+    width: auto;
+    /* Deixa a largura se ajustar para manter a proporção */
+    margin: 0 auto;
+    /* Garante que a imagem fique centralizada em sua coluna */
+}
+
+/*--------------------------------------------------
+  ANIMAÇÃO DE PULSAR PARA O BANNER
+--------------------------------------------------*/
+
+/* 1. Definição da Animação */
+@keyframes pulse-effect {
+    0% {
+        transform: scale(1);
+        /* Tamanho normal */
+    }
+
+    50% {
+        transform: scale(1.03);
+        /* Aumenta 3% no meio da animação */
+    }
+
+    100% {
+        transform: scale(1);
+        /* Volta ao tamanho normal */
+    }
+}
+
+/* 2. Aplicação da Animação nas Imagens */
+/* Aplica o efeito à imagem principal dos prêmios e ao mascote */
+.premios-imagem-principal,
+.premios-mascote-sobreposto,
+.hero-coluna-mensagem {
+    animation-name: pulse-effect;
+    animation-duration: 2.5s;
+    /* Duração de cada pulso */
+    animation-iteration-count: infinite;
+    /* Repete para sempre */
+    animation-timing-function: ease-in-out;
+    /* Deixa a animação mais suave */
+}
+
+/* 6. Lógica para o Banner Mobile */
+.banner-mobile {
+    display: none;
+    /* Fica escondido no desktop */
+}
+
+@media (max-width: 768px) {
+    .hero-banner {
+        min-height: auto;
+        /* Reseta a altura no mobile */
+        padding: 0;
+    }
+
+    /* Esconde o conteúdo de desktop no mobile */
+    .banner-desktop-wrapper {
+        display: none;
+    }
+
+    /* Mostra a imagem única de banner no mobile */
+    .banner-mobile {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+}
+
+/*--------------------------------------------------
+  SEÇÃO 2: PRÊMIOS 
+--------------------------------------------------*/
+.prizes-section {
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+}
+
+.prizes-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.prize-item {
+    width: 45%;
+}
+
+/* Icone de mais */
+.plus-icon {
+    width: 5%;
+}
+
+/*--------------------------------------------------
+  NOVA ESTRUTURA PARA SEÇÃO 3
+--------------------------------------------------*/
+.image-grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    /* Permite que os itens quebrem para a próxima linha */
+    gap: 20px;
+    /* Espaço entre todas as imagens */
+    margin-top: 40px;
+    /* Espaço abaixo do título */
+}
+
+.grid-item {
+    /* Estilo base para todos os itens da grade */
+    width: 100%;
+}
+
+/* Define que os itens 1 e 2 ocuparão 50% cada, menos o espaço do gap */
+.grid-item.item-1,
+.grid-item.item-2 {
+    flex: 1 1 calc(50% - 10px);
+    align-self: center;
+}
+
+/* Opcional: Garante que o item 3 ocupe 100% da largura */
+.grid-item.item-3 {
+    flex-basis: 100%;
+    justify-items: center;
+}
+
+/*--------------------------------------------------
+  ESTILOS CORRIGIDOS PARA A SEÇÃO DE VÍDEO COM MÁSCARA
+--------------------------------------------------*/
+.video-mask-section {
+    padding: 60px 0;
+    background-color: #fffffff1;
+}
+
+/* O container principal que alinha tudo */
+.video-mask-container {
+    position: relative;
+    max-width: 1100px; /* Garante a mesma largura de outras seções */
+    margin: 40px auto 0;
+    /* CHAVE 1: Corta qualquer conteúdo que vaze para fora */
+    overflow: hidden;
+}
+
+.video-mask-container iframe {
+    display: block;
+    margin: 0 auto;
+}
+
+/* A imagem da máscara que fica por cima */
+.tv-mask-overlay {
+    width: 100%;
+    height: auto;
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+    /* para dar o play */
+
+}
+
+/* O container do vídeo que fica por trás */
+.video-background {
+    position: absolute;
+    z-index: 1;
+
+    /* CHAVE 2: Ancora o vídeo pelo centro */
+    top: 50%;
+    left: 42%;
+    transform: translate(-50%, -50%);
+    /* Puxa o vídeo de volta para o centro exato */
+
+    /* === ATENÇÃO: AJUSTE ESTES VALORES === */
+    /* Estes valores definem o tamanho do vídeo. 
+       Você precisará ajustá-los para sua imagem específica. */
+    width: 63%;
+    /* Largura do vídeo em relação ao container */
+    height: 75%;
+    /* Altura do vídeo em relação ao container */
+}
+
+/* Garante que o iframe do vídeo preencha o container dele */
+.video-background iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/*--------------------------------------------------
+  AJUSTES RESPONSIVOS PARA O VÍDEO
+--------------------------------------------------*/
+@media (max-width: 768px) {
+    /* Em telas menores, o vídeo pode ficar muito pequeno.
+       Uma opção é mostrar o vídeo normalmente, sem a máscara. */
+
+    .tv-mask-overlay {
+        /* display: none;  // Descomente esta linha se quiser esconder a máscara no mobile */
+    }
+
+    .video-background {
+        /* Se esconder a máscara, ajuste o vídeo para ocupar o espaço. Ex:
+        position: relative;
+        width: 100%;
+        height: 0;
+        padding-bottom: 56.25%; /* Proporção 16:9 */
+        /* top: auto; left: auto; */
+    }
+}
+
+
+/*--------------------------------------------------
+  LAYOUT FINAL PARA SEÇÃO 4: WHATSAPP (VERSÃO 2.0)
+--------------------------------------------------*/
+
+/* Remove o padding padrão da seção para o mascote encostar na borda */
+.whatsapp-section {
+    padding-bottom: 0;
+}
+
+.whatsapp-container-new {
+    display: flex;
+    align-items: center;
+    /* Mantém o alinhamento vertical geral */
+    gap: 30px;
+}
+
+.whatsapp-col-mascot {
+    flex: 0 0 40%;
+    align-self: flex-end;
+    /* <<< CHAVE 1: Alinha esta coluna na parte de baixo */
+    margin-bottom: 0px;
+    /* <<< CHAVE 2: Faz o mascote 'vazar' um pouco (ajuste fino) */
+}
+
+.whatsapp-col-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+    padding-bottom: 60px;
+    /* Adiciona um padding para compensar a remoção do padding da seção */
+}
+
+/* Estilo para o TÍTULO PRINCIPAL (CADASTRE PELO WHATSAPP) */
+.whatsapp-col-content h3 {
+    font-size: 2.8rem;
+    /* Tamanho maior */
+    font-weight: 900;
+    /* Super negrito */
+    text-transform: uppercase;
+    color: var(--primary-color);
+    line-height: 1.1;
+}
+
+/* Estilo para o parágrafo de descrição */
+.whatsapp-col-content p {
+    font-size: 30px;
+    max-width: 450px;
+    /* Limita a largura do texto para melhor leitura */
+}
+
+.align-left-content-buttons {
+    display: flex;
+    justify-content: left;
+}
+
+.align-center-content-buttons {
+    display: flex;
+    justify-content: center;
+}
+
+/* Ajuste no tamanho da imagem do botão */
+.content-buttons img {
+    max-width: 600px;
+    /* Tamanho ajustado para o botão */
+}
+
+/* Bloco de texto p whatsapp*/
+.whatsapp-col-content p {
+    font-size: 30px;
+    margin-top: 5px;
+    line-height: 40px;
+}
+
+/*--------------------------------------------------
+  SEÇÃO 5: REGULAMENTO HOME 
+--------------------------------------------------*/
+.regulation-container {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    justify-content: center;
+    margin-left: 25%;
+}
+
+.regulation-col-image {
+    flex: 1;
+}
+
+.regulation-col-text {
+    flex: 1;
+    max-width: 500px;
+    text-align: right;
+}
+
+/* DIV do regulamento na página interna */
+.regulamento-text {
+    font-size: 1.1rem;
+    line-height: 3;
+    color: var(--dark-text-color);
+    margin: 20px 0;
+}
+
+.regulation-col-text p {
+    font-size: 25px;
+    color: var(--dark-text-color);
+    margin-top: 20px;
+}
+
+/*--------------------------------------------------
+  SEÇÃO 6: SORTEIOS 
+--------------------------------------------------*/
+.draws-header-new {
+    position: relative;
+    /* Cria um contexto para o posicionamento do mascote */
+    text-align: center;
+    /* Centraliza o bloco de título */
+    margin-bottom: 120px;
+    padding: 0 180px;
+    /* Adiciona espaço nas laterais para o mascote não sobrepor o texto */
+}
+
+.draws-title-new h2 {
+    font-size: 2.8rem;
+    color: var(--primary-color);
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.draws-title-new p {
+    font-size: 30px;
+    color: var(--dark-text-color);
+    margin-top: -25px;
+}
+
+.draws-section {
+    padding-bottom: 25px;
+}
+
+.draws-mascot-new {
+    position: absolute;
+    right: -70px;
+    /* Alinha o mascote na direita */
+    top: 50%;
+    /* Centraliza verticalmente */
+    transform: translateY(-50%);
+    width: 450px;
+    /* Define um tamanho para o mascote */
+}
+
+.draws-header {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.draws-title {
+    text-align: center;
+}
+
+.draws-title h2 {
+    font-size: 2.8rem;
+    color: var(--primary-color);
+}
+
+.accordion-item {
+    margin-bottom: 5px;
+}
+
+.accordion-header {
+    width: 100%;
+    background-color: var(--primary-color);
+    color: var(--light-text-color);
+    border: none;
+    padding: 35px 20px;
+    font-size: 1.3rem;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+}
+
+.accordion-content {
+    background-color: var(--accordion-content-bg);
+    color: var(--light-text-color);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.accordion-body {
+    padding: 60px;
+    font-size: 20px;
+}
+
+.accordion-icon {
+    transition: transform 0.3s;
+}
+
+.accordion-icon::before {
+    content: '▶';
+    /* Seta para a direita (fechado)  */
+    font-size: 0.8rem;
+}
+
+.accordion-item.active .accordion-icon {
+    transform: rotate(90deg);
+    /* Seta para baixo (aberto)  */
+}
+
+/*--------------------------------------------------
+  SEÇÃO 7: DÚVIDAS 
+--------------------------------------------------*/
+.doubts-section {
+    background-color: #F61A07;
+    padding-top: 60px;
+    position: relative;
+    overflow: hidden;
+    color: var(--light-text-color);
+}
+
+.doubts-section h2 {
+    font-size: 2.5rem;
+    font-style: normal;
+}
+
+.doubts-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 20px;
+}
+
+.doubts-mascot {
+    align-self: flex-end;
+}
+
+.doubts-mascot img {
+    position: relative;
+    max-width: 380px;
+    padding-bottom: 1px;
+}
+
+.doubts-content-wrapper {
+    text-align: left;
+    max-width: 500px;
+}
+
+.cta-button-image {
+    max-width: 100%;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    padding-top: 30px;
+
+}
+
+img.cta-button-image {
+
+    max-width: 500px;
+}
+
+/* Bloco de texto p whatsapp*/
+.doubts-section p {
+    font-size: 30px;
+    margin-top: -5px;
+    line-height: 40px;
+    color: var(--light-bg-color);
+}
+
+/*--------------------------------------------------
+  RODAPÉ 
+--------------------------------------------------*/
+.main-footer {
+    background-color: var(--secondary-color);
+    color: var(--dark-text-color);
+    padding: 40px 0;
+}
+
+.footer-logo {
+    margin-bottom: 20px;
+    max-width: 50%;
+}
+
+.footer-links {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.footer-text {
+    font-size: 0.8rem;
+    max-width: 800px;
+}
+
+/*--------------------------------------------------
+  PÁGINAS INTERNAS
+--------------------------------------------------*/
+
+.page-content {
+    padding: 60px 0;
+}
+
+#external-form-container {
+    min-height: 400px;
+    border: 2px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.section-up-interna {
+    padding-top: 4%;
+}
+
+/*--------------------------------------------------
+  ESTILOS PARA A PÁGINA "COMO PARTICIPAR"
+--------------------------------------------------*/
+.participar-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    /* Espaço entre cada etapa */
+    padding: 0 10%;
+}
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    /* Alinha os itens no topo */
+    gap: 25px;
+}
+
+.step-icon {
+    flex: 0 0 80px;
+    /* Tamanho base do container do ícone */
+}
+
+.step-icon img {
+    background-color: #fff;
+    border-radius: 50%;
+    padding: 15px;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.step-title {
+    color: var(--primary-color);
+    font-weight: 900;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.step-content p {
+    line-height: 1.7;
+    color: #333;
+    font-size: 30px;
+}
+
+.premio-box {
+    background-color: rgba(246, 26, 7, 0.05);
+    /* Fundo avermelhado bem claro */
+    border-left: 4px solid var(--primary-color);
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 0 8px 8px 0;
+}
+
+.premio-box h4,
+.premio-final h4 {
+    color: var(--primary-color);
+    font-weight: 900;
+    margin-bottom: 5px;
+}
+
+.premio-final {
+    margin-top: 20px;
+}
+
+.regulamento-link {
+    text-align: center;
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid #eee;
+}
+
+.regulamento-link a {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+/* Estilo para os botões internos das etapas */
+.btn-etapa {
+    display: inline-block;
+    /* Permite definir largura e altura */
+    width: auto;
+    /* Largura se ajusta ao texto */
+    max-width: 100%;
+    /* Garante que não ultrapasse o container no mobile */
+    background-color: var(--primary-color);
+    color: #fff;
+    /* Usa a cor vermelha principal */
+    border: 2px solid var(--primary-color);
+    /* Borda vermelha */
+    border-radius: 5px;
+    /* Bordas totalmente arredondadas */
+    padding: 10px 25px;
+    /* Espaçamento interno */
+    margin-top: 15px;
+    /* Espaço acima do botão */
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    /* Efeito de transição suave */
+}
+
+/*--------------------------------------------------
+  ESTILOS GERAIS PARA O REGULAMENTO
+--------------------------------------------------*/
+.pdf-section {
+    font-family: (var(--font-family));
+    color: #333;
+    line-height: 1.6;
+    max-width: 900px;
+    /* Largura máxima para boa legibilidade em telas grandes */
+    margin: 40px auto;
+    /* Centraliza o container na página */
+    padding: 20px 30px;
+    /* Espaçamento interno */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.pdf-section h2,
+.pdf-section h3,
+.pdf-section h4,
+.pdf-section h5 {
+    font-weight: 700;
+    color: #1a202c;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+}
+
+.pdf-section h2 {
+    font-size: 28px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+.pdf-section h3 {
+    font-size: 24px;
+}
+
+.pdf-section h4 {
+    font-size: 20px;
+}
+
+.pdf-section h5 {
+    font-size: 18px;
+    color: #4a5568;
+}
+
+.pdf-section p {
+    font-size: 30px;
+    margin-bottom: 1em;
+}
+
+.pdf-section ul {
+    list-style-type: disc;
+    padding-left: 20px;
+    margin-bottom: 1em;
+}
+
+.pdf-section li {
+    font-size: 16px;
+    margin-bottom: 0.5em;
+}
+
+.pdf-section strong {
+    color: #000;
+}
+
+.pdf-section table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pdf-section th,
+.pdf-section td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.pdf-section thead tr {
+    background-color: #f2f2f2;
+}
+
+.pdf-section th {
+    font-weight: bold;
+}
+
+.pdf-section tbody tr:nth-of-type(even) {
+    background-color: #f9f9f9;
+}
+
+.lista-produtos-completa ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 40px 0;
+    column-count: 4;
+    /* Define 4 colunas para a lista */
+    column-gap: 20px;
+}
+
+.lista-produtos-completa li {
+    padding: 8px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+
+.produtos-participantes-image {
+    width: 100%;
+    /* Make the image take full width */
+    margin-bottom: 20px;
+    /* Add a little space above the footer */
+}
+
+.produtos-participantes-image img {
+    display: block;
+    /* Prevent extra space below the image */
+    width: 50%;
+    height: auto;
+    /* Maintain image aspect ratio */
+    object-fit: contain;
+    /* Ensures the image fits within the container without cropping, preserving aspect ratio */
+    place-self: center;
+}
+
+@media (max-width: 1200px) {
+    .lista-produtos-completa ul {
+        column-count: 3;
+    }
+}
+
+@media (max-width: 768px) {
+    .lista-produtos-completa ul {
+        column-count: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    .lista-produtos-completa ul {
+        column-count: 1;
+    }
+}
+
+/*--------------------------------------------------
+  ESTILOS PARA A PÁGINA DE TUTORIAL DO CUPOM
+--------------------------------------------------*/
+.tutorial-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.tutorial-container h1 {
+    text-align: center;
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    font-weight: 900;
+}
+
+.tutorial-container .subtitle {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: 60px;
+}
+
+.step-tutorial {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 50px;
+}
+
+.step-tutorial:nth-child(even) {
+    flex-direction: row-reverse;
+}
+
+.step-image {
+    flex: 1;
+}
+
+.step-text {
+    flex: 1;
+}
+
+.step-text h2 {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+    .step-tutorial,
+    .step-tutorial:nth-child(even) {
+        flex-direction: column;
+        /* Empilha tudo no mobile */
+        text-align: center;
+    }
+
+    .tutorial-container h1 {
+        font-size: 2rem;
+    }
+
+    .step-text h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/*--------------------------------------------------
+  RESPONSIVIDADE 
+--------------------------------------------------*/
+@media (max-width: 768px) {
+    .main-nav {
+        display: none;
+        position: absolute;
+        top: 80px;
+        left: 0;
+        width: 100%;
+        background-color: var(--secondary-color);
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .main-nav.active {
+        display: flex;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        text-align: center;
+        width: 100%;
+    }
+
+    .nav-links li {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+
+    .btn-primary {
+        width: 100%;
+        text-align: center;
+    }
+
+    .hamburger-menu {
+        display: block;
+    }
+
+    .hamburger-menu span {
+        display: block;
+        width: 25px;
+        height: 3px;
+        background-color: var(--dark-text-color);
+        margin: 5px 0;
+    }
+
+    .hero-container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .prizes-container {
+        flex-direction: column;
+    }
+
+    .prize-item {
+        width: 70%;
+    }
+
+    img.prize-item2 {
+        width: 60%;
+    }
+
+    .plus-icon {
+        width: 10%;
+    }
+
+    .whatsapp-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .regulation-container {
+        flex-direction: column;
+    }
+
+    .draws-header {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .draws-header img {
+        flex: 0 0 130px;
+        max-width: 130px;
+        height: auto;
+    }
+
+    .draws-title {
+        width: 100%;
+        order: 3;
+        text-align: center;
+    }
+
+    .footer-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .hero-banner {
+        padding-top: 0;
+        padding-bottom: 0;
+        height: auto;
+    }
+
+    .hero-container {
+        justify-content: center;
+    }
+
+    .hero-image-front {
+        flex-basis: 90%;
+    }
+
+    .hero-banner {
+        height: 100%;
+    }
+
+    .draws-header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        flex-direction: row;
+    }
+
+    .draws-header img {
+        flex: 0 0 130px;
+        max-width: 130px;
+        height: auto;
+    }
+
+    .draws-title {
+        width: 100%;
+        order: 3;
+        text-align: center;
+    }
+
+    .footer-logo {
+        max-width: 300px;
+    }
+
+    .image-grid-container {
+        flex-direction: column;
+    }
+
+    .grid-item.item-1 {
+        order: 1;
+    }
+
+    .grid-item.item-2 {
+        order: 2;
+    }
+
+    .grid-item.item-3 {
+        order: 3;
+    }
+
+    .whatsapp-section {
+        padding-top: 60px;
+    }
+
+    .whatsapp-container-new {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .whatsapp-col-mascot {
+        align-self: center;
+        margin-bottom: 0;
+        max-width: 250px;
+    }
+
+    .whatsapp-col-content {
+        align-items: center;
+        padding-bottom: 0;
+    }
+
+    .whatsapp-col-content h3 {
+        font-size: 2.2rem;
+    }
+
+    .draws-header-new {
+        padding: 0;
+    }
+
+    .draws-mascot-new {
+        display: none;
+    }
+
+    img.cta-button-image {
+        max-width: 100%;
+    }
+
+    .whatsapp-container-new {
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .whatsapp-col-content {
+        order: 1;
+    }
+
+    .whatsapp-col-mascot {
+        order: 2;
+        margin-top: 40px;
+    }
+
+    .whatsapp-section {
+        padding-bottom: 0;
+    }
+}
+
+/*--------------------------------------------------
+  AJUSTES RESPONSIVOS PARA "COMO PARTICIPAR"
+--------------------------------------------------*/
+@media (max-width: 768px) {
+    .step {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .step-icon {
+        flex-basis: auto;
+    }
+}
+
+/*--------------------------------------------------
+  AJUSTES RESPONSIVOS PARA "REGULAMENTO"
+--------------------------------------------------*/
+@media (max-width: 768px) {
+    .pdf-section {
+        padding: 15px;
+        margin: 20px auto;
+    }
+
+    .pdf-section h2 {
+        font-size: 22px;
+    }
+
+    .pdf-section h3 {
+        font-size: 20px;
+    }
+
+    .pdf-section h4 {
+        font-size: 18px;
+    }
+
+    .pdf-section h5 {
+        font-size: 16px;
+    }
+
+    .pdf-section p,
+    .pdf-section li {
+        font-size: 30px;
+        line-height: 1.7;
+    }
+
+    .pdf-section thead {
+        border: none;
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+    }
+
+    .pdf-section table,
+    .pdf-section tbody,
+    .pdf-section tr,
+    .pdf-section td {
+        display: block;
+    }
+
+    .pdf-section tr {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .pdf-section table {
+        box-shadow: none;
+        border: none;
+    }
+
+    .pdf-section td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+        text-align: right;
+        padding-left: 50%;
+        position: relative;
+        min-height: 30px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .pdf-section td:last-child {
+        border-bottom: 0;
+    }
+
+    .pdf-section td:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
+        color: #333;
+    }
+}
+
+/*--------------------------------------------------
+  ESTILOS PARA O BANNER DE COOKIES
+--------------------------------------------------*/
+.cookie-consent-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(20, 20, 20, 0.95); /* Fundo escuro semi-transparente */
+    backdrop-filter: blur(5px);
+    color: #fff;
+    padding: 20px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 2000; /* Garante que fique na frente de tudo */
+    
+    /* Para a animação de entrada */
+    transform: translateY(100%);
+    transition: transform 0.5s ease-in-out;
+}
+
+.cookie-consent-banner.active {
+    transform: translateY(0);
+}
+
+.cookie-consent-text {
+    flex-grow: 1;
+    margin-right: 20px;
+    font-size: 0.9rem;
+}
+
+.cookie-consent-text a {
+    color: var(--secondary-color); /* Cor amarela do site */
+    text-decoration: underline;
+}
+
+.cookie-consent-button {
+    background-color: var(--primary-color); /* Cor vermelha principal */
+    color: white;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    flex-shrink: 0; /* Impede que o botão encolha */
+}
+
+@media (max-width: 768px) {
+    .cookie-consent-banner {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    .cookie-consent-text {
+        margin-right: 0;
+    }
+
+    .header-menu-wrapper.active {
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        background-color: #ffda00 !important; /* Amarelo */
+    }
+}
+
+/*--------------------------------------------------
+  BOTÃO FLUTUANTE DO MASCOTE
+--------------------------------------------------*/
+.floating-mascot-button {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 150px; /* Largura do botão */
+    z-index: 1000; /* Garante que fique sobre os outros elementos */
+    transition: transform 0.3s ease-in-out;
+}
+
+.floating-mascot-button:hover {
+    transform: scale(1.1); /* Efeito de zoom ao passar o mouse */
+}
+
+.floating-mascot-button img {
+    width: 100%;
+    height: auto;
+    animation: none; /* Remove a animação de pulso para este elemento */
+}
+
+/*--------------------------------------------------
+  MEDIA QUERIES
+--------------------------------------------------*/
+.hamburger-menu {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 30px;
+    height: 25px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1001;
+}
+
+.hamburger-bar {
+    width: 100%;
+    height: 3px;
+    background-color: #333;
+    border-radius: 5px;
+    transition: all 0.3s ease-in-out;
+}
+
+.hamburger-menu.active .hamburger-bar:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+}
+
+.hamburger-menu.active .hamburger-bar:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-menu.active .hamburger-bar:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Estilos para o conteúdo principal */
+.main-content {
+    padding-top: 80px; /* Ajuste para o header fixo */
+}
+
+@media (max-width: 992px) {
+    .header-menu-wrapper {
+        display: none;
+        position: absolute;
+        top: 80px; /* Altura do header */
+        right: 0;
+        width: 100%;
+        max-width: 320px;
+        height: calc(100vh - 80px);
+        background-color: #fff;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease-in-out;
+        transform: translateX(100%);
+        z-index: 1000;
+    }
+
+    .header-menu-wrapper.active {
+        display: flex;
+        transform: translateX(0);
+    }
+
+    .main-nav .nav-links {
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .hamburger-menu {
+        display: flex;
+    }
+}
