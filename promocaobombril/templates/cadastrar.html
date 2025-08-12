@@ -76,10 +76,10 @@
         </div>
 
         <form id="wizard" method="POST" action="{% url 'cadastrar' %}" novalidate>
-            {% csrf_token %}
-            {% if erro %}
-            <p class="form-error" style="color:#c00; font-weight:700; margin-top:6px;">{{ erro }}</p>
-          {% endif %}  
+          {% csrf_token %}
+          {% if erro %}
+          <p class="form-error" style="color:#c00; font-weight:700; margin-top:6px;">{{ erro }}</p>
+        {% endif %}   
           <section class="card step-pane active" data-step="1" aria-labelledby="step1-title">
             <div class="grid">
 
@@ -153,6 +153,33 @@
                 <label for="estado">Estado</label>
                 <select id="estado" name="estado" required>
                   <option value="" selected disabled>Selecione</option>
+                  <option value="AC">Acre (AC)</option>
+                  <option value="AL">Alagoas (AL)</option>
+                  <option value="AP">Amapá (AP)</option>
+                  <option value="AM">Amazonas (AM)</option>
+                  <option value="BA">Bahia (BA)</option>
+                  <option value="CE">Ceará (CE)</option>
+                  <option value="DF">Distrito Federal (DF)</option>
+                  <option value="ES">Espírito Santo (ES)</option>
+                  <option value="GO">Goiás (GO)</option>
+                  <option value="MA">Maranhão (MA)</option>
+                  <option value="MT">Mato Grosso (MT)</option>
+                  <option value="MS">Mato Grosso do Sul (MS)</option>
+                  <option value="MG">Minas Gerais (MG)</option>
+                  <option value="PA">Pará (PA)</option>
+                  <option value="PB">Paraíba (PB)</option>
+                  <option value="PR">Paraná (PR)</option>
+                  <option value="PE">Pernambuco (PE)</option>
+                  <option value="PI">Piauí (PI)</option>
+                  <option value="RJ">Rio de Janeiro (RJ)</option>
+                  <option value="RN">Rio Grande do Norte (RN)</option>
+                  <option value="RS">Rio Grande do Sul (RS)</option>
+                  <option value="RO">Rondônia (RO)</option>
+                  <option value="RR">Roraima (RR)</option>
+                  <option value="SC">Santa Catarina (SC)</option>
+                  <option value="SP">São Paulo (SP)</option>
+                  <option value="SE">Sergipe (SE)</option>
+                  <option value="TO">Tocantins (TO)</option>
                 </select>
               </div>
               <div class="col-6 field">
@@ -237,9 +264,9 @@
         <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
       </div>
       <ul class="footer-links">
-        <li><a href="/termos">Termos de uso</a></li>
-        <li><a href="/privacidade">Política de privacidade</a></li>
-        <li><a href="/lgpd">LGPD</a></li>
+        <li><a href="#">Termos de uso</a></li>
+        <li><a href="https://www.bombril.com.br/politica-de-privacidade">Política de privacidade</a></li>
+        <li><a href="#">LGPD</a></li>
       </ul>
       <p class="footer-legal">
         PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.

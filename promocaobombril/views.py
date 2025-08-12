@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.hashers import check_password, make_password
 from participantes.models import Participantes
 from cupons.models.cupom import Cupom
@@ -134,7 +135,6 @@ def cadastrar(request):
         except Exception as e:
             return render(request, 'cadastrar.html', {'erro': f'Erro ao salvar cadastro: {str(e)}'})
         return redirect('logar')
-    # GET ou outro método: renderiza o formulário
     return render(request, 'cadastrar.html')
 
 def logar(request):
@@ -154,8 +154,12 @@ def logar(request):
             erro = "Participante não encontrado."
 
         return render(request, 'logar.html', {'erro': erro})
-    # GET: renderiza página de login
-    return render(request, 'logar.html')
+    # GET: renderiza página de login e, se houver, mensagem de sucesso pós-cadastro
+    sucesso = request.GET.get('signup') == '1'
+    contexto = {}
+    if sucesso:
+        contexto['msg_sucesso'] = 'Cadastro realizado com sucesso! Faça login para continuar.'
+    return render(request, 'logar.html', contexto)
 
 # Logout: limpa sessão e volta ao login
 
@@ -347,6 +351,10 @@ def cadastrar_cupom(request, id_participante):
             contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
             if msg_numeros:
                 contexto['msg_numeros'] = msg_numeros
+
+            # Redireciona para a tela de detalhes do cupom recém cadastrado
+            detalhes_url = f"{reverse('painel_detalhes_cupom')}?id={novo_cupom.id}"
+            return redirect(detalhes_url)
 
         except Exception as e:
             contexto['msg_erro'] = f'Erro ao processar o cadastro: {e}'
