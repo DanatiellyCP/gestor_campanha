@@ -31,4 +31,9 @@ urlpatterns = [
         api_views.BuscarParticipanteView.as_view(), 
         name='api_buscar_participante'
     ),
+    path(
+        'api/participantes/cupons-por-celular/',
+        api_views.BuscarCuponsPorCelularView.as_view(),
+        name='api_cupons_por_celular'
+    ),
 ]
