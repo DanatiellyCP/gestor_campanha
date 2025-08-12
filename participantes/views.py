@@ -10,7 +10,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
 from django.core import serializers
 from .forms import ParticipanteForm
-from cupons.models import Cupom
+from cupons.models import Cupom, NumeroDaSorte
 from django.shortcuts import render, get_object_or_404, redirect
 
 import re
@@ -223,12 +223,14 @@ def area_cupom(request, id):
         dados_cupom_dict = {}
     
     produtos_validos = Produto.objects.filter(cupom=id)
+    numeros_sorte = NumeroDaSorte.objects.filter(cupom=id)
 
     contexto = {
         'cupom': cupom,
         'dados_cupom': dados_cupom_dict,
         'dados_json': dados_cupom,
-        'produtos_validos': produtos_validos
+        'produtos_validos': produtos_validos,
+        'numeros_sorte': numeros_sorte
     }
 
     return render(request, 'area_cupom.html', contexto)

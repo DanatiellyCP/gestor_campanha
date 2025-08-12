@@ -31,15 +31,7 @@ def guardar_cupom(arquivo):
     caminho_arquivo = os.path.join('cupons', nome_arquivo)
     return default_storage.save(caminho_arquivo, ContentFile(arquivo.read()))
 
-import json
-from dataclasses import asdict
-from django.shortcuts import render, get_object_or_404
 
-from django.shortcuts import render, get_object_or_404
-from django.core.files.storage import default_storage
-import cv2
-import json
-from dataclasses import asdict
 
 def cadastrar_cupom(request, id_participante):
     participante = get_object_or_404(Participantes, id=id_participante)
@@ -118,6 +110,10 @@ def cadastrar_cupom(request, id_participante):
             msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
             contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
 
+            # --- Chamada para gerar números da sorte ---
+            msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
+            contexto['msg_numeros'] = msg_numeros
+
         except Exception as e:
             contexto['msg_erro'] = f'Erro ao processar o cadastro: {e}'
 
@@ -130,65 +126,71 @@ def cadastrar_cupom(request, id_participante):
 # para ler qrccode -----------------------------------------------------------------
 @csrf_exempt
 # @login_required
+
+
+@csrf_exempt
 def salvar_qrcode_ajax(request, id_participante):
-    """Recebe dados do QR Code lido pela câmera via AJAX e tenta registrar o cupom."""
     if request.method != 'POST':
         return JsonResponse({'status': 'erro', 'mensagem': 'Método inválido.'}, status=405)
 
     try:
-        contexto = {'id_participante': id_participante}
-
         body = json.loads(request.body)
-        dados_qr = body.get('dados_qr')
-        
-        if not dados_qr:
-            return JsonResponse({'status': 'erro', 'mensagem': 'Nenhum dado de QR Code recebido.'}, status=400)
+    except json.JSONDecodeError:
+        return JsonResponse({'status': 'erro', 'mensagem': 'Requisição JSON malformada.'}, status=400)
 
-        chave_acesso =  extrai_codigo_qrcode(dados_qr)
-        print('chave: ' +  chave_acesso)
-        if not chave_acesso or len(chave_acesso) != 44:
-            return JsonResponse({'status': 'erro', 'mensagem': 'Não foi possível extrair uma chave válida do QR Code.'}, status=400)
+    dados_qr = body.get('dados_qr')
+    if not dados_qr:
+        return JsonResponse({'status': 'erro', 'mensagem': 'Nenhum dado de QR Code recebido.'}, status=400)
 
+    chave_acesso = extrai_codigo_qrcode(dados_qr)
+
+    if not chave_acesso or len(chave_acesso) != 44:
+        return JsonResponse({'status': 'erro', 'mensagem': 'Chave inválida extraída do QR Code.'}, status=400)
+
+    try:
         participante = get_object_or_404(Participantes, id=id_participante)
+    except Participantes.DoesNotExist:
+        return JsonResponse({'status': 'erro', 'mensagem': 'Participante não encontrado.'}, status=404)
 
-        dados_nota = identificar_chave_detalhada(chave_acesso)
+    dados_nota = identificar_chave_detalhada(chave_acesso)
 
-        if not dados_nota.valida:
-            contexto['msg_erro'] = f"Chave inválida: {dados_nota.mensagem}"
-            return render(request, 'cad_cupom.html', contexto)
+    if not dados_nota.valida:
+        return JsonResponse({'status': 'erro', 'mensagem': f'Chave inválida: {dados_nota.mensagem}'}, status=400)
 
-        status_nota = 'Aprovado'  # já validado acima
+    status_nota = 'Aprovado'  # validado acima
 
-        validar = validar_cupom(dados_nota.chave, dados_nota.tipo_documento)
+    validar = validar_cupom(dados_nota.chave, dados_nota.tipo_documento)
+    dados_cupom_json = json.dumps(asdict(dados_nota))
 
-        # Serializa dados_nota para string JSON, caso dados_cupom seja TextField
-        dados_cupom_json = json.dumps(asdict(dados_nota))
-
+    try:
         novo_cupom = Cupom.objects.create(
             participante=participante,
-            dados_cupom=dados_cupom_json,  # string JSON
-            tipo_envio='Codigo',
+            dados_cupom=dados_cupom_json,
+            tipo_envio='QRCode',
             status=status_nota,
             numero_documento=dados_nota.codigo_numerico,
             cnpj_loja=dados_nota.cnpj_emitente,
-            dados_json=validar,            # dict direto se for JSONField
+            dados_json=validar,
             tipo_documento=dados_nota.tipo_documento
         )
-        
-        msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
-        print(msg_produto)
-
-        contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
-        return render(request, 'cad_cupom.html', contexto)
-    
-    except json.JSONDecodeError:
-        return JsonResponse({'status': 'erro', 'mensagem': 'Requisição JSON malformada.'}, status=400)
-    except Participantes.DoesNotExist:
-        return JsonResponse({'status': 'erro', 'mensagem': 'Participante não encontrado.'}, status=404)
     except Exception as e:
-        # Logar o erro real no servidor é importante
-        logger.error(f"Erro inesperado em salvar_qrcode_ajax: {e}")
-        #return JsonResponse({'status': 'erro', 'mensagem': 'Ocorreu um erro interno.'}, status=500)
+        return JsonResponse({'status': 'erro', 'mensagem': 'Erro ao salvar cupom no banco.'}, status=500)
+
+    try:
+        msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
+    except Exception as e:
+        return JsonResponse({'status': 'erro', 'mensagem': 'Erro ao cadastrar produtos.'}, status=500)
+
+    try:
+        msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
+    except Exception as e:
+        return JsonResponse({'status': 'erro', 'mensagem': 'Erro ao gerar números da sorte.'}, status=500)
+
+    return JsonResponse({
+        'status': 'sucesso',
+        'mensagem': f'Cupom cadastrado com sucesso! {msg_produto} {msg_numeros}',
+        'id_cupom': novo_cupom.id
+    })
 
 
 
@@ -247,13 +249,11 @@ def cadastrar_produto(id_cupom, id_participante):
                 print(f"[ERRO] Valor unitário inválido para o produto {ean}: {ve}")
                 continue
 
-            novo_numero_sorte = gerar_numero_sorte()
             produto_obj = Produto(
                 cupom=cupom,
                 nome=produto.get("descricao", ""),
                 quantidade=produto.get("qtd", 1),
                 valor_unitario=valor_unitario,
-                num_sorte=novo_numero_sorte
             )
             produtos_para_cadastro.append(produto_obj)
 
@@ -311,6 +311,48 @@ def edita_numero_serie(id, num_serie, status):
 
 def completa_numero(numero, tamanho):
     return str(numero).zfill(tamanho)
+
+
+def cadastrar_numeros_da_sorte(cupom):
+    dados_cupom = get_dados_json(cupom.dados_json, cupom.tipo_documento)
+
+    total_valido = 0
+    tem_acelerador = False
+
+    for produto in dados_cupom.get("produtos", []):
+        ean = (produto.get("ean") or produto.get("codigo") or "").strip()
+
+        try:
+            qtd = int(float(produto.get("qtd", 1)))  # garante que seja int
+        except (ValueError, TypeError):
+            qtd = 1
+
+        try:
+            sku = Skus_validos.objects.get(ean=ean)
+            total_valido += qtd
+            if sku.is_acelerador:
+                tem_acelerador = True
+        except Skus_validos.DoesNotExist:
+            continue
+
+    n_por_quantidade = total_valido // 3
+    n_por_acelerador = 1 if tem_acelerador else 0
+    total_numeros = n_por_quantidade + n_por_acelerador
+
+    if total_numeros == 0:
+        return "Cupom não tem direito a números da sorte."
+
+    for _ in range(total_numeros):
+        num_sorte = gerar_numero_sorte()
+        NumeroDaSorte.objects.create(
+            cupom=cupom,
+            participante=cupom.participante,
+            numero=num_sorte,
+            status='ativo'
+        )
+
+    return f"{total_numeros} número(s) da sorte gerado(s) com sucesso."
+
 
 
 

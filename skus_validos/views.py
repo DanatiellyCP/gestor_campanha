@@ -16,7 +16,8 @@ def detectar_encoding(file_path):
 
 def skus(request):
     # exibir as skus em tabela 
-    skus = Skus_validos.objects.all().values()
+    #skus = Skus_validos.objects.all().values()
+    skus = Skus_validos.objects.all().order_by('id').values()
     template = loader.get_template('skus.html')
     context = {
         'skus': skus,
