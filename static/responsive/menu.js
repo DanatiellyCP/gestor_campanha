@@ -80,49 +80,46 @@
   }
 })();
 
-// Login page behaviors (CPF mask, toggle password, submit, go to register)
+// Login page behaviors (CPF mask, toggle password, submit)
 (function(){
   const qs = (s,p=document)=>p.querySelector(s);
   const qsa = (s,p=document)=>Array.from(p.querySelectorAll(s));
-  const form = qs('#login');
+  const form = qs('#loginForm');
   const cpf = qs('#cpf');
   const senha = qs('#senha');
-  if (!form || !cpf || !senha) return;
 
   function onlyDigits(v){ return (v||'').replace(/\D+/g,''); }
 
-  cpf.addEventListener('input', e=>{
-    let v = onlyDigits(e.target.value).slice(0,11);
-    v = v.replace(/(\d{3})(\d)/, '$1.$2')
-         .replace(/(\d{3})(\d)/, '$1.$2')
-         .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    e.target.value = v;
-  });
-
-  qsa('.toggle-pass').forEach(btn => {
-    const target = qs('#' + btn.dataset.target);
-    if (!target) return;
-    btn.addEventListener('click', () => {
-      const showing = target.type === 'text';
-      target.type = showing ? 'password' : 'text';
-      btn.textContent = showing ? '👁️' : '🙈';
-      try { target.focus({ preventScroll: true }); } catch(_) { target.focus(); }
+  if (cpf){
+    cpf.addEventListener('input', e=>{
+      let v = onlyDigits(e.target.value).slice(0,11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2')
+           .replace(/(\d{3})(\d)/, '$1.$2')
+           .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      e.target.value = v;
     });
-  });
+  }
 
-  form.addEventListener('submit', (e)=>{
-    if (!form.checkValidity()){
-      form.reportValidity();
-      e.preventDefault();
-      return;
-    }
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(form).entries());
-    console.log('Login:', data);
-  });
+  if (form){
+    // Toggle show/hide password only within login form
+    qsa('.toggle-pass', form).forEach(btn => {
+      const target = qs('#' + btn.dataset.target);
+      if (!target) return;
+      btn.addEventListener('click', () => {
+        const showing = target.type === 'text';
+        target.type = showing ? 'password' : 'text';
+        try { target.focus({ preventScroll: true }); } catch(_) { target.focus(); }
+      });
+    });
 
-  const goReg = qs('#goRegister');
-  if (goReg){ goReg.addEventListener('click', ()=>{ window.location.href = 'form_wizard.html'; }); }
+    form.addEventListener('submit', (e)=>{
+      if (!form.checkValidity()){
+        form.reportValidity();
+        e.preventDefault();
+      }
+      // Caso válido, permite envio nativo ao backend
+    });
+  }
 })();
 
 // Wizard page behaviors (form_wizard.html)
@@ -259,7 +256,7 @@
     }
   }
 
-  // Toggle show/hide password
+  // Toggle show/hide password (wizard)
   qsa('.toggle-pass').forEach(btn => {
     const target = qs('#' + btn.dataset.target);
     if (!target) return;

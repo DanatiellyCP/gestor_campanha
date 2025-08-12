@@ -570,7 +570,7 @@ body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cant
   -moz-osx-font-smoothing: grayscale;
   /* menu fixo e centralizado no topo */
   position: fixed; top: 30px; left: 50%; transform: translateX(-50%);
-  width: calc(100% - 32px); max-width: 1200px; z-index: 1002; 
+  width: calc(100% - 32px); max-width: 1250px; z-index: 1002; 
 }
 .bar{ display:flex; align-items:center; gap:22px; position:relative; min-height: 48px; }
 .brand{ position:relative; height:44px; width:112px; flex:0 0 112px; display:flex; align-items:center; }
@@ -628,6 +628,11 @@ body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cant
 
 nav{ margin-left: 68px; flex:1 1 auto; }
 .links{ display:flex; align-items:center; justify-content:center; gap:30px; list-style:none; padding:0; margin:0; font-weight:800; font-size:15px; color:#333b42; text-transform:uppercase; letter-spacing:.45px; }
+.drawer .links{ font-size:15px; }
+@media (min-width: 901px){
+  /* diminuir 2px apenas na visão web/desktop */
+  .links{ font-size:13px; }
+}
 .links a{ color: inherit; text-decoration:none; position:relative; }
 .links a:focus-visible{ outline:none; box-shadow: 0 0 0 3px var(--focus); border-radius:10px; }
 
