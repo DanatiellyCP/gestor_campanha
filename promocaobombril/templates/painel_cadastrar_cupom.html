@@ -25,7 +25,7 @@
           <ul class="links">
             <li><a href="/">Sorteios</a></li>
             <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
-            <li><a href="/editar-perfil/">Editar perfil</a></li>
+            <li><a href="/painel-home/">Editar perfil</a></li>
           </ul>
         </nav>
         <div class="actions">
@@ -40,7 +40,7 @@
           <br/>
           <li><a href="/">Sorteios</a></li>
           <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
-          <li><a href="/editar-perfil/">Editar perfil</a></li>
+          <li><a href="/painel-home/">Editar perfil</a></li>
         </ul>
         <div class="actions">
           <a href="{% url 'logout' %}" class="btn btn-participe" id="mParticipar">SAIR</a>
@@ -67,15 +67,26 @@
           <h2 class="panel-title">Cadastro de cupom</h2>
           <p class="panel-sub">Escolha a forma de cadastro</p>
         </header>
+        
+        {% if msg_erro %}
+        <div role="alert" class="alert alert-error">{{ msg_erro }}</div>
+        {% endif %}
+        {% if msg_sucesso %}
+        <div role="status" class="alert alert-success">{{ msg_sucesso }}</div>
+        {% endif %}
+        {% if msg_numeros %}
+        <div role="status" class="alert alert-info">{{ msg_numeros }}</div>
+        {% endif %}
         <section class="register-block" aria-label="01 - Envie a imagem do seu cupom">
           <h3 class="register-step"><span class="num">01</span> - Envie a imagem do seu cupom</h3>
-          <form class="register-form" action="#" method="post" enctype="multipart/form-data">
+          <form class="register-form" action="{% url 'cadastrar_cupom' id_participante %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
             <label class="file-field">
-              <input type="file" name="cupom_imagem" aria-label="Carregar imagem do cupom" />
+              <input type="file" name="img_cupom" aria-label="Carregar imagem do cupom" />
               <span class="placeholder">Carregar arquivo</span>
             </label>
             <div class="actions">
-              <button type="submit" class="btn-red">ENVIAR IMAGEM</button>
+              <button type="submit" name="submit_imagem" value="1" class="btn-red">ENVIAR IMAGEM</button>
             </div>
           </form>
         </section>
@@ -96,12 +107,13 @@
 
         <section class="register-block" aria-label="03 - Digite o código do seu cupom">
           <h3 class="register-step"><span class="num">03</span> - Ou digite o código do seu cupom</h3>
-          <form class="register-form" action="#" method="post">
+          <form class="register-form" action="{% url 'cadastrar_cupom' id_participante %}" method="post">
+            {% csrf_token %}
             <label class="text-field">
-              <input type="text" name="cupom_codigo" placeholder="" aria-label="Código do cupom" />
+              <input type="text" name="cod_cupom" placeholder="" aria-label="Código do cupom" />
             </label>
             <div class="actions">
-              <button type="submit" class="btn-red btn-red--sm">ENVIAR CÓDIGO</button>
+              <button type="submit" name="submit_codigo" value="1" class="btn-red btn-red--sm">ENVIAR CÓDIGO</button>
               <a href="#" class="hint-link">Onde encontrar?</a>
             </div>
           </form>
