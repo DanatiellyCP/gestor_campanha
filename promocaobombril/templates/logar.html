@@ -66,10 +66,14 @@
         <div class="robot" aria-hidden="true">
           <img src="{% static 'responsive/images/mascote_login.png' %}" alt="" />
         </div>
-        <form id="login" class="login" novalidate>
+        <form id="loginForm" class="login" method="post" action="{% url 'logar' %}">
+          {% if erro %}
+            <p class="form-error" style="color:#c00; font-weight:700; margin-top:6px;">{{ erro }}</p>
+          {% endif %}     
+          {% csrf_token %}
           <div class="field">
-            <label for="cpf">Login:</label>
-            <input id="cpf" name="cpf" inputmode="numeric" placeholder="Informe seu CPF" maxlength="14" required />
+            <label for="email">E-mail:</label>
+            <input id="email" name="email" type="email" placeholder="Informe seu e-mail" required />
           </div>
           <div class="field">
             <label for="senha">Senha</label>

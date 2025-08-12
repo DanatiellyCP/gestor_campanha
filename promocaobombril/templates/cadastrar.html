@@ -75,7 +75,11 @@
           </div>
         </div>
 
-        <form id="wizard" novalidate>
+        <form id="wizard" method="POST" action="{% url 'cadastrar' %}" novalidate>
+            {% csrf_token %}
+            {% if erro %}
+            <p class="form-error" style="color:#c00; font-weight:700; margin-top:6px;">{{ erro }}</p>
+          {% endif %}  
           <section class="card step-pane active" data-step="1" aria-labelledby="step1-title">
             <div class="grid">
 
