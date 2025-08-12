@@ -140,21 +140,34 @@ def cadastrar(request):
 
 def logar(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
-        senha = request.POST.get('senha')
+        email = (request.POST.get('email') or '').strip()
+        senha = request.POST.get('senha') or ''
+
+        if not email or not senha:
+            return render(request, 'logar.html', {'erro': 'Informe e-mail e senha.'})
 
         try:
-            participante = Participantes.objects.get(email=email)
+            # Evita 500 com e-mails duplicados: pega o mais recente
+            participante = (
+                Participantes.objects.filter(email=email).order_by('-id').first()
+            )
+            if not participante:
+                return render(request, 'logar.html', {'erro': 'Participante não encontrado.'})
+
+            # Senha pode estar ausente ou em formato inválido
+            if not participante.senha:
+                return render(request, 'logar.html', {'erro': 'Conta sem senha válida. Redefina sua senha.'})
+
             if check_password(senha, participante.senha):
                 # Autenticado com sucesso – salvar ID na sessão
                 request.session['participante_id'] = participante.id
-                return redirect('painel_home')  # ou a página pós-login
+                return redirect('painel_home')
             else:
-                erro = "Senha incorreta."
-        except Participantes.DoesNotExist:
-            erro = "Participante não encontrado."
+                return render(request, 'logar.html', {'erro': 'Senha incorreta.'})
+        except Exception as e:
+            # Log opcional: print(e)
+            return render(request, 'logar.html', {'erro': 'Não foi possível autenticar. Tente novamente.'})
 
-        return render(request, 'logar.html', {'erro': erro})
     # GET: renderiza página de login e, se houver, mensagem de sucesso pós-cadastro
     sucesso = request.GET.get('signup') == '1'
     contexto = {}
@@ -275,8 +288,20 @@ def cadastrar_cupom(request, id_participante):
 
         try:
             if 'submit_codigo' in request.POST:
-                # Captura código digitado manualmente
-                chave_acesso = request.POST.get('cod_cupom')
+                # Captura e normaliza código digitado manualmente
+                raw = (request.POST.get('cod_cupom') or '').strip()
+                if raw:
+                    if raw.startswith('CFe'):
+                        # Formato SAT: usa a parte antes do '|', remove 'CFe' e espaços
+                        pos = raw.find('|')
+                        head = raw[:pos] if pos > -1 else raw
+                        # Mantém somente dígitos
+                        chave_acesso = re.sub(r'\D', '', head)
+                    else:
+                        # Remove não dígitos e espera 44 dígitos para NF-e/NFC-e
+                        chave_acesso = re.sub(r'\D', '', raw)
+                else:
+                    chave_acesso = None
 
             elif 'submit_imagem' in request.POST:
                 arquivo = request.FILES.get('img_cupom')
@@ -287,22 +312,57 @@ def cadastrar_cupom(request, id_participante):
                     imagem_path = guardar_cupom(arquivo)
                     imagem_local_path = default_storage.path(imagem_path)
 
-                    # Primeiro tenta OCR para extrair o código (44 dígitos)
-                    dados_ocr = extrair_texto_ocr(imagem_local_path)
-                    chave_acesso = extrair_numero_cupom(dados_ocr) or None
+                    # 1) Tenta extrair via QR Code a partir da imagem
+                    try:
+                        chave_acesso = extrai_codigo_qrcode(imagem_local_path)
+                    except Exception:
+                        chave_acesso = None
+
+                    # 2) Se não encontrou por QR, tenta OCR + parse numérico (44 dígitos)
+                    if not chave_acesso:
+                        try:
+                            dados_ocr = extrair_texto_ocr(imagem_local_path)
+                            chave_acesso = extrair_numero_cupom(dados_ocr) or None
+                        except Exception:
+                            chave_acesso = None
+
+            # Normalização final: garantir apenas dígitos caso algo tenha sobrado com letras/URL
+            if chave_acesso:
+                chave_acesso = re.sub(r'\D', '', str(chave_acesso))
+                # Se não tiver exatamente 44 dígitos, tenta extrair algum bloco de 44 dígitos
+                if len(chave_acesso) != 44:
+                    m = re.search(r"\b\d{44}\b", str(chave_acesso))
+                    if m:
+                        chave_acesso = m.group(0)
 
             if erro:
                 contexto['msg_erro'] = erro
                 return render(request, 'painel_cadastrar_cupom.html', contexto)
 
             if not chave_acesso:
-                contexto['msg_erro'] = "Informe o código do cupom."
+                contexto['msg_erro'] = "Não foi possível ler o código do cupom. Envie uma foto nítida do QR ou digite o código manualmente."
                 return render(request, 'painel_cadastrar_cupom.html', contexto)
 
             # Validação da chave do cupom
             dados_nota = identificar_chave_detalhada(chave_acesso)
             if not dados_nota.valida:
-                contexto['msg_erro'] = f"Chave inválida: {dados_nota.mensagem}"
+                # Debug seguro no servidor
+                try:
+                    _norm = str(chave_acesso or '')
+                    _mask = _norm[:6] + ('*' * max(0, len(_norm) - 10)) + _norm[-4:] if len(_norm) > 10 else ('*' * len(_norm))
+                    print('[DEBUG cupom] chave normalizada:', _mask, 'len=', len(_norm), 'mensagem:', dados_nota.mensagem)
+                except Exception:
+                    pass
+                # Evita duplicar prefixo caso a mensagem já contenha 'Chave inválida'
+                msg = dados_nota.mensagem or 'Chave inválida.'
+                if not msg.lower().startswith('chave inválida'):
+                    msg = f"Chave inválida: {msg}"
+                # Acrescenta o total de dígitos lidos
+                try:
+                    msg = f"{msg} (lido: {len(str(chave_acesso or ''))} dígitos)"
+                except Exception:
+                    pass
+                contexto['msg_erro'] = msg
                 return render(request, 'painel_cadastrar_cupom.html', contexto)
 
             # Status compatível com o modelo
@@ -358,7 +418,12 @@ def cadastrar_cupom(request, id_participante):
             return redirect(detalhes_url)
 
         except Exception as e:
-            contexto['msg_erro'] = f'Erro ao processar o cadastro: {e}'
+            # Log seguro no servidor e feedback amigável ao usuário
+            try:
+                print('[ERROR cupom] Falha inesperada no cadastro:', str(e))
+            except Exception:
+                pass
+            contexto['msg_erro'] = 'Não foi possível concluir o cadastro do seu cupom no momento. Tente novamente mais tarde.'
 
     return render(request, 'painel_cadastrar_cupom.html', contexto)
 
