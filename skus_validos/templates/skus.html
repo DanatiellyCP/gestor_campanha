@@ -21,6 +21,7 @@
                         <th>EAN</th>
                         <th>DUN</th>
                         <th>Categoria</th>
+                        <th>Acelerado</th>
                     </thead>
                     {% for x in skus %}
                          <tr>
@@ -29,6 +30,11 @@
                             <td> {{ x.ean }} </td>
                             <td> {{ x.dun }} </td>
                             <td> {{ x.categoria }} </td>
+                            {% if x.is_acelerador == True %}
+                                <td> Acelerado</td>
+                            {% else %}
+                                <td> </td>
+                            {% endif %}
                          </tr>
                     {% endfor %}
                 </table>

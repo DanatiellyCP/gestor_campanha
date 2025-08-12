@@ -180,7 +180,6 @@
             <th>Nome</th>
             <th>Quantidade</th>
             <th>Valor Unitário</th>
-            <th>Número da Sorte</th>
           </tr>
         </thead>
         <tbody>
@@ -190,13 +189,38 @@
               <td>{{ produto.nome }}</td>
               <td>{{ produto.quantidade }}</td>
               <td>R$ {{ produto.valor_unitario|floatformat:2 }}</td>
-              <td>{{ produto.num_sorte }}</td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
     {% else %}
       <p>Não há produtos para esse cupom.</p>
+    {% endif %}
+  </div>
+
+  <div class="mb-4">
+    <h5>Número da Sorte:</h5>
+    {% if produtos_validos %}
+      <table class="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Número</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for n in numeros_sorte %}
+            <tr>
+              <td>{{ n.counter }}</td>
+              <td>{{ n.numero }}</td>
+              <td>{{ n.status }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p>Não há  número da sorte para este cupom.</p>
     {% endif %}
   </div>
 
