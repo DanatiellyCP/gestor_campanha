@@ -1,0 +1,210 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Promoção Bombril - Home</title>
+    <meta name="description"
+        content="Participe da promoção Bombril e concorra a prêmios incríveis. Cadastre seus cupons e dê um brilho no seu futuro!">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://kit.fontawesome.com/f0d3945d17.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
+
+    <link rel="icon" type="image/png" href="{% static 'responsive/images/favicon.png' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+</head>
+<body>
+  <div class="wrap">
+    <header class="menu" role="navigation" aria-label="Principal">
+        <div class="bar">
+          <a class="brand" href="#" aria-label="Página inicial">
+            <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+          </a>
+          <nav aria-label="Seções">
+            <ul class="links">
+              <li><a href="/">Sorteios</a></li>
+              <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
+              <li><a href="/painel-home/">Editar perfil</a></li>
+            </ul>
+          </nav>
+          <div class="actions">
+            <a href="{% url 'logout' %}" class="btn btn-participe" id="ctaParticipar">SAIR</a>
+          </div>
+          <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+        <div class="drawer" id="drawer">
+          <ul class="links">
+            <br/>
+            <li><a href="/">Sorteios</a></li>
+            <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
+            <li><a href="/painel-home/">Editar perfil</a></li>
+          </ul>
+          <div class="actions">
+            <a href="{% url 'logout' %}" class="btn btn-participe" id="mParticipar">SAIR</a>
+          </div>
+        </div>
+      </header>
+  </div>
+
+  <div class="topo panel-hero" role="img" aria-label="Topo do site">
+    <img src="{% static 'responsive/images/background_topo.png' %}" alt="" class="topo-measure" aria-hidden="true" />
+    <div class="inner">
+      <h1 class="sr-only">Painel</h1>
+      <div class="panel-duo" aria-hidden="true">
+        <img src="{% static 'responsive/images/PRODUTOS.png' %}" alt="" class="panel-logo" />
+        <img src="{% static 'responsive/images/painel_promocao.png' %}" alt="" class="panel-side" />
+      </div>
+      <img src="{% static 'responsive/images/ROBOM-BRIL_NAVE.png' %}" alt="" class="topo-robot" aria-hidden="true" />
+    </div>
+  </div>
+  <div id="content">
+    <section class="participant-panel" aria-label="Painel do participante">
+      <div class="inner">
+        <header class="panel-header">
+          <h2 class="panel-title">Detalhes do Cupom</h2>
+        </header>
+
+        <div class="coupon-details">
+          <div class="details-container">
+            <!-- Coluna 1: Dados do Cupom -->
+            <div class="coupon-info">
+              <h3 class="section-title">Dados do Cupom Fiscal</h3>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Loja:</span>
+                  <span class="info-value">{{ cupom.nome_loja }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">CNPJ:</span>
+                  <span class="info-value">{{ cupom.cnpj_loja }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Documento:</span>
+                  <span class="info-value">{{ cupom.tipo_documento }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Número/Chave:</span>
+                  <span class="info-value">{{ cupom.numero_documento }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Status:</span>
+                  <span class="info-value">{{ cupom.status }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Cadastro:</span>
+                  <span class="info-value">{{ cupom.data_cadastro|date:"d/m/Y" }} {{ cupom.hora_cadastro|time:"H:i" }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Total:</span>
+                  <span class="info-value">{% if cupom.valor_total %}R$ {{ cupom.valor_total }}{% else %}-{% endif %}</span>
+                </div>
+                {% if dados_extra %}
+                <div class="info-item">
+                  <span class="info-label">Emitente:</span>
+                  <span class="info-value">{{ dados_extra.emitente.nome|default:cupom.nome_loja }}</span>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Coluna 2: Lista de Produtos -->
+            <div class="products-list">
+              <h3 class="section-title">Produtos</h3>
+              <div class="products-container">
+                {% if produtos %}
+                  {% for p in produtos %}
+                  <div class="product-item">
+                    <div class="product-name">{{ p.nome }}</div>
+                    <div class="product-details">
+                      <span>Qtd: {{ p.quantidade }}</span>
+                      <span>R$ {{ p.valor_unitario }}</span>
+                      <span>R$ {{ p.valor_total }}</span>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% else %}
+                  <p>Nenhum produto registrado para este cupom.</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela de Produtos e Números da Sorte -->
+          <div class="table-responsive">
+            <h3 class="section-title">Números da Sorte Gerados</h3>
+            <table class="coupons-table" role="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Número da Sorte</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% if numeros %}
+                  {% for n in numeros %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ n }}</td>
+                  </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="2" style="text-align:center;">Nenhum número da sorte gerado.</td>
+                  </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+
+          <section class="panel-data" aria-label="Seus dados">
+            <h3 class="band-title">Você gerou esse(s) número(s) da sorte:
+              <br/><br/>
+              {% if numeros %}
+                {% for n in numeros %}
+                  {{ n }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+              {% else %}
+                Nenhum número gerado.
+              {% endif %}
+              <br/><br/>
+              <div class="action-buttons">
+                <a href="/painel-home/" style="text-decoration: none; width: 400px;" class="btn btn-yellow" id="back3">< Voltar</a>
+              </div>
+            </h3>
+          </section>
+
+        </div>
+      </div>
+    </section>
+  </div>
+  <footer class="footer">
+    <div class="inner">
+      <div class="footer-top">
+        <h2 class="footer-title">É mais do que bom. É da</h2>
+        <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+      </div>
+      <ul class="footer-links">
+        <li><a href="/termos">Termos de uso</a></li>
+        <li><a href="/privacidade">Política de privacidade</a></li>
+        <li><a href="/lgpd">LGPD</a></li>
+      </ul>
+      <p class="footer-legal">
+        PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Privacy/Cookie banner -->
+  <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Aviso de cookies e privacidade">
+    <div class="cookie-inner">
+      <p class="cookie-text">Utilizamos cookies para otimizar sua experiência em nosso site. Ao continuar a navegação, você concorda com a nossa <a href="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
+      <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
+    </div>
+   </div>
+  <script src="{% static 'responsive/menu.js' %}"></script>
+</body>
+</html>
+

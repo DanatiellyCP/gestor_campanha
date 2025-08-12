@@ -1,8 +1,28 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.hashers import check_password, make_password
 from participantes.models import Participantes
+from cupons.models.cupom import Cupom
 from datetime import datetime
 import re
+import json
+from dataclasses import asdict
+from django.core.files.storage import default_storage
+
+# Helpers de cupom e validação
+from utils.get_modelo import identificar_chave_detalhada
+from utils.funcoes_cupom import (
+    extrair_texto_ocr,
+    extrair_numero_cupom,
+    extrai_codigo_qrcode,
+    get_dados_json,
+)
+from cupons.views import (
+    guardar_cupom,
+    validar_cupom,
+    cadastrar_produto,
+    cadastrar_numeros_da_sorte,
+)
+from cupons.models.numero_sorte import NumeroDaSorte
 
 # Decorator simples para exigir login via sessão
 
@@ -31,6 +51,9 @@ def lista_resultado(request):
 
 def duvidas(request):    
     return render(request, 'duvidas.html')
+
+def regulamento(request):    
+    return render(request, 'regulamentos.html')
 
 def cadastrar(request):
     if request.method == 'POST':
@@ -147,9 +170,13 @@ def logout_view(request):
 def painel_home(request):
     participante = None
     pid = request.session.get('participante_id')
+    cupons_participantes = Cupom.objects.none()
+
     if pid:
         try:
             participante = Participantes.objects.get(id=pid)
+            # Filtra os cupons do participante autenticado (mais recentes primeiro)
+            cupons_participantes = Cupom.objects.filter(participante=participante).order_by('-data_cadastro', '-hora_cadastro')
         except Participantes.DoesNotExist:
             # Se algo der errado com a sessão, force logout
             return redirect('logout')
@@ -170,6 +197,7 @@ def painel_home(request):
         salvo = True
 
     context = {
+        'cupons_participantes': cupons_participantes,
         'participante': participante,
         'salvo': salvo,
     }
@@ -177,4 +205,151 @@ def painel_home(request):
 
 @require_login
 def painel_cadastrar_cupom(request):
-    return render(request, 'painel_cadastrar_cupom.html')
+    # Garantir que o template tenha o id do participante para montar a action corretamente
+    pid = request.session.get('participante_id')
+    if not pid:
+        return redirect('logout')
+    return render(request, 'painel_cadastrar_cupom.html', {'id_participante': pid})
+
+@require_login
+def painel_detalhes_cupom(request):
+    # Garantir participante logado
+    pid = request.session.get('participante_id')
+    if not pid:
+        return redirect('logout')
+
+    # ID do cupom via querystring ?id=123
+    try:
+        cupom_id = int(request.GET.get('id', ''))
+    except (TypeError, ValueError):
+        return redirect('painel_home')
+
+    # Busca cupom do participante
+    try:
+        participante = Participantes.objects.get(id=pid)
+        cupom = Cupom.objects.select_related('participante').prefetch_related('produtos').get(
+            id=cupom_id, participante=participante
+        )
+    except (Participantes.DoesNotExist, Cupom.DoesNotExist):
+        return redirect('painel_home')
+
+    # Produtos relacionados
+    produtos = list(cupom.produtos.all())
+
+    # Números da sorte relacionados
+    numeros_objs = list(NumeroDaSorte.objects.filter(cupom=cupom).order_by('id'))
+    numeros = [n.numero for n in numeros_objs]
+
+    # Tenta extrair dados detalhados caso necessários no futuro
+    dados_extra = None
+    try:
+        if cupom.dados_json:
+            dados_extra = get_dados_json(cupom.dados_json, cupom.tipo_documento)
+    except Exception:
+        dados_extra = None
+
+    contexto = {
+        'cupom': cupom,
+        'produtos': produtos,
+        'numeros': numeros,
+        'participante': participante,
+        'dados_extra': dados_extra,
+    }
+    return render(request, 'painel_detalhes_cupom.html', contexto)
+
+
+def cadastrar_cupom(request, id_participante):
+    participante = get_object_or_404(Participantes, id=id_participante)
+    contexto = {'id_participante': id_participante}
+
+    if request.method == 'POST':
+        chave_acesso = None
+        dados_ocr = ""
+        imagem_path = None
+        erro = None
+
+        try:
+            if 'submit_codigo' in request.POST:
+                # Captura código digitado manualmente
+                chave_acesso = request.POST.get('cod_cupom')
+
+            elif 'submit_imagem' in request.POST:
+                arquivo = request.FILES.get('img_cupom')
+                if not arquivo:
+                    erro = 'Nenhum arquivo de imagem foi selecionado.'
+                else:
+                    # Salva arquivo e obtém caminho local
+                    imagem_path = guardar_cupom(arquivo)
+                    imagem_local_path = default_storage.path(imagem_path)
+
+                    # Primeiro tenta OCR para extrair o código (44 dígitos)
+                    dados_ocr = extrair_texto_ocr(imagem_local_path)
+                    chave_acesso = extrair_numero_cupom(dados_ocr) or None
+
+            if erro:
+                contexto['msg_erro'] = erro
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+            if not chave_acesso:
+                contexto['msg_erro'] = "Informe o código do cupom."
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+            # Validação da chave do cupom
+            dados_nota = identificar_chave_detalhada(chave_acesso)
+            if not dados_nota.valida:
+                contexto['msg_erro'] = f"Chave inválida: {dados_nota.mensagem}"
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+            # Status compatível com o modelo
+            status_nota = 'Validado'
+
+            # Validação adicional (ex: consulta externa)
+            validar = None
+            try:
+                validar = validar_cupom(dados_nota.chave, dados_nota.tipo_documento)
+            except Exception as _e:
+                # Mantém validar = None; trataremos abaixo
+                validar = None
+
+            # Serializa dados para JSON (string) para armazenar
+            dados_cupom_json = json.dumps(asdict(dados_nota))
+
+            # Criação do cupom no banco (ajustando campos ao modelo)
+            novo_cupom = Cupom.objects.create(
+                participante=participante,
+                dados_cupom=dados_cupom_json,
+                tipo_envio='Sistema',
+                status=status_nota,
+                numero_documento=getattr(dados_nota, 'codigo_numerico', ''),
+                cnpj_loja=getattr(dados_nota, 'cnpj_emitente', ''),
+                nome_loja=getattr(dados_nota, 'nome_emitente', 'Desconhecido'),
+                dados_json=validar,
+                tipo_documento=getattr(dados_nota, 'tipo_documento', '')
+            )
+
+            # Cadastro dos produtos vinculados ao cupom (somente se houver dados válidos)
+            msg_produto = ''
+            msg_numeros = ''
+            if validar:
+                try:
+                    msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
+                except Exception as e_prod:
+                    msg_produto = f'Erro ao processar produtos do cupom.'
+
+                try:
+                    # --- Chamada para gerar números da sorte ---
+                    msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
+                except Exception as e_num:
+                    msg_numeros = 'Falha ao gerar números da sorte.'
+            else:
+                msg_produto = 'Dados do cupom indisponíveis; produtos não processados.'
+
+            contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
+            if msg_numeros:
+                contexto['msg_numeros'] = msg_numeros
+
+        except Exception as e:
+            contexto['msg_erro'] = f'Erro ao processar o cadastro: {e}'
+
+    return render(request, 'painel_cadastrar_cupom.html', contexto)
+

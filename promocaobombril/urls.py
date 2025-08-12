@@ -9,8 +9,11 @@ urlpatterns = [
     path('lista-resultados/', views.lista_resultado, name='lista_resultado'),
     path('cadastrar/', views.cadastrar, name='cadastrar'),
     path('duvidas/', views.duvidas, name='duvidas'),
+    path('regulamento/', views.regulamento, name='regulamento'),
     path('logar/', views.logar, name='logar'),
     path('logout/', views.logout_view, name='logout'),
     path('painel-home/', views.painel_home, name='painel_home'),
     path('painel-cadastrar-cupom/', views.painel_cadastrar_cupom, name='painel_cadastrar_cupom'),
+    path('painel-detalhes-cupom/', views.painel_detalhes_cupom, name='painel_detalhes_cupom'),
+    path('cadastrar-cupom/<int:id_participante>/', views.cadastrar_cupom, name='cadastrar_cupom'),
 ]

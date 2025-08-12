@@ -25,7 +25,7 @@
           <ul class="links">
             <li><a href="/">Sorteios</a></li>
             <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
-            <li><a href="/editar-perfil/">Editar perfil</a></li>
+            <li><a href="/painel-home/">Editar perfil</a></li>
           </ul>
         </nav>
         <div class="actions">
@@ -40,7 +40,7 @@
           <br/>
           <li><a href="/">Sorteios</a></li>
           <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
-          <li><a href="/editar-perfil/">Editar perfil</a></li>
+          <li><a href="/painel-home/">Editar perfil</a></li>
         </ul>
         <div class="actions">
           <a href="{% url 'logout' %}" class="btn btn-participe" id="mParticipar">SAIR</a>
@@ -81,36 +81,20 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td data-label="Status"><span class="badge status-ok">Aprovado</span></td>
-                  <td data-label="Data">07/08/2025</td>
-                  <td data-label="Hora">12:00</td>
-                  <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="#">Exibir</a></td>
-                </tr>
-                <tr>
-                  <td data-label="Status"><span class="badge status-wait">Aguardando</span></td>
-                  <td data-label="Data">07/08/2025</td>
-                  <td data-label="Hora">12:00</td>
-                  <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="#">Exibir</a></td>
-                </tr>
-                <tr>
-                  <td data-label="Status"><span class="badge status-bad">Reprovado</span></td>
-                  <td data-label="Data">07/08/2025</td>
-                  <td data-label="Hora">12:00</td>
-                  <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="#">Exibir</a></td>
-                </tr>
-                <tr>
-                  <td data-label="Status"><span class="badge status-ok">Aprovado</span></td>
-                  <td data-label="Data">07/08/2025</td>
-                  <td data-label="Hora">12:00</td>
-                  <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="#">Exibir</a></td>
-                </tr>
-                <tr>
-                  <td data-label="Status"><span class="badge status-ok">Aprovado</span></td>
-                  <td data-label="Data">07/08/2025</td>
-                  <td data-label="Hora">12:00</td>
-                  <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="#">Exibir</a></td>
-                </tr>
+                {% if cupons_participantes %}
+                  {% for cupom in cupons_participantes %}
+                    <tr>
+                      <td data-label="Status"><span class="badge {% if cupom.status == 'Validado' %}status-ok{% elif cupom.status == 'Pendente' %}status-wait{% else %}status-bad{% endif %}">{{ cupom.status }}</span></td>
+                      <td data-label="Data">{{ cupom.data_cadastro|date:"d/m/Y" }}</td>
+                      <td data-label="Hora">{{ cupom.hora_cadastro|time:"H:i" }}</td>
+                      <td data-label="Detalhar" class="detail"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> <a href="{% url 'painel_detalhes_cupom' %}?id={{ cupom.id }}">Exibir</a></td>
+                    </tr>
+                  {% endfor %}
+                {% else %}
+                  <tr>
+                    <td colspan="4" style="text-align:center;">Você ainda não cadastrou nenhum cupom.</td>
+                  </tr>
+                {% endif %}
               </tbody>
             </table>
           </div>
