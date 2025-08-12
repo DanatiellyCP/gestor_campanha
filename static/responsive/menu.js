@@ -157,9 +157,9 @@
     compl: qs('#compl'),
   };
 
-  // Estados (UF)
+  // Estados (UF) - só preenche dinamicamente se o select não tiver opções além do placeholder
   const UFs = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
-  if (f.estado && !f.estado.dataset.filled){
+  if (f.estado && !f.estado.dataset.filled && (f.estado.options?.length || 0) <= 1){
     f.estado.insertAdjacentHTML('beforeend', UFs.map(uf=>`<option value="${uf}">${uf}</option>`).join(''));
     f.estado.dataset.filled = '1';
   }
@@ -333,13 +333,9 @@
   // Initialize
   goTo(1);
 
-  // Submit
+  // Submit: permitir envio nativo ao servidor (sem interceptar)
   wizard.addEventListener('submit', (e)=>{
     if (!wizard.checkValidity()){ wizard.reportValidity(); e.preventDefault(); return; }
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(wizard).entries());
-    console.log('Dados enviados:', data);
-    wizard.reset();
-    goTo(1);
+    // não chamar preventDefault: deixa o form enviar para o backend Django
   });
 })();

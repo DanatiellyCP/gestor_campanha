@@ -23,7 +23,7 @@
         </a>
         <nav aria-label="Seções">
           <ul class="links">
-            <li><a href="/">Sorteios</a></li>
+            <li><a href="/home_responsive/">Sorteios</a></li>
             <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
             <li><a href="/painel-home/">Editar perfil</a></li>
           </ul>
@@ -38,7 +38,7 @@
       <div class="drawer" id="drawer">
         <ul class="links">
           <br/>
-          <li><a href="/">Sorteios</a></li>
+          <li><a href="/home_responsive/">Sorteios</a></li>
           <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
           <li><a href="/painel-home/">Editar perfil</a></li>
         </ul>
@@ -97,6 +97,10 @@
           <h3 class="register-step"><span class="num">02</span> - Ou escaneie o QR Code do cupom com a sua câmera</h3>
           <div class="register-row">
             <button type="button" id="btnAtivarCamera" class="btn-red btn-red--sm" aria-controls="qrVideo" aria-expanded="false">ATIVAR CÂMERA</button>
+            <label style="margin-left:10px; display:none; align-items:center; gap:6px;" id="cameraPickerWrap">
+              <span style="font-size:.9rem; color:#555;">Câmera:</span>
+              <select id="cameraSelect" aria-label="Selecione a câmera" style="padding:6px 8px; border-radius:6px; border:1px solid #ddd;"></select>
+            </label>
             <a href="#" class="hint-link">Onde encontrar?</a>
           </div>
           <div class="qr-preview" aria-live="polite" aria-busy="false">
@@ -135,9 +139,9 @@
         <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
       </div>
       <ul class="footer-links">
-        <li><a href="/termos">Termos de uso</a></li>
-        <li><a href="/privacidade">Política de privacidade</a></li>
-        <li><a href="/lgpd">LGPD</a></li>
+        <li><a href="#">Termos de uso</a></li>
+        <li><a href="https://www.bombril.com.br/politica-de-privacidade">Política de privacidade</a></li>
+        <li><a href="#">LGPD</a></li>
       </ul>
       <p class="footer-legal">
         PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
@@ -155,6 +159,16 @@
   <script src="{% static 'responsive/menu.js' %}"></script>
   <!-- jsQR para decodificar QR Codes no cliente -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <!-- Overlay de carregamento -->
+  <style>
+    .loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.55); display: none; align-items: center; justify-content: center; z-index: 9999; }
+    .loading-box { background: #fff; padding: 16px 20px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,.25); font: 600 16px/1.3 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; display: flex; gap: 10px; align-items: center; }
+    .spinner { width: 20px; height: 20px; border: 3px solid #dcdcdc; border-top-color: #e30613; border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <div id="loadingOverlay" class="loading-overlay" role="alert" aria-live="assertive" aria-busy="true">
+    <div class="loading-box"><span class="spinner" aria-hidden="true"></span> Enviando seus dados…</div>
+  </div>
   <script>
     (function() {
       const btn = document.getElementById('btnAtivarCamera');
@@ -163,11 +177,20 @@
       const statusEl = document.getElementById('qrStatus');
       const form = document.getElementById('formCodigo');
       const input = document.getElementById('inputCodigo');
+      const formImagem = document.querySelector('form.register-form[enctype="multipart/form-data"]');
+      const overlay = document.getElementById('loadingOverlay');
+      const cameraSelect = document.getElementById('cameraSelect');
+      const cameraPickerWrap = document.getElementById('cameraPickerWrap');
 
       if (!btn || !video || !canvas || !form || !input) return;
 
       let stream = null;
       let scanning = false;
+      let devices = [];
+      let currentDeviceId = null;
+
+      function showOverlay(){ if (overlay) overlay.style.display = 'flex'; }
+      function hideOverlay(){ if (overlay) overlay.style.display = 'none'; }
 
       function stopScanner() {
         scanning = false;
@@ -194,15 +217,51 @@
         return null;
       }
 
-      async function startScanner() {
+      async function listVideoInputs() {
         try {
-          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          const all = await navigator.mediaDevices.enumerateDevices();
+          devices = all.filter(d => d.kind === 'videoinput');
+          if (devices.length > 1) {
+            cameraPickerWrap.style.display = 'inline-flex';
+            // Preenche select se vazio ou mudou quantidade
+            const prev = cameraSelect.value;
+            cameraSelect.innerHTML = '';
+            devices.forEach((d, idx) => {
+              const opt = document.createElement('option');
+              opt.value = d.deviceId;
+              opt.textContent = d.label || `Câmera ${idx+1}`;
+              cameraSelect.appendChild(opt);
+            });
+            // Mantém seleção anterior se existir
+            const match = devices.find(d => d.deviceId === prev);
+            cameraSelect.value = match ? prev : (devices[0]?.deviceId || '');
+            currentDeviceId = cameraSelect.value;
+          } else {
+            cameraPickerWrap.style.display = 'none';
+            currentDeviceId = devices[0]?.deviceId || null;
+          }
+        } catch (e) {
+          // silencia enum errors
+        }
+      }
+
+      async function startScanner(deviceId) {
+        try {
+          // Se deviceId informado, usa-o; senão tenta traseira
+          const constraints = deviceId ? { video: { deviceId: { exact: deviceId } } }
+                                       : { video: { facingMode: 'environment' } };
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
           video.srcObject = stream;
           await video.play();
           video.style.display = 'block';
           statusEl.style.display = 'block';
           btn.setAttribute('aria-expanded', 'true');
           scanning = true;
+          // Após ter permissão, podemos listar as câmeras com rótulos
+          await listVideoInputs();
+          if (!currentDeviceId && cameraSelect && cameraSelect.value) {
+            currentDeviceId = cameraSelect.value;
+          }
           requestAnimationFrame(tick);
         } catch (e) {
           console.error('Falha ao acessar a câmera', e);
@@ -236,6 +295,7 @@
                   form.appendChild(hidden);
                 }
                 stopScanner();
+                showOverlay();
                 form.submit();
                 return;
               }
@@ -249,15 +309,35 @@
         if (scanning) {
           stopScanner();
         } else {
-          startScanner();
+          startScanner(currentDeviceId);
         }
       });
+
+      if (cameraSelect) {
+        cameraSelect.addEventListener('change', async function() {
+          const newId = cameraSelect.value;
+          if (!newId || newId === currentDeviceId) return;
+          currentDeviceId = newId;
+          const wasScanning = scanning;
+          stopScanner();
+          // reinicia com a nova câmera
+          await startScanner(currentDeviceId);
+        });
+      }
 
       // Para segurança, para a câmera quando sair da página
       window.addEventListener('beforeunload', stopScanner);
       document.addEventListener('visibilitychange', function() {
         if (document.hidden) stopScanner();
       });
+
+      // Mostra overlay para qualquer envio manual
+      if (form){
+        form.addEventListener('submit', ()=> { showOverlay(); });
+      }
+      if (formImagem){
+        formImagem.addEventListener('submit', ()=> { showOverlay(); });
+      }
     })();
   </script>
 </body>
