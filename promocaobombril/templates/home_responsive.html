@@ -17,42 +17,42 @@
 <body>
   <div class="wrap">
     <header class="menu" role="navigation" aria-label="Principal">
-        <div class="bar">
-          <a class="brand" href="#" aria-label="Página inicial">
-            <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
-          </a>
-          <nav aria-label="Seções">
-            <ul class="links">
-              <li><a href="/home_responsive/">Início</a></li>
-              <li><a href="/como-participar">Como participar</a></li>
-              <li><a href="/produtos/">Produtos</a></li>
-              <li><a href="/lista-resultados">Resultados</a></li>
-              <li><a href="/duvidas">Dúvidas</a></li>
-            </ul>
-          </nav>
-          <div class="actions">
-            <a href="/cadastrar/" class="btn btn-participe" id="ctaParticipar">CADASTRAR</a>
-            <a href="/logar/" class="btn btn-login" id="ctaLogin">LOGIN</a>
-          </div>
-          <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
-            <span></span><span></span><span></span>
-          </button>
-        </div>
-        <div class="drawer" id="drawer">
+      <div class="bar">
+        <a class="brand" href="#" aria-label="Página inicial">
+          <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+        </a>
+        <nav aria-label="Seções">
           <ul class="links">
-            <br/>
             <li><a href="/home_responsive/">Início</a></li>
             <li><a href="/como-participar">Como participar</a></li>
             <li><a href="/produtos/">Produtos</a></li>
             <li><a href="/lista-resultados">Resultados</a></li>
             <li><a href="/duvidas">Dúvidas</a></li>
           </ul>
-          <div class="actions">
-            <a href="/cadastrar/" class="btn btn-participe" id="mParticipar">CADASTRAR</a>
-            <a href="/logar/" class="btn btn-login" id="mLogin">LOGIN</a>
-          </div>
+        </nav>
+        <div class="actions">
+          <a href="/cadastrar/" class="btn btn-participe" id="ctaParticipar">CADASTRAR</a>
+          <a href="/logar/" class="btn btn-login" id="ctaLogin">LOGIN</a>
         </div>
-      </header>
+        <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+      <div class="drawer" id="drawer">
+        <ul class="links">
+          <br/>
+          <li><a href="/home_responsive/">Início</a></li>
+          <li><a href="/como-participar">Como participar</a></li>
+          <li><a href="/produtos/">Produtos</a></li>
+          <li><a href="/lista-resultados">Resultados</a></li>
+          <li><a href="/duvidas">Dúvidas</a></li>
+        </ul>
+        <div class="actions">
+          <a href="/cadastrar/" class="btn btn-participe" id="mParticipar">CADASTRAR</a>
+          <a href="/logar/" class="btn btn-login" id="mLogin">LOGIN</a>
+        </div>
+      </div>
+    </header>
   </div>
 
   <div class="topo home-hero" role="img" aria-label="Topo do site">
@@ -210,7 +210,7 @@
       <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
     </div>
    </div>
-  <script src="menu.js"></script>
+  <script src="{% static 'responsive/menu.js' %}"></script>
   <!-- Floating robot button -->
   <a href="/cadastrar/" class="floating-bot" aria-label="Assistente da promoção">
     <img src="{% static 'responsive/images/Banner - Robo - Direita.gif' %}" alt="" />
