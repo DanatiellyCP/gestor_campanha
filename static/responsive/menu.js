@@ -80,25 +80,27 @@
   }
 })();
 
-// Login page behaviors (CPF mask, toggle password, submit, go to register)
+// Login page behaviors (CPF mask, toggle password, submit)
 (function(){
   const qs = (s,p=document)=>p.querySelector(s);
   const qsa = (s,p=document)=>Array.from(p.querySelectorAll(s));
-  const form = qs('#login');
+  const form = qs('#loginForm');
   const cpf = qs('#cpf');
   const senha = qs('#senha');
-  if (!form || !cpf || !senha) return;
 
   function onlyDigits(v){ return (v||'').replace(/\D+/g,''); }
 
-  cpf.addEventListener('input', e=>{
-    let v = onlyDigits(e.target.value).slice(0,11);
-    v = v.replace(/(\d{3})(\d)/, '$1.$2')
-         .replace(/(\d{3})(\d)/, '$1.$2')
-         .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    e.target.value = v;
-  });
+  if (cpf){
+    cpf.addEventListener('input', e=>{
+      let v = onlyDigits(e.target.value).slice(0,11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2')
+           .replace(/(\d{3})(\d)/, '$1.$2')
+           .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      e.target.value = v;
+    });
+  }
 
+  // Toggle show/hide password on login page
   qsa('.toggle-pass').forEach(btn => {
     const target = qs('#' + btn.dataset.target);
     if (!target) return;
@@ -110,19 +112,15 @@
     });
   });
 
-  form.addEventListener('submit', (e)=>{
-    if (!form.checkValidity()){
-      form.reportValidity();
-      e.preventDefault();
-      return;
-    }
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(form).entries());
-    console.log('Login:', data);
-  });
-
-  const goReg = qs('#goRegister');
-  if (goReg){ goReg.addEventListener('click', ()=>{ window.location.href = 'form_wizard.html'; }); }
+  if (form){
+    form.addEventListener('submit', (e)=>{
+      if (!form.checkValidity()){
+        form.reportValidity();
+        e.preventDefault();
+      }
+      // Caso válido, permite envio nativo ao backend
+    });
+  }
 })();
 
 // Wizard page behaviors (form_wizard.html)
