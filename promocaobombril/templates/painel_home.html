@@ -29,7 +29,7 @@
           </ul>
         </nav>
         <div class="actions">
-          <button class="btn btn-participe" id="ctaParticipar">SAIR</button>
+          <a href="{% url 'logout' %}" class="btn btn-participe" id="ctaParticipar">SAIR</a>
         </div>
         <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
           <span></span><span></span><span></span>
@@ -43,7 +43,7 @@
           <li><a href="/editar-perfil/">Editar perfil</a></li>
         </ul>
         <div class="actions">
-          <button class="btn btn-participe" id="mParticipar">SAIR</button>
+          <a href="{% url 'logout' %}" class="btn btn-participe" id="mParticipar">SAIR</a>
         </div>
       </div>
     </header>
@@ -65,7 +65,7 @@
       <div class="inner">
         <header class="panel-header">
           <h2 class="panel-title">Painel do participante</h2>
-          <p class="panel-sub">Bem-vindo de volta, Rodrigo</p>
+          <p class="panel-sub">Bem-vindo de volta, {{ participante.nome }}</p>
         </header>
 
         <section class="panel-coupons" aria-label="Seus cupons cadastrados">
@@ -118,26 +118,30 @@
 
         <section class="panel-data" aria-label="Seus dados">
           <h3 class="band-title">Seus dados</h3>
-          <form class="panel-form" action="#" method="post">
+          <form class="panel-form" action="{% url 'painel_home' %}" method="post">
+            {% csrf_token %}
             <label class="field">
               <span class="label">Nome:</span>
-              <input type="text" name="nome" value="Rodrigo Castanho" />
+              <input type="text" name="nome" value="{{ participante.nome }}" />
             </label>
             <label class="field">
               <span class="label">CPF:</span>
-              <input type="text" name="cpf" value="222.333.444-56" />
+              <input type="text" name="cpf" value="{{ participante.cpf }}" />
             </label>
             <label class="field">
               <span class="label">e-mail:</span>
-              <input type="email" name="email" value="rodrigo@rodrigocastanho.com" />
+              <input type="email" name="email" value="{{ participante.email }}" />
             </label>
             <label class="field">
               <span class="label">Celular:</span>
-              <input type="text" name="celular" value="(11) 98877-6655" />
+              <input type="text" name="celular" value="{{ participante.celular }}" />
             </label>
             <div class="form-actions">
               <button type="submit" class="btn-save">Salvar alterações</button>
             </div>
+            {% if salvo %}
+              <p class="save-success" role="status">Dados atualizados com sucesso.</p>
+            {% endif %}
           </form>
         </section>
       </div>

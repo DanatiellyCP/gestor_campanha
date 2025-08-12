@@ -29,7 +29,7 @@
           </ul>
         </nav>
         <div class="actions">
-          <button class="btn btn-participe" id="ctaParticipar">SAIR</button>
+          <a href="{% url 'logout' %}" class="btn btn-participe" id="ctaParticipar">SAIR</a>
         </div>
         <button class="hamb" id="hamb" aria-label="Abrir menu" aria-expanded="false" aria-controls="drawer">
           <span></span><span></span><span></span>
@@ -43,7 +43,7 @@
           <li><a href="/editar-perfil/">Editar perfil</a></li>
         </ul>
         <div class="actions">
-          <button class="btn btn-participe" id="mParticipar">SAIR</button>
+          <a href="{% url 'logout' %}" class="btn btn-participe" id="mParticipar">SAIR</a>
         </div>
       </div>
     </header>
