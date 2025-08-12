@@ -96,8 +96,13 @@
         <section class="register-block" aria-label="02 - Escaneie o QR Code do cupom com a sua câmera">
           <h3 class="register-step"><span class="num">02</span> - Ou escaneie o QR Code do cupom com a sua câmera</h3>
           <div class="register-row">
-            <button type="button" class="btn-red btn-red--sm">ATIVAR CÂMERA</button>
+            <button type="button" id="btnAtivarCamera" class="btn-red btn-red--sm" aria-controls="qrVideo" aria-expanded="false">ATIVAR CÂMERA</button>
             <a href="#" class="hint-link">Onde encontrar?</a>
+          </div>
+          <div class="qr-preview" aria-live="polite" aria-busy="false">
+            <video id="qrVideo" playsinline style="width: 100%; max-width: 420px; display: none; border-radius: 8px;" aria-label="Pré-visualização da câmera para leitura do QR Code"></video>
+            <canvas id="qrCanvas" style="display:none"></canvas>
+            <p id="qrStatus" class="hint" style="margin-top:8px; display:none;">Aponte a câmera para o QR Code do seu cupom…</p>
           </div>
           <img src="{% static 'responsive/images/seta_cupom_qr.png' %}" alt="Seta apontando para o QR Code no cupom" class="reg-arrow reg-arrow--qr" aria-hidden="true" />
           <img src="{% static 'responsive/images/cupom_qr.png' %}" alt="Exemplo de cupom destacando o QR Code" class="reg-art reg-art--qr" aria-hidden="true" />
@@ -107,10 +112,10 @@
 
         <section class="register-block" aria-label="03 - Digite o código do seu cupom">
           <h3 class="register-step"><span class="num">03</span> - Ou digite o código do seu cupom</h3>
-          <form class="register-form" action="{% url 'cadastrar_cupom' id_participante %}" method="post">
+          <form id="formCodigo" class="register-form" action="{% url 'cadastrar_cupom' id_participante %}" method="post">
             {% csrf_token %}
             <label class="text-field">
-              <input type="text" name="cod_cupom" placeholder="" aria-label="Código do cupom" />
+              <input id="inputCodigo" type="text" name="cod_cupom" placeholder="" aria-label="Código do cupom" />
             </label>
             <div class="actions">
               <button type="submit" name="submit_codigo" value="1" class="btn-red btn-red--sm">ENVIAR CÓDIGO</button>
@@ -148,6 +153,113 @@
     </div>
    </div>
   <script src="{% static 'responsive/menu.js' %}"></script>
+  <!-- jsQR para decodificar QR Codes no cliente -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script>
+    (function() {
+      const btn = document.getElementById('btnAtivarCamera');
+      const video = document.getElementById('qrVideo');
+      const canvas = document.getElementById('qrCanvas');
+      const statusEl = document.getElementById('qrStatus');
+      const form = document.getElementById('formCodigo');
+      const input = document.getElementById('inputCodigo');
+
+      if (!btn || !video || !canvas || !form || !input) return;
+
+      let stream = null;
+      let scanning = false;
+
+      function stopScanner() {
+        scanning = false;
+        if (stream) {
+          stream.getTracks().forEach(t => t.stop());
+          stream = null;
+        }
+        video.style.display = 'none';
+        statusEl.style.display = 'none';
+        btn.setAttribute('aria-expanded', 'false');
+      }
+
+      function extractCodigoFromText(text) {
+        if (!text) return null;
+        // 1) tenta 44 dígitos
+        const match44 = text.match(/\b\d{44}\b/);
+        if (match44) return match44[0];
+        // 2) trata formato CFe...|... (SAT)
+        if (text.startsWith('CFe')) {
+          const pos = text.indexOf('|');
+          const head = pos > 0 ? text.substring(0, pos) : text;
+          return head.replace(/CFe|\s+/g, '');
+        }
+        return null;
+      }
+
+      async function startScanner() {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+          video.srcObject = stream;
+          await video.play();
+          video.style.display = 'block';
+          statusEl.style.display = 'block';
+          btn.setAttribute('aria-expanded', 'true');
+          scanning = true;
+          requestAnimationFrame(tick);
+        } catch (e) {
+          console.error('Falha ao acessar a câmera', e);
+          alert('Não foi possível acessar a câmera. Verifique as permissões do navegador.');
+        }
+      }
+
+      function tick() {
+        if (!scanning) return;
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          const w = video.videoWidth;
+          const h = video.videoHeight;
+          if (w && h) {
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, w, h);
+            const imageData = ctx.getImageData(0, 0, w, h);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+            if (code && code.data) {
+              const codigo = extractCodigoFromText(code.data);
+              if (codigo && codigo.length === 44) {
+                input.value = codigo;
+                // garante submit_codigo=1
+                let hidden = form.querySelector('input[name="submit_codigo"]');
+                if (!hidden) {
+                  hidden = document.createElement('input');
+                  hidden.type = 'hidden';
+                  hidden.name = 'submit_codigo';
+                  hidden.value = '1';
+                  form.appendChild(hidden);
+                }
+                stopScanner();
+                form.submit();
+                return;
+              }
+            }
+          }
+        }
+        requestAnimationFrame(tick);
+      }
+
+      btn.addEventListener('click', function() {
+        if (scanning) {
+          stopScanner();
+        } else {
+          startScanner();
+        }
+      });
+
+      // Para segurança, para a câmera quando sair da página
+      window.addEventListener('beforeunload', stopScanner);
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) stopScanner();
+      });
+    })();
+  </script>
 </body>
 </html>
 
