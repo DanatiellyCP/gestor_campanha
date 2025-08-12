@@ -100,19 +100,18 @@
     });
   }
 
-  // Toggle show/hide password on login page
-  qsa('.toggle-pass').forEach(btn => {
-    const target = qs('#' + btn.dataset.target);
-    if (!target) return;
-    btn.addEventListener('click', () => {
-      const showing = target.type === 'text';
-      target.type = showing ? 'password' : 'text';
-      btn.textContent = showing ? '👁️' : '🙈';
-      try { target.focus({ preventScroll: true }); } catch(_) { target.focus(); }
-    });
-  });
-
   if (form){
+    // Toggle show/hide password only within login form
+    qsa('.toggle-pass', form).forEach(btn => {
+      const target = qs('#' + btn.dataset.target);
+      if (!target) return;
+      btn.addEventListener('click', () => {
+        const showing = target.type === 'text';
+        target.type = showing ? 'password' : 'text';
+        try { target.focus({ preventScroll: true }); } catch(_) { target.focus(); }
+      });
+    });
+
     form.addEventListener('submit', (e)=>{
       if (!form.checkValidity()){
         form.reportValidity();
@@ -257,7 +256,7 @@
     }
   }
 
-  // Toggle show/hide password
+  // Toggle show/hide password (wizard)
   qsa('.toggle-pass').forEach(btn => {
     const target = qs('#' + btn.dataset.target);
     if (!target) return;

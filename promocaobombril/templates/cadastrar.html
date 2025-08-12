@@ -64,6 +64,16 @@
   <div id="content">
     <div class="content-inner">
       <div class="container wizard-container">
+        {% if sucesso %}
+        <div id="successBox" class="success-box" role="status" aria-live="polite">
+          <strong>Cadastro realizado com sucesso!</strong>
+          <span>Você será redirecionado para o login em até 5 segundos...</span>
+        </div>
+        <script>
+          // Redireciona após 5 segundos
+          setTimeout(function(){ window.location.href = "{% url 'logar' %}"; }, 5000);
+        </script>
+        {% endif %}
 
         <div id="stepper" class="stepper" aria-label="Progresso do cadastro" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="1">
           <div class="step">
@@ -75,7 +85,7 @@
           </div>
         </div>
 
-        <form id="wizard" method="POST" action="{% url 'cadastrar' %}" novalidate>
+        <form id="wizard" method="POST" action="{% url 'cadastrar' %}" novalidate {% if sucesso %}style="display:none"{% endif %}>
           {% csrf_token %}
           {% if erro %}
           <p class="form-error" style="color:#c00; font-weight:700; margin-top:6px;">{{ erro }}</p>
@@ -254,6 +264,13 @@
             </div>
           </section>
         </form>
+        <!-- Loading overlay -->
+        <div id="loadingOverlay" class="loading-overlay" aria-hidden="true" hidden>
+          <div class="loading-content" role="alert" aria-live="assertive">
+            <div class="spinner" aria-hidden="true"></div>
+            <span>Enviando seus dados, por favor aguarde...</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -281,6 +298,27 @@
       <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
     </div>
    </div>
+  <style>
+    .loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999}
+    .loading-overlay[hidden]{display:none !important}
+    .loading-content{background:#fff;border-radius:10px;padding:18px 22px;box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;gap:12px;align-items:center;font-weight:600}
+    .spinner{width:24px;height:24px;border:3px solid #eee;border-top-color:#e30613;border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .success-box{background:#e6ffed;border:1px solid #b7ebc6;color:#096b2c;padding:12px 14px;border-radius:8px;font-weight:700;margin-bottom:14px}
+  </style>
   <script src="{% static 'responsive/menu.js' %}"></script>
+  <script>
+    // Exibe overlay ao enviar o wizard
+    (function(){
+      var wizard = document.getElementById('wizard');
+      var overlay = document.getElementById('loadingOverlay');
+      if (wizard && overlay){
+        wizard.addEventListener('submit', function(e){
+          if (!wizard.checkValidity()) return; // já tratado no JS principal
+          try{ overlay.hidden = false; overlay.setAttribute('aria-hidden','false'); }catch(_){ overlay.style.display='flex'; }
+        });
+      }
+    })();
+  </script>
 </body>
 </html>

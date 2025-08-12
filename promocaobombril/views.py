@@ -134,7 +134,8 @@ def cadastrar(request):
             participante.save()
         except Exception as e:
             return render(request, 'cadastrar.html', {'erro': f'Erro ao salvar cadastro: {str(e)}'})
-        return redirect('logar')
+        # Renderiza tela de sucesso para mostrar feedback e redirecionar após 5s
+        return render(request, 'cadastrar.html', {'sucesso': True})
     return render(request, 'cadastrar.html')
 
 def logar(request):
