@@ -336,3 +336,21 @@
     // não chamar preventDefault: deixa o form enviar para o backend Django
   });
 })();
+
+// Fallback global: garantir toggle de senha em qualquer página com .toggle-pass
+(function(){
+  document.addEventListener('click', function(e){
+    const btn = e.target.closest && e.target.closest('.toggle-pass');
+    if (!btn) return;
+    const id = btn.getAttribute('data-target');
+    if (!id) return;
+    const target = document.getElementById(id);
+    if (!target) return;
+    const showing = target.type === 'text';
+    target.type = showing ? 'password' : 'text';
+    // refletir estado visual quando houver CSS baseado em .show/aria-pressed
+    try{ btn.classList.toggle('show', !showing); }catch(_){/* noop */}
+    try{ btn.setAttribute('aria-pressed', String(!showing)); }catch(_){/* noop */}
+    try { target.focus({ preventScroll: true }); } catch(_) { target.focus(); }
+  }, true);
+})();

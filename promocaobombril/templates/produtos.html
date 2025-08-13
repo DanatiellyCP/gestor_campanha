@@ -18,7 +18,7 @@
   <div class="wrap">
     <header class="menu" role="navigation" aria-label="Principal">
       <div class="bar">
-        <a class="brand" href="#" aria-label="Página inicial">
+        <a class="brand" href="{% url 'home_responsive' %}" aria-label="Página inicial">
           <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
         </a>
         <nav aria-label="Seções">
@@ -84,10 +84,263 @@
         <section class="products-block regulars" aria-labelledby="reg-title">
           <h2 id="reg-title" class="pill-title">REGULARES</h2>
           <div class="pill-grid" role="list" aria-label="Lista de produtos regulares">
-            <div class="pill" role="listitem">PRODUTO TESTE</div>
-            <div class="pill" role="listitem">PRODUTO TESTE</div>
-            <div class="pill" role="listitem">PRODUTO TESTE</div>
-            <div class="pill" role="listitem">PRODUTO TESTE</div>
+            <div class="pill" role="listitem">LA DE ACO BOM BRIL MINI 80/60 g</div>
+            <div class="pill" role="listitem">BOMBRIL 1/1200 6 UNIDADES</div>
+            <div class="pill" role="listitem">Q'LUSTRO 40g (6 UNIDADES)</div>
+            <div class="pill" role="listitem">BRILLO 0 1/80 - 25  g</div>
+            <div class="pill" role="listitem">BRILLO 1 1/80 - 25 g</div>
+            <div class="pill" role="listitem">BRILLO 2 1/80 - 25  g</div>
+            <div class="pill" role="listitem">BRILLO INOX 1/40 - 16 g</div>
+            <div class="pill" role="listitem">MON BIJOU TIRA MANC 3 EM 1 - 6/1,5 L</div>
+            <div class="pill" role="listitem">MON BIJOU TIRA MANC 3 EM 1 - 12/500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU TIRA MANC 3 EM 1 REF - 12/500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU TIRA MANC 3 EM 1 - 12/100 ml</div>
+            <div class="pill" role="listitem">MON BIJOU TIRA MANC PÓ 3 EM 1 - 12/450 g</div>
+            <div class="pill" role="listitem">MON BIJOU TIRA FERRUGEM 3 EM 1 - 12/50 ml</div>
+            <div class="pill" role="listitem">MON BIJOU TIRA MANC PÓ 3 EM 1 24/350 g</div>
+            <div class="pill" role="listitem">MON BIJOU LAVA ROUPAS COCO 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU LAV ROUP. ESC.E PRETAS 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU LAV ROUPAS NENEM 12/1 L</div>
+            <div class="pill" role="listitem">FACILITA PASS.M.BIJOU PURE 12X500 ml-GAT</div>
+            <div class="pill" role="listitem">FACILITA PASS.M.BIJOU PURE.12X500 ml-REF</div>
+            <div class="pill" role="listitem">FACILITA PASS.M.BIJOU HARMON12X500 ml REF</div>
+            <div class="pill" role="listitem">MON BIJOU LAVA ROUPAS COCO 12X500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU LAVA ROUPAS HARMONIA 12X500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU LAVA ROUPAS INTIMAS 12X 300 ml</div>
+            <div class="pill" role="listitem">MON BIJOU LAVA ROUPA INTIMA NEU 12/300 ml</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO MISTERIO 12/500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO CLASSICO 12/500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO MAGIA 12/500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO CLASSICO 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO MAGIA 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU EVITA MOFO PUREZA 12/130 g</div>
+            <div class="pill" role="listitem">MON BIJOU EVITA MOFO HARMON 12/130 g</div>
+            <div class="pill" role="listitem">MON BIJOU EVITA MOFO NEUTRO 12/130 g</div>
+            <div class="pill" role="listitem">LAVA ROUP M BIJOU BABY NANANENEM12/500 ml</div>
+            <div class="pill" role="listitem">LIMPA MAQUINAS MON BIJOU 2/24/80G</div>
+            <div class="pill" role="listitem">PERFUM DE ROUPAS M BIJOU PUREZA 12X300 ml</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO MISTERIO 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG NENEM ALGO 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG NENEM ROSA 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG NENEM AZUL 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO CUIDADO 12/500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO CUIDADO 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU LAV ROUPAS MULT AZUL 4/3L</div>
+            <div class="pill" role="listitem">MON BIJOU LAV ROUPAS MULT AZUL 12/900 ml</div>
+            <div class="pill" role="listitem">MON BIJOU LAV ROUPAS MULT VERDE 4/3L</div>
+            <div class="pill" role="listitem">MON BIJOU LAV ROUPAS MULT VERDE 12/900 ml</div>
+            <div class="pill" role="listitem">MON BIJOU LAV ROUPAS MULT AZUL 9/1,5 L</div>
+            <div class="pill" role="listitem">MON BIJOU LAV ROUPAS MULT VERDE 9/1,5 L</div>
+            <div class="pill" role="listitem">MON BIJOU LAV ROUPAS MULT LAVANDA 4/3L</div>
+            <div class="pill" role="listitem">MON BIJOU LAV ROUPAS MULT LAVANDA 9/1,5L</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO ROSA 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO ROSA 12/500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO TURQUESA 12/1 L</div>
+            <div class="pill" role="listitem">MON BIJOU CONCENTRADO TURQUESA 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL CRISTAL 24/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMAO 24/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL NEUTRO 24/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL MACA 24/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL COCO 24/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL BABY CONCENTRADO 12/300 ml</div>
+            <div class="pill" role="listitem">LIMPOL LAVANDA 24/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL JABUTICABA 24/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL MAQUINA DE LAVAR PO 12/1KG</div>
+            <div class="pill" role="listitem">LIMPOL MAQ DE LAVAR ABRILHANTAD 12/100 ml</div>
+            <div class="pill" role="listitem">LIMPOL MAQUINA DE LAVAR TABLETE 12/315G</div>
+            <div class="pill" role="listitem">LIMPOL GEL CRISTAL 12/400g</div>
+            <div class="pill" role="listitem">LIMPOL GEL NEUTRO 12/400g</div>
+            <div class="pill" role="listitem">LIMPOL GEL LIMÃO E VERBENA 12/400g</div>
+            <div class="pill" role="listitem">LIMPOL GEL UVA E ORQUÍDEA 12/400g</div>
+            <div class="pill" role="listitem">LIMPOL GEL CEREJA E HIBISCO 12/400g</div>
+            <div class="pill" role="listitem">LIMPA ALUMINIO LIMPOL 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPA INOX LIMPOL 12/500 ml</div>
+            <div class="pill" role="listitem">PINHOBRILACCEPT BICODIR LILLY12/500 ml</div>
+            <div class="pill" role="listitem">PINHOBRILACCEPT BICODIR LAVANDA12/500 ml</div>
+            <div class="pill" role="listitem">PINHOBRILACCEPT BICODIR CLORADO12/500 ml</div>
+            <div class="pill" role="listitem">PINHOBRILACCEPT TIRA LIMO GATILH12/500 ml</div>
+            <div class="pill" role="listitem">PINHOBRILACCEPT TIRA LIMO REFIL12/500 ml</div>
+            <div class="pill" role="listitem">PINHOBRILACCEPT TIRALIMO SQUEEZE12/500 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL ACCEPT BICO DIR POWER12/500 ml</div>
+            <div class="pill" role="listitem">LIMPEZA PESADA LIMPOL CLÁSSICO 500 ml</div>
+            <div class="pill" role="listitem">LIMPEZA PESADA LIMPOL LIMÃO 500 ml</div>
+            <div class="pill" role="listitem">LIMPEZA PESADA LIMPOL FLORAL 500 ml</div>
+            <div class="pill" role="listitem">LIMPEZA PESADA LIMPOL LAVANDA 500 ml</div>
+            <div class="pill" role="listitem">LIMPEZA PESADA LIMPOL CLORO MAX AT 500 ml</div>
+            <div class="pill" role="listitem">LIMPADOR PERFUMADO ROXO 4/5L</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO MAGENTA 12/1 L</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO ROXO 12/1 L</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO VERDE 12/1 L</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO AZUL 12/1 L</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO MAGENTA 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO ROXO 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO VERDE 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO AZUL 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO MAGENTA 6/2L</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO ROXO 6/2L</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO AZUL 6/2L</div>
+            <div class="pill" role="listitem">LIMPADOR MULTIUSO LIMPOL CLÁSSICO 500 ml</div>
+            <div class="pill" role="listitem">LIMPADOR MULTIUSO LIMPOL LIMÃO 500 ml</div>
+            <div class="pill" role="listitem">LIMPADOR MULTIUSO LIMPOL LAVANDA 500 ml</div>
+            <div class="pill" role="listitem">LIMPADOR MULTIUSO LIMPOL FLORAL 500 ml</div>
+            <div class="pill" role="listitem">LIMPADOR MULTIUSO LIMPOL COM ÁLCOOL 500 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMP VIDR TRAD SQUEEZE 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMP VIDR TRAD GATILHO 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMP VIDR TRAD REFIL 12/500 ml</div>
+            <div class="pill" role="listitem">L. ESP. VIDR. LIMPOL ANTIEMB. GAT. 300 ml</div>
+            <div class="pill" role="listitem">DESENGORD. LIMPOL COZINHA SQUEEZE 500 ml</div>
+            <div class="pill" role="listitem">DESENGORD. LIMPOL COZINHA GATILHO 500 ml</div>
+            <div class="pill" role="listitem">DESENGORD. LIMPOL COZINHA REFIL 500 ml</div>
+            <div class="pill" role="listitem">TIRA-LIMO LIMPOL SQUEEZE 4/1 CLORO 500 ml</div>
+            <div class="pill" role="listitem">LIMPADOR C/BRIL LIMPOL CERAM/PORCE 750 ml</div>
+            <div class="pill" role="listitem">LIMPADOR C/BRIL LIMPOL LAMINADOS 750 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMP PERFUMADO CRISTAL 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPADOR PERF CRISTAL 12/1 L</div>
+            <div class="pill" role="listitem">LIMPOL MULTIUSO AZUL E LARANJA 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMPA VIDROS CRISTAL GAT 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL LIMPA VIDROS CRISTAL SQU 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL TIRA LIMO GATILHO 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL TIRA LIMO REFIL 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL MULTIUSO PRETO 12/500 ml</div>
+            <div class="pill" role="listitem">LIMPOL L. VIDROS ANTIEMBACANTE 12/500 ml</div>
+            <div class="pill" role="listitem">CERA LIQ P SAPATO QBRILHO PRET 2/12/60 ml</div>
+            <div class="pill" role="listitem">CERA LIQ P SAPATO QBRILHO MARROM 2/12/60 ml</div>
+            <div class="pill" role="listitem">LUSTRA MOVEIS QBRILHO LAVANDA 12/200 ml</div>
+            <div class="pill" role="listitem">LUSTRA MOVEIS QBRILHO JASMIM 12/200 ml</div>
+            <div class="pill" role="listitem">L. MOVEIS QBRILHO AEROSSOL LAV 12/300 ml</div>
+            <div class="pill" role="listitem">L. MOVEIS QBRILHO AEROSSOL JASM 12/300 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL SILVESTRE PLUS 12/500 ml PET</div>
+            <div class="pill" role="listitem">PINHO BRIL SILVESTRE PLUS 12/1000 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL FLORES DE LIMAO 12/500 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL FLORES DE LIMAO 12/1000 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL CAMPOS DE LAVANDA 12/500 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL CAMPOS DE LAVANDA 12/1000 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL SILVESTRE PLUS 6/1750 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL CAMPOS DE LAVANDA 6/1750 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL FLORAL 12/500 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL BRISA DO MAR 12/500 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL BRISA DO MAR 12/1000 ml</div>
+            <div class="pill" role="listitem">KALIPTO EUCALIPTO15/750 ml</div>
+            <div class="pill" role="listitem">KALIPTO HERBAL 15/750 ml</div>
+            <div class="pill" role="listitem">KALIPTO MARINE 15/750 ml</div>
+            <div class="pill" role="listitem">KALIPTO LAVANDA 15/750 ml</div>
+            <div class="pill" role="listitem">KALIPTO EUCALIPTO 12/500 ml</div>
+            <div class="pill" role="listitem">KALIPTO LAVANDA 12/500 ml</div>
+            <div class="pill" role="listitem">KALIPTO FLORAL 15/750 ml</div>
+            <div class="pill" role="listitem">KALIPTO FLORAL 12/500 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL POWER CLASSICO 12/1000 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL POWER LAVANDA 12/1000 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL LIMP SANIT CLORO 12/500 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL LIMP SANIT POWER 12/500 ml</div>
+            <div class="pill" role="listitem">PINHO BRIL LIMP SANIT LAVANDA 12/500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU SACHET PUREZA 12X50 g</div>
+            <div class="pill" role="listitem">MON BIJOU SACHET HARMONIA 12X50 g</div>
+            <div class="pill" role="listitem">KALIPTO OLEO DE PINHO 12/120 ml</div>
+            <div class="pill" role="listitem">KALIPTO OLEO DE EUCALIPTO 12/120 ml</div>
+            <div class="pill" role="listitem">KALIPTO OLEO DE LAVANDA 12/120 ml</div>
+            <div class="pill" role="listitem">KALIPTO OLEO DE CAPIM LIMAO 12/120 ml</div>
+            <div class="pill" role="listitem">REMOBRIL REMOVEDOR MULT TRAD 12/500 ml</div>
+            <div class="pill" role="listitem">REMOBRIL REMOVEDOR MULT LAVANDA 12/500 ml</div>
+            <div class="pill" role="listitem">REMOBRIL REMOVEDOR MULT LIMÃO 12/500 ml</div>
+            <div class="pill" role="listitem">REMOBRIL REMOVEDOR MULT TRAD 12/1 L</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM PO CLORO 12/300 g</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM PO LIMAO 12/300 g</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM PO LAVANDA 12X300 g</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM PO CLASSICO 12X300 g</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM ESP ATIVA LIMÃO 12/300 ml</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM ESP ATIVA LAVAND 12/300 ml</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM ESPUMA CLASS 12/300 ml</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM CREMOSO LAVANDA 12/450 ml</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM ESP ATIVA FLORAL 12/300 ml</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM PEDRA CLASSICO 24/200 g</div>
+            <div class="pill" role="listitem">SAPÓLIO RADIUM CREMOSO CLÁSSICO 12/250 ml</div>
+            <div class="pill" role="listitem">SAPÓLIO RADIUM CREMOSO LIMÃO 12/250 ml</div>
+            <div class="pill" role="listitem">SAPÓLIO RADIUM CREMOSO LAVANDA 12/250 ml</div>
+            <div class="pill" role="listitem">SAPÓLIO RADIUM CREMOSO CLORO 12/250 ml</div>
+            <div class="pill" role="listitem">SAPÓLIO RADIUM CREMOSO CLÁSSICO 12/450 ml</div>
+            <div class="pill" role="listitem">SAPÓLIO RADIUM CREMOSO LIMÃO 12/450 ml</div>
+            <div class="pill" role="listitem">SAPÓLIO RADIUM CREMOSO CLORO 12/450 ml</div>
+            <div class="pill" role="listitem">SAPÓLIO RADIUM LIMPA INOX 12/250 ml</div>
+            <div class="pill" role="listitem">SAPÓLIO RADIUM LIMPA ALUMÍNIO 12/250 ml</div>
+            <div class="pill" role="listitem">MON BIJOU LAVA ROUPAS EM PO COCO12X500 g</div>
+            <div class="pill" role="listitem">MON BIJOU LAVA ROUPAS EM PO NENEM12/500 g</div>
+            <div class="pill" role="listitem">POLIBRIL METAIS BRANCOS 12X200 ml</div>
+            <div class="pill" role="listitem">POLIBRIL METAIS E CROMADOS 12X200 ml</div>
+            <div class="pill" role="listitem">DESENTUPIDOR LIQUIDO FORCA AZUL 12X1 L</div>
+            <div class="pill" role="listitem">DESENTUPIDOR PO FORCA AZUL 12 X300 g</div>
+            <div class="pill" role="listitem">LIMPA FORNO PASTA FORCA AZUL 12X230 g</div>
+            <div class="pill" role="listitem">LIMPA FORNO SPRAY FORCA AZUL 12X400 ml</div>
+            <div class="pill" role="listitem">PRA LIXO ROLO PIA BANHEIRO 25/50 UN</div>
+            <div class="pill" role="listitem">PRA LIXO ROLO 15 LITROS 10/60 UN</div>
+            <div class="pill" role="listitem">PRA LIXO ROLO 30 LITROS 10/30 UN</div>
+            <div class="pill" role="listitem">PRA LIXO ROLO 50 LITROS 10/30 UN</div>
+            <div class="pill" role="listitem">PRA LIXO ROLO 100 LITROS 10/15</div>
+            <div class="pill" role="listitem">ESPONJA BOMBRIL MULTIUSO 1/60</div>
+            <div class="pill" role="listitem">ESPONJA BOMBRIL ANTIADERENTE 1/60</div>
+            <div class="pill" role="listitem">40C/3UN ESP BOMBRIL ANTIAD.EMB ECON</div>
+            <div class="pill" role="listitem">LIMPOL CRISTAL 4/5 LITROS</div>
+            <div class="pill" role="listitem">LIMPOL NEUTRO 4/5 LITROS</div>
+            <div class="pill" role="listitem">KALIPTO FLORAL 6/2 LTS</div>
+            <div class="pill" role="listitem">KALIPTO EUCALIPTO 6/2LTS</div>
+            <div class="pill" role="listitem">KALIPTO HERBAL 6/2 LTS</div>
+            <div class="pill" role="listitem">KALIPTO EUCALIPTO 4/5L</div>
+            <div class="pill" role="listitem">KALIPTO MARINE 6/2 LTS</div>
+            <div class="pill" role="listitem">KALIPTO LAVANDA 6/2 LTS</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG +PERF CLAS 24/500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG +PERF PROT 24/500 ml</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG +PERF CLASSICO 6/1,7L</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG +PERF CLASSICO 4/5L</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG +PERF 3EM1 LAV 6/1,7L</div>
+            <div class="pill" role="listitem">KALIPTO LAVANDA 4/5L</div>
+            <div class="pill" role="listitem">PINHO BRIL SILVESTRE PLUS 4/5L</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG +PROTEÇÃO 4/5L</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG +PERF CUIDADO 6/1,7L</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG +PERF MACIEZ 6/1,7L</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG +PERF PROTECAO 6/1,7L</div>
+            <div class="pill" role="listitem">MON BIJOU AMAC REG +PERF FRESCOR 6/1,7L</div>
+            <div class="pill" role="listitem">LIMPEX MULTI-USO AZUL 24/5</div>
+            <div class="pill" role="listitem">LIMPEX MULTI-USO ROSA 24/5</div>
+            <div class="pill" role="listitem">LIMPEX MULTI-USO ROLO AZUL 12/30</div>
+            <div class="pill" role="listitem">KALIPTO CONC LARANJA E MAÇA 12/120 ml</div>
+            <div class="pill" role="listitem">KALIPTO CONC HORTELÃ E LIMAO 12/120 ml</div>
+            <div class="pill" role="listitem">KALIPTO CONC MAR DO CARIBE 12/120 ml</div>
+            <div class="pill" role="listitem">KALIPTO CONC CITRONELA 12/120 ml</div>
+            <div class="pill" role="listitem">KALIPTO CONC FLORAL E TALCO 12/120 ml</div>
+            <div class="pill" role="listitem">6 CJ C/10UN ESP BOMBRIL MULTIUSO</div>
+            <div class="pill" role="listitem">144 CJ PCT ESP BOMBRIL MULTIUSO LV4PG3</div>
+            <div class="pill" role="listitem">144 CJ ESP BOMBRIL MULTIUSO FD PLASTICO</div>
+            <div class="pill" role="listitem">MON BIJOU AM REG +PERF CLAS PROMO 6/1,7L</div>
+            <div class="pill" role="listitem">KALIPTO EUCALIPTO 6/2L LV 2LTS PG 1,9L</div>
+            <div class="pill" role="listitem">KALIPTO HERBAL 6/2L LV 2LTS PG 1,9L</div>
+            <div class="pill" role="listitem">KALIPTO LAVANDA 6/2L LV 2LTS PG 1,9L</div>
+            <div class="pill" role="listitem">PINHO BRIL SILV PLUS12/500ML LV500PG450</div>
+            <div class="pill" role="listitem">PINHO BRIL C LAVANDA12/500MLLV500PG450</div>
+            <div class="pill" role="listitem">PINHO BRIL B DO MAR 12/500ML LV500PG450</div>
+            <div class="pill" role="listitem">PINHO BRIL FL LIMÃO 12/500ML LV500PG450</div>
+            <div class="pill" role="listitem">PINHO BRIL SILV PLUS12/1LT LV1000PG900ML</div>
+            <div class="pill" role="listitem">PINHO BRIL LAVANDA 12/1LT LV1000 PG900ML</div>
+            <div class="pill" role="listitem">LIMPOL CRISTAL LV MAIS PG MENOS 6/500ML</div>
+            <div class="pill" role="listitem">LIMPOL NEUTRO LV MAIS PG MENOS 6/500ML</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM CREM CLAS 450ML 20%GRATIS</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM CREM LIMA 450ML 20%GRATIS</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM CREM CLOR 450ML 20%GRATIS</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM CREM CLAS 250ML 20%GRATIS</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM CREM LIMA 250ML 20%GRATIS</div>
+            <div class="pill" role="listitem">SAPOLIO RADIUM CREM CLOR 250ML 20%GRATIS</div>
+            <div class="pill" role="listitem">4CJ6 LIMPOL CRISTAL 24/500ML</div>
+            <div class="pill" role="listitem">4CJ6 LIMPOL NEUTRO 24/500 ML</div>
+            <div class="pill" role="listitem">4CJ6 LIMPOL COCO 24/500 ML</div>
+            <div class="pill" role="listitem">6CJ2 SAPÓLIO RADIUM CREMOSO CL 12/450 ML</div>
+            <div class="pill" role="listitem">4CJ3 LIMPOL GEL CONC CRISTAL 12/400GR</div>
+            <div class="pill" role="listitem">4CJ3 LIMPOL GEL CONC NEUTRO 12/400GR</div>
+            <div class="pill" role="listitem">4CJ3 LIMPOL GEL CONC LIMAO VERB 12/400GR</div>
+            <div class="pill" role="listitem">PINHO BRIL TRAN P. SILV 50% DESC 3UN 1L</div>
+            <div class="pill" role="listitem">LIMPOL GEL CRISTAL 50% DESC 2UN 400G</div>
+            <div class="pill" role="listitem">PINHO BRIL TRAN P. SILV LV3 PG2 500ML</div>
+            <div class="pill" role="listitem">LIMPOL GEL CRISTAL LV3 PG2 400G</div>
+            <div class="pill" role="listitem">PINHO BRIL P. SILV 2UN+1 GTS FLOR 500ML</div>
+            <div class="pill" role="listitem">L. VIDROS LIMPOL C/ÁLCOOL 4/1 SQUZ 500ML</div>
+            <div class="pill" role="listitem">L. VIDROS LIMPOL C/ÁLCOOL 4/1 REF. 500ML</div>
           </div>
         </section>        
       </div>
@@ -99,13 +352,13 @@
   <footer class="footer">
     <div class="inner">
       <div class="footer-top">
-        <h2 class="footer-title">É mais do que bom. É da</h2>
+        <h2 class="footer-title">É MAIS QUE BOM. É DA</h2>
         <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
       </div>
       <ul class="footer-links">
-        <li><a href="#">Termos de uso</a></li>
-        <li><a href="https://www.bombril.com.br/politica-de-privacidade">Política de privacidade</a></li>
-        <li><a href="#">LGPD</a></li>
+        <li><a target="_blank" href="https://ri.bombril.com.br/termos-e-condicoes-de-uso">Termos de uso</a></li>
+        <li><a target="_blank" href="https://www.bombril.com.br/politica-de-privacidade">Política de privacidade</a></li>
+        <li><a target="_blank" href="https://www.bombril.com.br/politica-de-privacidade">LGPD</a></li>
       </ul>
       <p class="footer-legal">
         PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
