@@ -1,0 +1,278 @@
+{% extends 'base_index_responsive.html' %}
+{% load static %}
+
+{% block content %}
+<div class="topo" role="img" aria-label="Topo do site">
+  <div class="inner">
+    <h1 class="topo-title">TUTORIAL</h1>
+    <img src="{% static 'responsive/images/ROBOM-BRIL_NAVE.png' %}" alt="" class="topo-robot" aria-hidden="true" />
+  </div>
+</div>
+
+<div id="content">
+  <div class="container" style="width: 900px; margin: 0 auto;">
+    <style>
+        /* CSS Incorporado e Finalizado */
+        :root {
+            --primary-red: #F61A07;
+            --dark-grey: #4D4D4D;
+            --body-text: #6D6E71;
+            --image-border: #CCCCCC;
+            --background: #FFFFFF;
+            --font-family: futura-pt, sans-serif;
+        }
+    
+    
+    
+    
+        .main-title {
+            text-align: center;
+            color: var(--primary-red);
+            font-size: 2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 50px;
+        }
+    
+        .step-row {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+    
+        .content-column {
+            flex: 1;
+        }
+    
+        .image-column {
+            flex: 1;
+            max-width: 200px;
+            /*border: 1px solid var(--image-border);*/
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            /* Garante que a imagem não ultrapasse as bordas arredondadas */
+            flex-shrink: 0;
+        }
+    
+        .image-column img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+    
+        .step-row h2 {
+            color: var(--dark-grey);
+            font-size: 25px ;
+            margin-top: 0;
+            margin-bottom: 8px;
+        }
+    
+        .step-row p,
+        .step-row ul {
+            margin: 0;
+            font-size: 20px;
+            line-height: 1.5;
+        }
+    
+        .step-row ul {
+            padding-left: 20px;
+            list-style-position: inside;
+        }
+    
+        .highlight-red {
+            color: var(--primary-red);
+            font-weight: bold;
+        }
+    
+        .final-section-wrapper {
+            background-color: var(--primary-red);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            margin-top: 50px;
+        }
+    
+        .final-section-wrapper .step-row {
+            gap: 30px;
+            margin-bottom: 0;
+        }
+    
+        .final-section-wrapper h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+    
+        .final-section-wrapper ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            color: white;
+        }
+    
+        .final-section-wrapper ul li::before {
+            content: '•';
+            margin-right: 10px;
+        }
+    
+        .final-section-wrapper .image-column {
+            /*border: 2px solid white;*/
+            background-color: var(--primary-red);
+        }
+    
+        .important-section {
+            background-color: var(--primary-red);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+    
+        .important-section h3 {
+            margin: 0 0 5px 0;
+            font-size: 1.1em;
+            text-transform: uppercase;
+        }
+    
+        .important-section p {
+            margin: 0;
+            font-weight: bold;
+        }
+    
+        /* Configurações de Responsividade */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+    
+            .main-title {
+                font-size: 1.6em;
+            }
+    
+            /* A imagem agora ficará ABAIXO do texto */
+            .step-row {
+                flex-direction: column;
+                gap: 25px;
+                text-align: center;
+            }
+    
+            .step-row ul {
+                text-align: left;
+                display: inline-block;
+            }
+    
+            .image-column {
+                width: 100%;
+                max-width: 250px;
+            }
+    
+            .final-section-wrapper {
+                padding: 20px;
+            }
+        }
+    </style>
+    <h1 class="main-title">Como escanear seu cupom fiscal para participar da promoção</h1>
+
+    <div class="step-row">
+        <div class="content-column">
+            <h2>1. POSICIONE CORRETAMENTE</h2>
+            <p>Abra o cupom sobre uma superfície plana e limpa. <span class="highlight-red">Evite dobras,
+                    sombras ou objetos</span> por cima da nota. Isso facilita a leitura do código.</p>
+        </div>
+        <div class="image-column">
+            <img src="{% static 'responsive/images/ComoEscanear1.png' %}" alt="Demonstração de cupom fiscal posicionado corretamente em uma superfície plana.">
+        </div>
+    </div>
+
+    <div class="step-row">
+        <div class="content-column">
+            <h2>2. DOBRE COM CUIDADO (SE NECESSÁRIO)</h2>
+            <p>Se a nota for muito comprida, dobre a parte que não contém os produtos da promoção. <span class="highlight-red">Mas nunca esconda o QR Code</span> ou o nome dos produtos
+                participantes.</p>
+        </div>
+        <div class="image-column">
+            <img src="{% static 'responsive/images/ComoEscanear2.png' %}" alt="Exemplo de dobra de um cupom fiscal longo.">
+        </div>
+    </div>
+
+    <div class="step-row">
+        <div class="content-column">
+            <h2>3. VERIFIQUE OS DADOS VISÍVEIS</h2>
+            <p>Certifique-se de que os seguintes dados estejam legíveis na foto:</p>
+            <ul>
+                <li><span class="highlight-red">Nome e quantidade dos produtos da promoção</span></li>
+                <li><span class="highlight-red">Data da compra</span></li>
+                <li><span class="highlight-red">CNPJ do estabelecimento</span></li>
+                <li><span class="highlight-red">QR Code ou código de barras</span></li>
+            </ul>
+        </div>
+        <div class="image-column">
+            <img src="{% static 'responsive/images/ComoEscanear3.png' %}" alt="Cupom fiscal com dados importantes como QR Code e CNPJ destacados.">
+        </div>
+    </div>
+
+    <div class="step-row">
+        <div class="content-column">
+            <h2>4. FOTOGRAFE COM BOA ILUMINAÇÃO</h2>
+            <p>Use a câmera do seu celular, de preferência com flash desligado, em ambiente bem iluminado.
+                Evite
+                tremores e aproxime até que todos os dados estejam nítidos.</p>
+        </div>
+        <div class="image-column">
+            <img src="{% static 'responsive/images/ComoEscanear4.png' %}" alt="Celular fotografando um cupom fiscal com boa iluminação.">
+        </div>
+    </div>
+
+    <div class="step-row">
+        <div class="content-column">
+            <h2>5. SALVE EM FORMATO CORRETO</h2>
+            <p>Salve a imagem em JPG ou PNG. Evite enviar capturas de tela ou fotos borradas.</p>
+        </div>
+        <div class="image-column">
+            <img src="{% static 'responsive/images/ComoEscanear5.png' %}" alt="Ícones indicando que formatos JPG e PNG são aceitos.">
+        </div>
+    </div>
+
+    <div class="step-row">
+        <div class="content-column">
+            <h2>6. ENVIE NO SITE DA PROMOÇÃO</h2>
+            <p>Acesse o Site ou WhatsApp oficial da campanha e faça o upload da imagem. Pronto! Agora é só
+                cruzar os dedos e torcer!</p>
+        </div>
+        <div class="image-column">
+            <img src="{% static 'responsive/images/ComoEscanear6.png' %}" alt="Tela de um site ou aplicativo com botão para enviar imagem.">
+        </div>
+    </div>
+
+    <div class="final-section-wrapper">
+        <div class="step-row">
+            <div class="content-column">
+                <h3>NÃO SERÃO ACEITOS:</h3>
+                <ul>
+                    <li>Notas rasuradas, molhadas ou apagadas</li>
+                    <li>Imagens cortadas ou tremidas</li>
+                    <li>Notas sem produtos participantes</li>
+                </ul>
+            </div>
+            <div class="image-column">
+                <img src="{% static 'responsive/images/ComoEscanear7.png' %}" alt="Ícones de recusa para cupons inválidos.">
+            </div>
+        </div>
+    </div>
+
+    <div class="important-section">
+        <h3>IMPORTANTE:</h3>
+        <p>GUARDE OS SEUS CUPONS FISCAIS CADASTRADOS PARA COMPROVAÇÃO EM CASO DE PREMIAÇÃO!</p>
+    </div>
+    <br>
+    <br>
+
+</div>
+</div>
+
+{% endblock %}
