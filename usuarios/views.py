@@ -11,6 +11,9 @@ from functools import wraps
 from utils.funcoes import limpar_lista_sku, retorna_atividades
 from cupons.models import Cupom
 from utils.link_sefaz import gerar_link_sefaz
+from django.core.paginator import Paginator
+from django.db.models import Q
+
 ## Função para restringir acessos por niveis - Danny - 27-06-2025
 def nivel_required(nivel_permitido):
     def decorator(view_func):
@@ -177,13 +180,65 @@ def perfil(request, id):
 
 @login_required
 def dados_participantes(request):
-  #pegar os dados dos participantes
-  lista_participantes = Participantes.objects.all().values()
-  template = loader.get_template('dados_participantes.html')
-  context = {
-    'lista_participantes': lista_participantes,
-  }
-  return HttpResponse(template.render(context, request))
+    search_query = request.GET.get('q', '')
+    participantes = Participantes.objects.all()
+
+    if search_query:
+        participantes = participantes.filter(
+            Q(nome__icontains=search_query) |
+            Q(cpf__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+
+    total_part = participantes.count()
+
+    # Paginação
+    paginator = Paginator(participantes, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Lógica de páginas com elipses
+    current_page = page_obj.number
+    total_pages = paginator.num_pages
+    if total_pages <= 7:
+        page_range = range(1, total_pages + 1)
+    else:
+        if current_page <= 4:
+            page_range = list(range(1, 6)) + ['...', total_pages]
+        elif current_page >= total_pages - 3:
+            page_range = [1, '...'] + list(range(total_pages - 4, total_pages + 1))
+        else:
+            page_range = [1, '...'] + list(range(current_page - 1, current_page + 2)) + ['...', total_pages]
+
+    return render(request, 'dados_participantes.html', {
+        'page_obj': page_obj,
+        'page_range': page_range,
+        'Total': total_part,
+        'search_query': search_query
+    })
+
+
+
+
+"""
+def dados_participantes(request):
+    # QuerySet de participantes
+    lista_participantes = Participantes.objects.all()
+
+    # Criar paginator - 5 itens por página
+    participantes_paginator = Paginator(lista_participantes, 5)
+
+    # Número da página atual (padrão: 1)
+    page_num = request.GET.get('page')
+    page = participantes_paginator.get_page(page_num)
+
+    # Renderizar template
+    template = loader.get_template('dados_participantes.html')
+    context = {
+        'page': page
+    }
+    return HttpResponse(template.render(context, request))
+"""
 
 
 @login_required
@@ -287,19 +342,41 @@ def deletar_skus(request):
 
 @login_required
 def cupons_enviados(request):
-  # filtrar cupons cadastrados
-  lista_cupons = Cupom.objects.all().values()
-  total_cup = Cupom.objects.count()
-  template = loader.get_template('cupons_enviados.html')
-  context = {
-    'lista_cupons': lista_cupons,
-    'Total' : total_cup
-  }
-  return HttpResponse(template.render(context, request))
+    lista_cupons = Cupom.objects.all().values()
+    total_cup = Cupom.objects.count()
+
+    paginator = Paginator(lista_cupons, 10)  # 10 cupons por página
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    # Lógica de elipses
+    current_page = page_obj.number
+    total_pages = paginator.num_pages
+    if total_pages <= 7:
+        page_range = range(1, total_pages + 1)
+    else:
+        if current_page <= 4:
+            page_range = list(range(1, 6)) + ["...", total_pages]
+        elif current_page >= total_pages - 3:
+            page_range = [1, "..."] + list(range(total_pages - 4, total_pages + 1))
+        else:
+            page_range = [1, "..."] + list(range(current_page - 1, current_page + 2)) + ["...", total_pages]
+
+    context = {
+        'page_obj': page_obj,
+        'page_range': page_range,
+        'Total': total_cup
+    }
+    return render(request, 'cupons_enviados.html', context)
 
 
-# para geração de token para usuarios
-  
+
+# Deletar participantes
+@login_required
+def deletar_participante(request, id):
+  participante = Participantes.objects.get(id=id)
+  participante.delete()
+  return redirect('dados_participantes')  
 
 
    
