@@ -1,0 +1,199 @@
+<h1 id="api---promoção-bombril">API - Promoção Bombril</h1>
+<p>Este documento descreve os endpoints de consulta e de envio de notas
+adicionados ao sistema. Todos exigem autenticação via Token fixo
+(service-to-service) ou usuário autenticado do DRF. O método recomendado
+é o Token fixo, configurado em <code>gestor_campanha/settings.py</code>
+como <code>PROMOCAO_FIXED_TOKEN</code>.</p>
+<ul>
+<li>Ambientes exemplo:
+<ul>
+<li>Local: <code>http://localhost:8000</code></li>
+<li>Produção: <code>https://promocaobombril.com.br</code></li>
+</ul></li>
+<li>Cabeçalho de autenticação (use um dos formatos):
+<ul>
+<li><code>Authorization: Token &lt;PROMOCAO_FIXED_TOKEN&gt;</code></li>
+<li><code>Authorization: Bearer &lt;PROMOCAO_FIXED_TOKEN&gt;</code></li>
+<li><code>X-API-Key: &lt;PROMOCAO_FIXED_TOKEN&gt;</code></li>
+</ul></li>
+</ul>
+<p>Observação: o número de celular no banco costuma estar salvo com DDI
+55. Os endpoints já tentam com e sem <code>55</code>
+automaticamente.</p>
+<hr />
+<h2 id="buscar-participante">1) Buscar participante</h2>
+<ul>
+<li>Path: <code>/participantes/api/participantes/buscar/</code></li>
+<li>Método: <code>POST</code></li>
+<li>Auth: Token fixo</li>
+<li>Conteúdo: <code>application/json</code></li>
+<li>Body (um dos campos):
+<ul>
+<li><code>cpf</code> (string)</li>
+<li><code>email</code> (string)</li>
+<li><code>celular</code> (string, apenas dígitos, ex.:
+<code>5582987124616</code>)</li>
+</ul></li>
+</ul>
+<p>Exemplo (local):</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> <span class="at">-X</span> POST <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Token &lt;TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;celular&quot;:&quot;5582987124616&quot;}&#39;</span> <span class="dt">\</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  http://localhost:8000/participantes/api/participantes/buscar/</span></code></pre></div>
+<p>Resposta (200):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;Participante encontrado.&quot;</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span> <span class="fu">{</span> <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;nome&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span><span class="fu">,</span> <span class="dt">&quot;cpf&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span><span class="fu">,</span> <span class="er">...</span> <span class="fu">}</span> <span class="ot">]</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<hr />
+<h2 id="listar-códigos-de-sorteio-do-participante-por-celular">2) Listar
+códigos de sorteio do participante (por celular)</h2>
+<ul>
+<li>Path:
+<code>/participantes/api/participantes/cupons-por-celular/</code></li>
+<li>Método: <code>POST</code></li>
+<li>Auth: Token fixo</li>
+<li>Conteúdo: <code>application/json</code></li>
+<li>Body:
+<ul>
+<li><code>celular</code> (string)</li>
+</ul></li>
+</ul>
+<p>Exemplo (produção):</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> <span class="at">-X</span> POST <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Token &lt;TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;celular&quot;:&quot;5582987124616&quot;}&#39;</span> <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  https://promocaobombril.com.br/participantes/api/participantes/cupons-por-celular/</span></code></pre></div>
+<p>Resposta (200):</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;5 código(s) encontrado(s).&quot;</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;1234567890123&quot;</span><span class="ot">,</span> <span class="st">&quot;9876543210001&quot;</span><span class="ot">,</span> <span class="st">&quot;...&quot;</span><span class="ot">]</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<hr />
+<h2 id="enviar-nota-44-dígitos-imagem-completa-ou-qr">3) Enviar nota (44
+dígitos, imagem completa ou QR)</h2>
+<ul>
+<li>Path:
+<code>/participantes/api/participantes/enviar-nota/</code></li>
+<li>Método: <code>POST</code></li>
+<li>Auth: Token fixo</li>
+<li>Parsers: <code>multipart/form-data</code> ou
+<code>application/json</code></li>
+<li>Identificação do participante: <code>celular</code>
+(obrigatório)</li>
+<li>Formas de enviar a nota (um dos itens):
+<ol type="1">
+<li>Chave de 44 dígitos: <code>chave_acesso</code> (ou
+<code>chave</code>)</li>
+<li>Imagem do QR code:
+<ul>
+<li>Arquivo: <code>imagem_qrcode</code> (multipart)</li>
+<li>Base64: <code>imagem_qrcode_base64</code> (data URL ou base64
+puro)</li>
+</ul></li>
+<li>Imagem da nota completa:
+<ul>
+<li>Arquivo: <code>imagem_nota</code> (ou <code>imagem</code>)
+(multipart)</li>
+<li>Base64: <code>imagem_nota_base64</code> (ou
+<code>imagem_base64</code>) (data URL ou base64 puro)</li>
+</ul></li>
+</ol></li>
+</ul>
+<p>Exemplos:</p>
+<ol type="a">
+<li>JSON com chave 44 dígitos (local)</li>
+</ol>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> <span class="at">-X</span> POST <span class="dt">\</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Token &lt;TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{&quot;celular&quot;:&quot;5582987124616&quot;,&quot;chave_acesso&quot;:&quot;99999999999999999999999999999999999999999999&quot;}&#39;</span> <span class="dt">\</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  http://localhost:8000/participantes/api/participantes/enviar-nota/</span></code></pre></div>
+<ol start="2" type="a">
+<li>Multipart com arquivo do QR (produção)</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> <span class="at">-X</span> POST <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Token &lt;TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-F</span> <span class="st">&quot;celular=5582987124616&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-F</span> <span class="st">&quot;imagem_qrcode=@/caminho/para/qrcode.jpg&quot;</span> <span class="dt">\</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  https://promocaobombril.com.br/participantes/api/participantes/enviar-nota/</span></code></pre></div>
+<ol start="3" type="a">
+<li>JSON com QR em base64 (data URL)</li>
+</ol>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> <span class="at">-X</span> POST <span class="dt">\</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Token &lt;TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;celular&quot;:&quot;5582987124616&quot;,</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;imagem_qrcode_base64&quot;:&quot;data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ...&quot;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="st">      }&#39;</span> <span class="dt">\</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  http://localhost:8000/participantes/api/participantes/enviar-nota/</span></code></pre></div>
+<ol start="4" type="a">
+<li>JSON com imagem da nota em base64 (puro)</li>
+</ol>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> <span class="at">-X</span> POST <span class="dt">\</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Token &lt;TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Content-Type: application/json&quot;</span> <span class="dt">\</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">&#39;{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;celular&quot;:&quot;5582987124616&quot;,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="st">        &quot;imagem_nota_base64&quot;:&quot;/9j/4AAQSkZJRgABAQ...&quot;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="st">      }&#39;</span> <span class="dt">\</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  http://localhost:8000/participantes/api/participantes/enviar-nota/</span></code></pre></div>
+<p>Resposta de sucesso (200):</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;success&quot;</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;message&quot;</span><span class="fu">:</span> <span class="st">&quot;Cupom cadastrado com sucesso.&quot;</span><span class="fu">,</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;data&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;cupom_id&quot;</span><span class="fu">:</span> <span class="dv">123</span><span class="fu">,</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;numeros_da_sorte&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;1234567890123&quot;</span><span class="ot">,</span> <span class="st">&quot;9876543210001&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;msg_produto&quot;</span><span class="fu">:</span> <span class="st">&quot;...&quot;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Erros comuns (200 com <code>success:false</code>): -
+<code>Campo 'celular' é obrigatório.</code> -
+<code>Chave de acesso inválida ou não encontrada (esperado 44 dígitos).</code>
+- <code>Participante não encontrado pelo celular informado.</code></p>
+<hr />
+<h2 id="listagem-opcional-via-viewset-padrão-do-drf">4) Listagem
+(opcional) via ViewSet padrão do DRF</h2>
+<ul>
+<li>Path: <code>/api/participantes/</code> (router DRF)</li>
+<li>Método: <code>GET</code></li>
+<li>Auth: Token fixo (aceito pela permission) ou Token DRF por
+usuário</li>
+</ul>
+<p>Exemplo:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-i</span> <span class="at">-X</span> GET <span class="dt">\</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">&quot;Authorization: Token &lt;TOKEN&gt;&quot;</span> <span class="dt">\</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  http://localhost:8000/api/participantes/</span></code></pre></div>
+<hr />
+<h2 id="autenticação-e-segurança">Autenticação e Segurança</h2>
+<ul>
+<li>O token fixo deve ser mantido em segredo, configurado via variável
+de ambiente:
+<ul>
+<li><code>PROMOCAO_FIXED_TOKEN=&lt;seu_token&gt;</code></li>
+</ul></li>
+<li>Sempre usar HTTPS em produção.</li>
+<li>Rate limiting e rotação de token são boas práticas (não incluídas
+aqui).</li>
+</ul>
+<hr />
+<h2 id="contato">Contato</h2>
+<p>Em caso de dúvidas ou para estender os endpoints (filtros adicionais,
+payloads mais ricos), entre em contato com a equipe de
+desenvolvimento.</p>
