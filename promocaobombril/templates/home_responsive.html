@@ -64,17 +64,17 @@
     </video>
     <div class="inner">
       <div class="hero-duo">
-        <img class="promo-logo" src="{% static 'responsive/images/Logo-promo.png' %}" alt="Promoção Dê um Brilho no seu Futuro" />
-        <img class="hero-left" src="{% static 'responsive/images/Banner-IMG-ESQUERDA.png' %}" alt="" aria-hidden="true" />
+        <img class="promo-logo hover-zoom" src="{% static 'responsive/images/Logo-promo.png' %}" alt="Promoção Dê um Brilho no seu Futuro" />
+        <img class="hero-left hover-zoom" src="{% static 'responsive/images/Banner-IMG-ESQUERDA.png' %}" alt=""/>
       </div>
     </div>
   </div>
   <div id="content">
     <section class="prizes-band" aria-label="Prêmios da promoção">
       <div class="band-inner">
-        <img src="{% static 'responsive/images/Round1V3.png' %}" class="prize-img left" alt="Prêmios diários e semanais" />
-        <img src="{% static 'responsive/images/PlusIcon.png' %}" class="plus" alt="" aria-hidden="true" />
-        <img src="{% static 'responsive/images/Round2V3.png' %}" class="prize-img right" alt="Prêmio final" />
+        <img src="{% static 'responsive/images/Round1V3.png' %}" class="prize-img left hover-zoom" alt="Prêmios diários e semanais" />
+        <img src="{% static 'responsive/images/PlusIcon.png' %}" class="plus hover-zoom" alt="" aria-hidden="true" />
+        <img src="{% static 'responsive/images/Round2V3.png' %}" class="prize-img right hover-zoom" alt="Prêmio final" />
       </div>
     </section>
 
@@ -98,11 +98,11 @@
     <section class="cta-products" aria-label="Compre 3 produtos e turbine suas chances">
       <div class="cta-inner">
         <div class="cta-top">
-          <img src="{% static 'responsive/images/COMPRE 3 PRODUTOS.png' %}" alt="Compre 3 produtos da família Bombril" class="cta-buy" />
-          <img src="{% static 'responsive/images/PRODUTOS.png' %}" alt="Produtos participantes" class="cta-lineup" />
+          <a href="{% url 'logar' %}"><img src="{% static 'responsive/images/COMPRE 3 PRODUTOS.png' %}" alt="Compre 3 produtos da família Bombril" class="cta-buy" /></a>
+          <a href="{% url 'produtos' %}"><img src="{% static 'responsive/images/PRODUTOS.png' %}" alt="Produtos participantes" class="cta-lineup" /></a>
         </div>
         <div class="cta-bottom">
-          <img src="{% static 'responsive/images/TURBINE SUAS CHANCES.png' %}" alt="Turbine suas chances de ganhar comprando - Produtos aceleradores" class="cta-boost" />
+          <a href="{% url 'produtos' %}"><img src="{% static 'responsive/images/TURBINE SUAS CHANCES.png' %}" alt="Turbine suas chances de ganhar comprando - Produtos aceleradores" class="cta-boost" /></a>
         </div>
       </div>
     </section>
@@ -140,7 +140,7 @@
     <section class="faq-cta" aria-label="Ainda tem dúvidas? Confira nosso FAQ">
       <div class="faq-inner">
         <div class="faq-left">
-          <img src="{% static 'responsive/images/mascote_teclando.png' %}" alt="Robô Bombril teclando" class="faq-mascot" />
+          <img width="250px" src="{% static 'responsive/images/mascote_teclando.gif' %}" alt="Robô Bombril teclando" class="faq-mascot" />
         </div>
         <div class="faq-right">
           <h2 class="faq-title">AINDA TEM DÚVIDAS?</h2>
@@ -191,12 +191,12 @@
   <footer class="footer">
     <div class="inner">
       <div class="footer-top">
-        <h2 class="footer-title">É mais do que bom. É da</h2>
+        <h2 class="footer-title">É MAIS QUE BOM. É DA</h2>
         <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
       </div>
       <ul class="footer-links">
         <li><a href="#">Termos de uso</a></li>
-        <li><a href="https://www.bombril.com.br/politica-de-privacidade">Política de privacidade</a></li>
+        <li><a target="_blank" href="https://www.bombril.com.br/politica-de-privacidade">Política de privacidade</a></li>
         <li><a href="#">LGPD</a></li>
       </ul>
       <p class="footer-legal">
@@ -213,8 +213,25 @@
     </div>
    </div>
   <script src="{% static 'responsive/menu.js' %}"></script>
+  <script>
+    // Desktop only: enlarge floating bot at top, shrink on scroll
+    (function(){
+      function updateBotSize(){
+        var bot = document.querySelector('.floating-bot');
+        if(!bot) return;
+        var isDesktop = window.matchMedia('(min-width: 821px)').matches;
+        var atTop = window.scrollY <= 0;
+        if(isDesktop && atTop){ bot.classList.add('is-top'); }
+        else { bot.classList.remove('is-top'); }
+      }
+      var t; function onScrollResize(){ clearTimeout(t); t = setTimeout(updateBotSize, 50); }
+      window.addEventListener('load', updateBotSize);
+      window.addEventListener('scroll', onScrollResize, { passive: true });
+      window.addEventListener('resize', onScrollResize);
+    })();
+  </script>
   <!-- Floating robot button -->
-  <a href="/cadastrar/" class="floating-bot" aria-label="Assistente da promoção">
+  <a href="/logar/" class="floating-bot" aria-label="Assistente da promoção">
     <img src="{% static 'responsive/images/Banner - Robo - Direita.gif' %}" alt="" />
   </a>
 </body>
