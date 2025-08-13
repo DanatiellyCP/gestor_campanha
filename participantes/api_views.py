@@ -26,6 +26,7 @@ from django.core.files.base import ContentFile
 import base64
 import re as _re
 
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
