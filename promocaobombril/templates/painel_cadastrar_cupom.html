@@ -69,7 +69,11 @@
         </header>
         
         {% if msg_erro %}
-        <div role="alert" class="alert alert-error">{{ msg_erro }}</div>
+        <div id="alertErroCupom" role="alert" class="alert alert-error alert-error--strong" tabindex="-1" aria-live="assertive">
+          <span class="alert-ico" aria-hidden="true">⚠️</span>
+          <strong>Não foi possível processar seu cupom.</strong>
+          <span class="alert-msg"> Tente ler o QR Code ou digite o código. Se persistir, aguarde alguns instantes e tente novamente. </span>
+        </div>
         {% endif %}
         {% if msg_sucesso %}
         <div role="status" class="alert alert-success">{{ msg_sucesso }}</div>
@@ -135,12 +139,12 @@
   <footer class="footer">
     <div class="inner">
       <div class="footer-top">
-        <h2 class="footer-title">É mais do que bom. É da</h2>
+        <h2 class="footer-title">É MAIS QUE BOM. É DA</h2>
         <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
       </div>
       <ul class="footer-links">
         <li><a href="#">Termos de uso</a></li>
-        <li><a href="https://www.bombril.com.br/politica-de-privacidade">Política de privacidade</a></li>
+        <li><a target="_blank" href="https://www.bombril.com.br/politica-de-privacidade">Política de privacidade</a></li>
         <li><a href="#">LGPD</a></li>
       </ul>
       <p class="footer-legal">
@@ -177,6 +181,14 @@
     .file-field.selected{ border-color:#ff8d8d; background:#fff6f6; }
     .file-field.selected .placeholder{ color:#c01919; }
     .file-field.selected .placeholder::before{ content:"✔ "; color:#c01919; font-weight:900; }
+    /* Error alert emphasis */
+    .alert{ padding: 14px 16px; border-radius: 8px; margin: 12px 0; font-size: 16px; line-height: 1.4; }
+    .alert-error{ background: #fff5f5; color: #8a1f1f; border: 1px solid #f3c2c2; }
+    .alert-success{ background: #f0fff4; color: #1f8a3a; border: 1px solid #b6e3c1; }
+    .alert-info{ background: #f5fbff; color: #155a8a; border: 1px solid #b6d8f0; }
+    .alert-error--strong{ box-shadow: 0 0 0 3px rgba(255, 0, 0, .12), 0 8px 20px rgba(0,0,0,.08); }
+    .alert-ico{ margin-right: 8px; font-size: 18px; }
+    .alert-help{ margin-top: 6px; color: #5c5c5c; font-size: 14px; }
   </style>
   <div id="loadingOverlay" class="loading-overlay" role="alert" aria-live="assertive" aria-busy="true">
     <div class="loading-box"><span class="spinner" aria-hidden="true"></span> Enviando seus dados…</div>
@@ -376,6 +388,24 @@
             filePh.textContent = name;
             if (lbl) lbl.classList.add('selected');
           }
+        });
+      }
+    })();
+
+    // Foco e destaque automático no erro, se existir
+    (function(){
+      const err = document.getElementById('alertErroCupom');
+      if (err) {
+        try {
+          err.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          err.focus({ preventScroll: true });
+        } catch(e) {}
+        // associa aos formulários para leitura por leitores de tela
+        const forms = document.querySelectorAll('.register-form');
+        forms.forEach(f => {
+          const prev = f.getAttribute('aria-describedby');
+          const add = 'alertErroCupom';
+          f.setAttribute('aria-describedby', prev ? (prev + ' ' + add) : add);
         });
       }
     })();
