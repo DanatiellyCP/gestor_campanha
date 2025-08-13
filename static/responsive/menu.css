@@ -288,6 +288,10 @@
   --icon-bad: url("images/reprovado.png");
 }
 
+body[data-page="home"]{  
+  --topo-img: none;
+}
+
 /* Home content: how it works video */
 .how-video{ background: var(--bg); padding: clamp(28px, 6vw, 56px) 0; }
 .how-video .how-inner{ max-width: 1200px; margin: 0 auto; padding: 0 16px; }
@@ -310,7 +314,7 @@ body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cant
 .panel-duo .panel-logo{ width: clamp(220px, 40vw, 520px); height:auto; display:block; }
 .panel-duo .panel-side{ width: clamp(160px, 26vw, 360px); height:auto; display:block; }
 /* Panel hero layout: three images side-by-side */
-.panel-hero{ position:relative; height:auto; padding: 0; }
+.panel-hero{ position:relative; height:auto; padding: 0;}
 .panel-hero .topo-measure{ display:block; width:100%; height:auto; opacity:0; pointer-events:none; }
 .panel-hero .inner{ position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:center; gap: clamp(10px, 3vw, 28px); padding: 0 clamp(10px, 2vw, 16px) clamp(10px, 2vw, 16px); }
 .panel-hero .panel-duo{ position:static; left:auto; top:auto; transform:none; display:flex; align-items:center; gap: clamp(10px, 3vw, 28px); z-index:auto; }
@@ -319,18 +323,21 @@ body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cant
 .panel-hero .topo-robot{ position:static; right:auto; bottom:auto; width: clamp(70px, 18vw, 190px); }
 /* Home only: video background in hero */
 .home-hero{ position: relative; height: 700px; background: none; overflow: hidden; }
-.home-hero .background-video{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+.home-hero .background-video{ position: absolute; margin: 0 auto; inset: 0; width: 910px; height: 100%; object-fit: cover; z-index: 0; }
 .home-hero .inner{ position: relative; z-index: 1; }
 /* Apenas na Home: fundo amarelo no topo */
 .home-page .topo.home-hero{ background-color: #FFE600; }
-/* Home header images positioning */
-.home-hero .hero-duo{ position:absolute; left:50%; top:55%; transform:translate(-50%, -50%); display:flex; align-items:center; gap: clamp(12px, 3vw, 36px); z-index:1; }
-.home-hero .hero-duo img{ width: min(450px, 42vw); height:auto; display:block; }
-.home-hero .promo-logo{ max-width:450px; }
-.home-hero .hero-left{ max-width:450px; pointer-events:none; }
-/* Desktop: aumentar a imagem hero-left em 50px (cap de 450 -> 500) */
+ /* Home header images positioning */
+ .home-hero .hero-duo{ position:absolute; left:50%; top:55%; transform:translate(-50%, -50%); display:flex; align-items:center; gap: clamp(12px, 3vw, 6px); z-index:1; }
+ .home-hero .hero-duo img{ width: 550px; height:auto; display:block; }
+  .home-hero .hero-center{ height: 300px; width: auto; margin-left: -46px;}
+  .home-hero .promo-logo{ height:auto; }
+  .home-hero .hero-left{ pointer-events:none; height:auto; margin-left: -24px;}
+/* Desktop: tamanhos apenas na visão web */
 @media (min-width: 821px){
-  .home-hero .hero-left{ width: min(550px, 42vw); max-width: 550px; }
+  .home-hero .promo-logo{ width:500px; max-width:500px; height:auto; }
+  .home-hero .hero-left{ width:500px; max-width:500px; height:auto; }
+  .home-hero .hero-center{ width:270px; max-width:270px; height:auto; }
 }
 @media (max-width: 900px){
   .topo{ height: 411px; background-position:center right; }
@@ -377,7 +384,7 @@ body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cant
   background-repeat: no-repeat;
   background-size: cover; /* keep only the image, no extra colored bar */
   background-position: center bottom;
-  background-color: transparent; /* override yellow bar */
+  background-color: #FFE600; /* override yellow bar */
   background-image: var(--topo-img);
   margin-bottom: 0;
   padding: 0;
@@ -387,7 +394,7 @@ body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cant
   box-sizing: border-box;
 }
 .topo:not(.panel-hero) .inner{
-  max-width: min(1000px, 100%);
+  max-width: min(1200px, 100%);
   margin: 0 auto;
   height: 100%; /* fill header height */
   display:flex;
@@ -836,7 +843,7 @@ nav{ margin-left: 68px; flex:1 1 auto; }
 .products-page .pill-grid .pill{ width:100%; max-width:260px; }
 
 /* Bottom lineup band (matches footer connection) */
-.products-page .lineup{ width:100%; height:102px; background-color:#cf963b; position:relative; overflow:visible; z-index:3; }
+.products-page .lineup{ width:100%; height:102px; background-color:#ffe600; position:relative; overflow:visible; z-index:3; }
 .products-page .lineup .lineup-img{ position:absolute; left:50%; bottom:0; transform:translateX(-50%); width:clamp(280px, 90vw, 900px); height:auto; display:block; pointer-events:none; }
 
 /* Floating robot button */
@@ -854,7 +861,7 @@ img.hover-zoom:focus-visible{ outline: 3px solid rgba(91,156,255,.6); outline-of
 @media (min-width: 821px){
   .floating-bot{ transition: width .22s ease, top .22s ease, right .22s ease, bottom .22s ease; }
   /* At top (desktop): bigger, shifted 50px left and 100px from top */
-  .floating-bot.is-top{ width:270px; right:188px; top:500px; bottom:auto; }
+  .floating-bot.is-top{ width:270px; right:108px; top:500px; bottom:auto; }
 }
 
 /* Responsiveness */

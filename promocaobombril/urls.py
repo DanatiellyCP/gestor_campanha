@@ -16,5 +16,5 @@ urlpatterns = [
     path('painel-cadastrar-cupom/', views.painel_cadastrar_cupom, name='painel_cadastrar_cupom'),
     path('painel-detalhes-cupom/', views.painel_detalhes_cupom, name='painel_detalhes_cupom'),
     path('cadastrar-cupom/<int:id_participante>/', views.cadastrar_cupom, name='cadastrar_cupom'),
-
+    path('tutorial/', views.tutorial, name='tutorial'),
 ]

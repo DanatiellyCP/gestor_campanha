@@ -44,6 +44,9 @@ def home_responsive(request):
 def como_participar(request):    
     return render(request, 'como-participar.html')
 
+def tutorial(request):    
+    return render(request, 'tutorial.html')
+
 def produtos(request):    
     return render(request, 'produtos.html')
     
