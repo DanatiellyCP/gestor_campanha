@@ -36,4 +36,9 @@ urlpatterns = [
         api_views.BuscarCuponsPorCelularView.as_view(),
         name='api_cupons_por_celular'
     ),
+    path(
+        'api/participantes/enviar-nota/',
+        api_views.EnviarNotaView.as_view(),
+        name='api_enviar_nota'
+    ),
 ]
