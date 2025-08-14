@@ -13,6 +13,7 @@ from utils.link_sefaz import gerar_link_sefaz
 from django.core.paginator import Paginator
 from django.db.models import Q
 from cupons.models import Cupom, NumeroDaSorte
+from campanha.models import Regras
 
 ## Função para restringir acessos por niveis - Danny - 27-06-2025
 def nivel_required(nivel_permitido):
@@ -386,7 +387,34 @@ def deletar_participante(request, id):
   return redirect('dados_participantes')  
 
 
-   
+# gerar a lista csv com os dados do sorteio
+@login_required
+def gerar_lista_csv(request):
+  ...
+    
+@login_required
+def editar_regra(request):
+    # Se tiver apenas uma regra, pega ela, senão pega a primeira
+    regra = Regras.objects.first()
+    if not regra:
+        regra = Regras.objects.create(
+            min_data_cupom_aceito="01/01/2025",
+            max_data_cupom_aceito="31/12/2025",
+            qtd_cupom_dia=1
+        )
+
+    if request.method == "POST":
+        regra.min_data_cupom_aceito = request.POST.get("min_data_cupom_aceito")
+        regra.max_data_cupom_aceito = request.POST.get("max_data_cupom_aceito")
+        regra.qtd_cupom_dia = request.POST.get("qtd_cupom_dia")
+        regra.save()
+        return redirect("editar_regra")
+
+    context = {
+        "regra": regra
+    }
+    return render(request, "regras.html", context)
+
+
 
     
-

@@ -3,6 +3,7 @@ import requests
 import json
 import os
 import re
+from datetime import datetime
 
 from utils.get_modelo import identificar_chave_detalhada
 
@@ -107,6 +108,35 @@ def validar_documento(codigo_documento):
     dados = identificar_chave_detalhada(codigo_documento)
     return dados
 
+def formatar_data_emissao(raw_data):
+    """
+    Recebe a string de data de emissão de diferentes formatos e retorna no formato 'dd/mm/yyyy'.
+    """
+    if not raw_data:
+        return None
+
+    try:
+        raw_data = raw_data.strip()
+
+        # SAT-CFe: "25 de novembro de 2022, às 16:09:17"
+        if " de " in raw_data:
+            dt = datetime.strptime(raw_data.split(",")[0].strip(), "%d de %B de %Y")
+        # NF-e com hora e possível fuso: "11/11/1111 11:11:11-11:11"
+        elif " " in raw_data:
+            dt = datetime.strptime(raw_data.split(" ")[0], "%d/%m/%Y")
+        # NFC-e: "22/05/2025 - 17:03:53"
+        elif "-" in raw_data:
+            dt = datetime.strptime(raw_data.split(" - ")[0], "%d/%m/%Y")
+        else:
+            # Tenta interpretar direto dd/mm/yyyy
+            dt = datetime.strptime(raw_data, "%d/%m/%Y")
+
+        print(dt)
+        return dt.strftime("%d/%m/%Y")
+    except Exception as e:
+        print(f"Falha ao formatar data: {raw_data} ({e})")
+        return None
+    
 
 def get_dados_json(dados_json, tipo_cupom):
     import json
@@ -179,4 +209,3 @@ def get_dados_json(dados_json, tipo_cupom):
     }
 
     return resultado
-

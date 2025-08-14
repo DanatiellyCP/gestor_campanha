@@ -37,5 +37,9 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/',auth_views.LogoutView.as_view(), name='logout'),
 
+
+    # gestão da campanha
+    path('gerar_lista_csv/', views.gerar_lista_csv, name='gerar_lista_csv'),
+     path('editar_regra/', views.editar_regra, name='editar_regra'),
     
 ]

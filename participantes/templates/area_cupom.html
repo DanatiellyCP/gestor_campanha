@@ -23,7 +23,7 @@
           {% else %}
             <li class="list-group-item text-danger">Dados do emitente não disponíveis.</li>
           {% endif %}
-          <li class="list-group-item"><strong>Data:</strong> {{ dados_json.infos.data_emissao|default:"-" }}</li>
+          <li class="list-group-item"><strong>Data:</strong> {{ dados_json.data_emissao|default_if_none:"-" }}</li>
           <li class="list-group-item"><strong>Total:</strong> R$ {{ dados_json.infos.valor_total|default:"0.00"|floatformat:2 }}</li>
           <li class="list-group-item"><strong>Forma de Pagamento:</strong> {{ dados_json.infos.forma_pagamento|default:"-" }}</li>
           <li class="list-group-item"><strong>Número de Série:</strong> {{ dados_json.infos.numero_serie|default:"-" }}</li>
@@ -69,7 +69,7 @@
           {% else %}
             <li class="list-group-item text-danger">Dados do emitente não disponíveis.</li>
           {% endif %}
-          <li class="list-group-item"><strong>Data:</strong> {{ dados_json.infos.data_emissao|default:"-" }}</li>
+          <li class="list-group-item"><strong>Data:</strong> {{ dados_json.data_emissao|default_if_none:"-" }}</li>
           <li class="list-group-item"><strong>Total:</strong> R$ {{ dados_json.infos.valor_total|default:"0.00"|floatformat:2 }}</li>
           <li class="list-group-item"><strong>Forma de Pagamento:</strong> {{ dados_json.cobranca.forma_pagamento|default:"-" }}</li>
           <li class="list-group-item"><strong>Número de Série SAT:</strong> {{ dados_json.infos.numero_serie|default:"-" }}</li>
@@ -116,7 +116,7 @@
             <li class="list-group-item text-danger">Dados do emitente não disponíveis.</li>
           {% endif %}
           {% if dados_json.nfe %}
-            <li class="list-group-item"><strong>Data de Emissão:</strong> {{ dados_json.nfe.data_emissao|default:"-" }}</li>
+            <li class="list-group-item"><strong>Data de Emissão:</strong> {{ dados_json.data_emissao|default_if_none:"-" }}</li>
             <li class="list-group-item"><strong>Total da Nota:</strong> R$ {{ dados_json.nfe.valor_total|default:"0.00"|floatformat:2 }}</li>
           {% endif %}
           {% if dados_json.cobranca %}
@@ -200,7 +200,7 @@
 
   <div class="mb-4">
     <h5>Número da Sorte:</h5>
-    {% if produtos_validos %}
+    {% if numeros_sorte %}
       <table class="table table-striped table-bordered">
         <thead>
           <tr>
@@ -212,7 +212,7 @@
         <tbody>
           {% for n in numeros_sorte %}
             <tr>
-              <td>{{ n.counter }}</td>
+              <td>{{ forloop.counter }}</td>
               <td>{{ n.numero }}</td>
               <td>{{ n.status }}</td>
             </tr>
@@ -220,7 +220,7 @@
         </tbody>
       </table>
     {% else %}
-      <p>Não há  número da sorte para este cupom.</p>
+      <p>Não há número da sorte para este cupom.</p>
     {% endif %}
   </div>
 

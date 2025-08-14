@@ -74,7 +74,7 @@
         {% if msg_erro %}
         <div id="alertErroCupom" role="alert" class="alert alert-error alert-error--strong" tabindex="-1" aria-live="assertive">
           <span class="alert-ico" aria-hidden="true">⚠️</span>
-          <strong>Não foi possível processar seu cupom.</strong>
+          <strong>Não foi possível processar seu cupom. {{ msg_erro }}</strong>
           <span class="alert-msg"> Tente ler o QR Code ou digite o código. Se persistir, aguarde alguns instantes e tente novamente. </span>
         </div>
         {% endif %}

@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
-from campanha.views import Validar_regras_cupom
+#from campanha.views import Validar_regras_cupom
 from cupons.models.series import Serie
 from utils.get_modelo import identificar_chave_detalhada 
 
@@ -24,6 +24,8 @@ from participantes.models import Participantes
 from utils.funcoes_cupom import extrair_texto_ocr, extrair_numero_cupom, extrai_codigo_qrcode, validar_documento, get_dados_json
 from utils.api_sefaz import gerar_link_sefaz, consulta_nfe, consulta_api_nfce, consulta_api_CFeSat
 from decimal import Decimal, InvalidOperation
+
+from campanha.views import Validar_regras_cupom
 
 
 
@@ -182,9 +184,14 @@ def cadastrar_cupom(request, id_participante):
             dados_cupom_json = json.dumps(asdict(dados_nota))
 
             # Validar regras do cupom
-            is_cupom_valido = Validar_regras_cupom(dados_nota.mes_emissao, dados_nota.chave , id_participante)
+            # Validar regras do cupom
+            valido, msg_validacao = Validar_regras_cupom(
+                dados_nota.mes_emissao,  # Aqui talvez precise ser a data completa, não só mês
+                dados_nota.chave,
+                id_participante
+            )
 
-            if is_cupom_valido == True:
+            if valido:
             # Criação do cupom no banco
                 novo_cupom = Cupom.objects.create(
                     participante=participante,
@@ -205,7 +212,8 @@ def cadastrar_cupom(request, id_participante):
                 msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
                 contexto['msg_numeros'] = msg_numeros
             else:
-                contexto['msg_erro'] = f'Cupom inválido:'
+                print(f'Validação falhou: {msg_validacao}')
+                contexto['msg_erro'] = f'Validação falhou: {msg_validacao}'
 
 
         except Exception as e:

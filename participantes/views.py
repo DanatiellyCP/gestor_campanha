@@ -203,32 +203,41 @@ def iframe_login(request):
 def area_cupom(request, id):
     cupom = get_object_or_404(Cupom, id=id)
 
-    # Tenta processar os dados_json com tratamento de exceções
+    # Processa dados_json com tratamento de exceções
     try:
         dados_cupom = get_dados_json(cupom.dados_json, cupom.tipo_documento)
     except Exception as e:
         print(f"[ERRO] Falha ao processar dados_json do cupom {cupom.id}: {e}")
         dados_cupom = {}
 
-    # Tenta converter dados_cupom do banco para dict Python
-    try:
-        if cupom.dados_cupom and isinstance(cupom.dados_cupom, str):
-            dados_cupom_dict = ast.literal_eval(cupom.dados_cupom)
-        elif isinstance(cupom.dados_cupom, dict):
-            dados_cupom_dict = cupom.dados_cupom
-        else:
+    # Converte dados_cupom do banco para dict
+    if cupom.dados_cupom and isinstance(cupom.dados_cupom, str):
+        try:
+            dados_cupom_dict = json.loads(cupom.dados_cupom)
+        except json.JSONDecodeError:
             dados_cupom_dict = {}
-    except Exception as e:
-        print(f"[ERRO] Falha ao interpretar dados_cupom do cupom {cupom.id}: {e}")
+    elif isinstance(cupom.dados_cupom, dict):
+        dados_cupom_dict = cupom.dados_cupom
+    else:
         dados_cupom_dict = {}
-    
-    produtos_validos = Produto.objects.filter(cupom=id)
-    numeros_sorte = NumeroDaSorte.objects.filter(cupom=id)
+
+    produtos_validos = Produto.objects.filter(cupom_id=id)
+    numeros_sorte = NumeroDaSorte.objects.filter(cupom_id=id)
+
+    # Pega a data de emissão formatada sem a hora
+    data_emissao = None
+    if isinstance(dados_cupom, dict):
+        if 'data_emissao' in dados_cupom and dados_cupom['data_emissao']:
+            data_emissao = str(dados_cupom['data_emissao']).split(' - ')[0]
+
+    # Para depuração
+    print("Data de emissão:", data_emissao)
 
     contexto = {
         'cupom': cupom,
         'dados_cupom': dados_cupom_dict,
         'dados_json': dados_cupom,
+        'data_emissao': data_emissao,   # adiciona direto no contexto
         'produtos_validos': produtos_validos,
         'numeros_sorte': numeros_sorte
     }
