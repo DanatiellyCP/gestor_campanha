@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
 
     <link rel="icon" type="image/png" href="{% static 'responsive/images/Favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}?v=2025-08-13-1">
 </head>
 <body>
   <div class="wrap">
@@ -74,8 +74,16 @@
         {% if msg_erro %}
         <div id="alertErroCupom" role="alert" class="alert alert-error alert-error--strong" tabindex="-1" aria-live="assertive">
           <span class="alert-ico" aria-hidden="true">⚠️</span>
-          <strong>Não foi possível processar seu cupom.</strong>
+          {% with msg_lower=msg_erro|lower %}
+          {% if msg_lower|slice:":14" == 'chave inválida' %}
+          <strong>Não foi possivel processar seu cupom agora.</strong>
+          {% else %}
+          <strong>{{ msg_erro|capfirst }}</strong>
+          {% endif %}
+          {% endwith %}
+          {% if msg_erro|lower != 'cupom já cadastrado' %}
           <span class="alert-msg"> Tente ler o QR Code ou digite o código. Se persistir, aguarde alguns instantes e tente novamente. </span>
+          {% endif %}
         </div>
         {% endif %}
         {% if msg_sucesso %}
@@ -153,6 +161,13 @@
       <p class="footer-legal">
         PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
       </p>
+      <p class="footer-legal">
+        Em caso de dúvidas, entre em contato com nosso SAC:<br/>
+
+        E-mail: faleconosco@promocaobombril.com.br<br/>
+
+        Telefone: 0800 7076161
+      </p>
     </div>
   </footer>
 
@@ -163,7 +178,7 @@
       <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
     </div>
    </div>
-  <script src="{% static 'responsive/menu.js' %}"></script>
+  <script src="{% static 'responsive/menu.js' %}?v=2025-08-13-1"></script>
   <!-- jsQR para decodificar QR Codes no cliente -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <!-- Overlay de carregamento -->

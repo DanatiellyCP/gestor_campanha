@@ -17,4 +17,5 @@ urlpatterns = [
     path('painel-detalhes-cupom/', views.painel_detalhes_cupom, name='painel_detalhes_cupom'),
     path('cadastrar-cupom/<int:id_participante>/', views.cadastrar_cupom, name='cadastrar_cupom'),
     path('tutorial/', views.tutorial, name='tutorial'),
+    path('cpf-invalido/', views.cpf_invalido_check, name='cpf_invalido_check'),
 ]

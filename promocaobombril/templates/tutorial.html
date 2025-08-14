@@ -10,7 +10,7 @@
 </div>
 
 <div id="content">
-  <div class="container" style="width: 900px; margin: 0 auto;">
+  <div class="container" style="max-width: 900px; width: 100%; margin: 0 auto; padding: 0 16px;">
     <style>
         /* CSS Incorporado e Finalizado */
         :root {
@@ -168,12 +168,20 @@
     
             .image-column {
                 width: 100%;
-                max-width: 250px;
+                max-width: 100%;
             }
-    
+
             .final-section-wrapper {
                 padding: 20px;
             }
+
+            /* Ajustes adicionais para melhor leitura em mobile */
+            #content { padding: 0; }
+            .container { max-width: 100% !important; padding: 0 12px !important; }
+            .content-column, .image-column { width: 100%; }
+            .step-row p, .step-row ul { font-size: 16px; line-height: 1.5; }
+            .step-row h2 { font-size: 20px; }
+            .image-column img { width: 100%; height: auto; }
         }
     </style>
     <h1 class="main-title">Como escanear seu cupom fiscal para participar da promoção</h1>

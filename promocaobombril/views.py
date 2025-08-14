@@ -8,6 +8,15 @@ import re
 import json
 from dataclasses import asdict
 from django.core.files.storage import default_storage
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db import IntegrityError
+
+# Lista de CPFs inválidos (importada do módulo dedicado)
+from cpfs_invalidos import CPFS_INVALIDOS
+
+# Conjunto para busca mais rápida (O(1))
+CPFS_INVALIDOS_SET = set(CPFS_INVALIDOS)
 
 # Helpers de cupom e validação
 from utils.get_modelo import identificar_chave_detalhada
@@ -37,6 +46,26 @@ def require_login(view_func):
 def participe(request):
     # lógica da view
     return render(request, 'participe.html')
+
+@csrf_exempt
+def cpf_invalido_check(request):
+    """
+    Endpoint para verificar se um CPF está na lista de inválidos.
+    Aceita CPF via querystring (?cpf=xxx) ou corpo POST (form/json).
+    Retorna JSON apenas com booleano: true (existe) ou false (não existe)
+    """
+    cpf_raw = (
+        request.GET.get('cpf')
+        or request.POST.get('cpf')
+        or ''
+    )
+    cpf = re.sub(r'\D', '', cpf_raw)
+    if not cpf:
+        # Sem CPF, respondemos false para manter contrato simples (apenas true/false)
+        return JsonResponse(False, safe=False)
+
+    exists = cpf in CPFS_INVALIDOS_SET
+    return JsonResponse(exists, safe=False)
 
 def home_responsive(request):    
     return render(request, 'home_responsive.html')
@@ -89,6 +118,17 @@ def cadastrar(request):
                 return render(request, 'cadastrar.html', {'erro': 'Data de nascimento inválida. Use o formato dd/mm/aaaa.'})
         else:
             dt_nasc = None
+
+        # Regra: impedir cadastro de menor de 18 anos
+        if dt_nasc is not None:
+            try:
+                today = datetime.today().date()
+                age = today.year - dt_nasc.year - ((today.month, today.day) < (dt_nasc.month, dt_nasc.day))
+                if age < 18:
+                    return render(request, 'cadastrar.html', {'erro': 'É necessário ser maior de 18 anos para se cadastrar.'})
+            except Exception:
+                # Em caso de qualquer falha inesperada no cálculo, retornar erro genérico de data
+                return render(request, 'cadastrar.html', {'erro': 'Data de nascimento inválida.'})
 
         # Criptografa a senha
         senha_hash = make_password(senha)
@@ -143,16 +183,17 @@ def cadastrar(request):
 
 def logar(request):
     if request.method == 'POST':
-        email = (request.POST.get('email') or '').strip()
+        cpf_raw = (request.POST.get('cpf') or '').strip()
+        cpf = re.sub(r'\D', '', cpf_raw)
         senha = request.POST.get('senha') or ''
 
-        if not email or not senha:
-            return render(request, 'logar.html', {'erro': 'Informe e-mail e senha.'})
+        if not cpf or not senha:
+            return render(request, 'logar.html', {'erro': 'Informe CPF e senha.'})
 
         try:
-            # Evita 500 com e-mails duplicados: pega o mais recente
+            # Busca por CPF normalizado (somente dígitos); pega o mais recente por segurança
             participante = (
-                Participantes.objects.filter(email=email).order_by('-id').first()
+                Participantes.objects.filter(cpf=cpf).order_by('-id').first()
             )
             if not participante:
                 return render(request, 'logar.html', {'erro': 'Participante não encontrado.'})
@@ -383,17 +424,21 @@ def cadastrar_cupom(request, id_participante):
             dados_cupom_json = json.dumps(asdict(dados_nota))
 
             # Criação do cupom no banco (ajustando campos ao modelo)
-            novo_cupom = Cupom.objects.create(
-                participante=participante,
-                dados_cupom=dados_cupom_json,
-                tipo_envio='Sistema',
-                status=status_nota,
-                numero_documento=getattr(dados_nota, 'codigo_numerico', ''),
-                cnpj_loja=getattr(dados_nota, 'cnpj_emitente', ''),
-                nome_loja=getattr(dados_nota, 'nome_emitente', 'Desconhecido'),
-                dados_json=validar,
-                tipo_documento=getattr(dados_nota, 'tipo_documento', '')
-            )
+            try:
+                novo_cupom = Cupom.objects.create(
+                    participante=participante,
+                    dados_cupom=dados_cupom_json,
+                    tipo_envio='Sistema',
+                    status=status_nota,
+                    numero_documento=getattr(dados_nota, 'codigo_numerico', ''),
+                    cnpj_loja=getattr(dados_nota, 'cnpj_emitente', ''),
+                    nome_loja=getattr(dados_nota, 'nome_emitente', 'Desconhecido'),
+                    dados_json=validar,
+                    tipo_documento=getattr(dados_nota, 'tipo_documento', '')
+                )
+            except IntegrityError:
+                contexto['msg_erro'] = 'cupom já cadastrado'
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
 
             # Cadastro dos produtos vinculados ao cupom (somente se houver dados válidos)
             msg_produto = ''
