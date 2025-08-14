@@ -101,6 +101,7 @@ def consulta_api_nfce(chave: str) -> dict | None:
         
         response.raise_for_status()
         response_data = response.json()
+        print('-----response_data', response_data)
 
         if response_data.get('code') == 200:
             logger.info(f"Consulta à Sefaz bem-sucedida para a chave iniciando com {chave[:10]}...")
