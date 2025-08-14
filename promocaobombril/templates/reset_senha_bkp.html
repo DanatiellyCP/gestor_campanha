@@ -1,0 +1,65 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redefinir senha - Promoção Bombril</title>
+  <link rel="icon" type="image/png" href="{% static 'responsive/images/Favicon.png' %}">
+  <link rel="stylesheet" href="{% static 'responsive/menu.css' %}?v=2025-08-13-1">
+</head>
+<body class="login-page">
+  <div class="wrap">
+    <header class="menu" role="navigation" aria-label="Principal">
+      <div class="bar">
+        <a class="brand" href="{% url 'home_responsive' %}" aria-label="Página inicial">
+          <img src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+        </a>
+      </div>
+    </header>
+  </div>
+
+  <div class="topo topo-login" role="img" aria-label="Redefinir senha">
+    <div class="inner">
+      <h1 class="topo-title">REDEFINIR SENHA</h1>
+    </div>
+  </div>
+
+  <div id="content">
+    <div class="content-inner">
+      <div class="row">
+        {% if erro %}
+          <p class="form-error" style="color:#c00; font-weight:700; margin: 0 auto 16px;">{{ erro }}</p>
+        {% else %}
+        <form class="login" method="post">
+          {% csrf_token %}
+          <div class="field">
+            <label for="senha">Nova senha</label>
+            <input id="senha" name="senha" type="password" minlength="8" placeholder="********" required />
+          </div>
+          <div class="field">
+            <label for="confirmar">Confirmar nova senha</label>
+            <input id="confirmar" name="confirmar" type="password" minlength="8" placeholder="********" required />
+          </div>
+          <div class="login-actions">
+            <button type="submit" class="btn btn-red">Salvar nova senha</button>
+            <a href="{% url 'logar' %}" class="btn btn-yellow" style="text-decoration:none">Cancelar</a>
+          </div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="inner">
+      <div class="footer-top">
+        <h2 class="footer-title">É MAIS QUE BOM. É DA</h2>
+        <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
+      </div>
+    </div>
+  </footer>
+
+  <script src="{% static 'responsive/menu.js' %}?v=2025-08-13-1"></script>
+</body>
+</html>
