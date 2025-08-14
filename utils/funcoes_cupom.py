@@ -3,6 +3,25 @@ import requests
 import json
 import os
 import re
+import base64
+from io import BytesIO
+
+from PIL import Image
+import pytesseract
+
+# OpenCV e numpy para leitura de QR a partir de imagem
+try:
+    import cv2  # type: ignore
+    import numpy as np  # type: ignore
+except Exception:  # mantém import opcional para ambientes sem cv2
+    cv2 = None  # type: ignore
+    np = None  # type: ignore
+
+# Fallback com pyzbar
+try:
+    from pyzbar.pyzbar import decode as zbar_decode  # type: ignore
+except Exception:
+    zbar_decode = None  # type: ignore
 
 from utils.get_modelo import identificar_chave_detalhada
 
@@ -54,22 +73,107 @@ def parse_dados_cupom(texto):
 
     return dados
 
-def extrai_codigo_qrcode(texto):
-    #pegar o texto extraido pela camera e separa a parte do codigo do cupom - danny - 07-08-2025
+def _to_pil_image(source):
+    """
+    Aceita vários formatos de entrada e retorna um PIL.Image.
+    - source pode ser: caminho (str), bytes, BytesIO, ContentFile (Django) ou já uma Image.
+    """
+    if isinstance(source, Image.Image):
+        return source
+    if isinstance(source, (bytes, bytearray)):
+        return Image.open(BytesIO(source))
+    # ContentFile tem atributo 'read' e possivelmente 'name'
+    if hasattr(source, 'read') and callable(source.read):
+        try:
+            data = source.read()
+            # reseta ponteiro se possível, pois o chamador pode reutilizar
+            try:
+                source.seek(0)
+            except Exception:
+                pass
+            return Image.open(BytesIO(data))
+        except Exception:
+            pass
+    # Caminho de arquivo
+    if isinstance(source, str) and os.path.exists(source):
+        return Image.open(source)
+    # Último recurso: tentar interpretar como data URL base64
+    if isinstance(source, str) and source.startswith('data:'):
+        try:
+            head, b64 = source.split(',', 1)
+            raw = base64.b64decode(b64)
+            return Image.open(BytesIO(raw))
+        except Exception:
+            pass
+    raise ValueError("Formato de imagem não suportado para leitura de QR.")
 
-    # copiar do 0 até a pos 77 #chave: CFe35250845495694001942590013611591810634041386|20250804173321|68.17|
-    pos = texto.find("|")
 
-    texto_qr_code = texto[0:pos]
-    
-    codigo = texto_qr_code.replace("CFe", "")
-    codigo = codigo.replace(" ", "")
+def decode_qr_image(source):
+    """
+    Decodifica QR Code a partir de uma imagem (arquivo/bytes/ContentFile/PIL.Image).
+    Tenta primeiro com OpenCV; se falhar, tenta pyzbar.
+    Retorna o texto do QR ou string vazia.
+    """
+    try:
+        pil_img = _to_pil_image(source).convert('RGB')
+    except Exception:
+        return ''
 
-    print('pos ' + str(pos))
-    print('texto_qr_code' + texto_qr_code)
-    print('codigo: ' + codigo)
+    # OpenCV
+    if cv2 is not None and np is not None:
+        try:
+            arr = np.array(pil_img)
+            # PIL RGB -> BGR
+            img_bgr = arr[:, :, ::-1]
+            detector = cv2.QRCodeDetector()
+            data, points, _ = detector.detectAndDecode(img_bgr)
+            if data:
+                return data.strip()
+        except Exception:
+            pass
 
-    return codigo
+    # pyzbar fallback
+    if zbar_decode is not None:
+        try:
+            results = zbar_decode(pil_img)
+            if results:
+                # pega o primeiro
+                data = results[0].data.decode('utf-8', errors='ignore')
+                return data.strip()
+        except Exception:
+            pass
+
+    return ''
+
+
+def _parse_qr_payload_to_key(payload: str) -> str:
+    """
+    Recebe o texto contido no QR e tenta extrair a chave de acesso (44 dígitos).
+    Suporta SAT (CFe...|...) e NFE/NFCE (apenas 44 dígitos no texto/URL).
+    """
+    if not payload:
+        return ''
+    txt = str(payload).strip()
+    if txt.startswith('CFe'):
+        pos = txt.find('|')
+        head = txt[:pos] if pos > -1 else txt
+        somente_digitos = re.sub(r'\D', '', head)
+        return somente_digitos
+    # Tenta 44 dígitos
+    m = re.search(r"\b(\d{44})\b", txt)
+    return m.group(1) if m else ''
+
+
+def extrai_codigo_qrcode(source):
+    """
+    Lê um QR Code de uma imagem (arquivo/bytes/ContentFile/PIL.Image) e retorna a chave (44 dígitos)
+    quando possível. Caso não encontre, retorna string vazia.
+    """
+    payload = decode_qr_image(source)
+    if not payload:
+        return ''
+    chave = _parse_qr_payload_to_key(payload)
+    return chave
 
 
 def extrair_numero_cupom(texto):
