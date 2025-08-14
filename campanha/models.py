@@ -32,3 +32,8 @@ class Soteios(models.Model):
     resultado_sorteio = models.CharField(max_length=200)
     def __str__(self):
         return f"log - {self.data_sorteio} - {self.hora_sorteio} - {self.status}"
+
+class Regras(models.Model):
+    max_data_cupom_aceito = models.DateField(blank=True, null=True)
+    min_data_cupom_aceito = models.DateField(blank=True, null=True)
+    qtd_cupom_dia = models.IntegerField(blank=True, null=True)
