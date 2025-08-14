@@ -9,10 +9,10 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
 from functools import wraps
 from utils.funcoes import limpar_lista_sku, retorna_atividades
-from cupons.models import Cupom
 from utils.link_sefaz import gerar_link_sefaz
 from django.core.paginator import Paginator
 from django.db.models import Q
+from cupons.models import Cupom, NumeroDaSorte
 
 ## Função para restringir acessos por niveis - Danny - 27-06-2025
 def nivel_required(nivel_permitido):
@@ -272,9 +272,16 @@ def editar_participante(request, id):
 @login_required
 def participante_detalhado(request, id):
   participante = Participantes.objects.get(id=id)
+  
+  # Busca todos os cupons e números da sorte relacionados
+  cupons_participante = Cupom.objects.filter(participante=participante.id)
+  numeros_sorte = NumeroDaSorte.objects.filter(participante=participante.id)
+
   template = loader.get_template('participante_detalhado.html')
   context = {
     'participante': participante,
+    'cupons': cupons_participante,
+    'numeros_sorte' : numeros_sorte
   }
   return HttpResponse(template.render(context, request))
 

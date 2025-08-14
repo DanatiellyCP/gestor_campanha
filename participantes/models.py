@@ -16,10 +16,22 @@ class Participantes(models.Model):
   num = models.IntegerField(blank=True, editable=True, null=True)
   senha = models.CharField(max_length=128)  # Ideal para senhas criptografadas
   aceita_termos = models.BooleanField(default=False)
+  aceita_msg_whatsapp = models.BooleanField(default=False)
+  aceita_info_bombril = models.BooleanField(default=False)
 
   # Status do participante
   STATUS = [
         ('1', 'Ativo'),
         ('2', 'Inativo')
     ]
-  status = models.CharField(max_length=1, choices=STATUS, default='1')  
+  status = models.CharField(max_length=1, choices=STATUS, default='1')
+
+  # novos campos solicitados
+  complemento = models.CharField(max_length=100, blank=True, editable=True, null=True)
+
+  CADASTRO = [
+        ('1', 'Whatsapp'),
+        ('2', 'Hotsite')
+    ]
+  cadastro = models.CharField(max_length=1, choices=CADASTRO, default='2') 
+  

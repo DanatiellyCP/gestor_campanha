@@ -48,11 +48,39 @@
         <td>  {{ participante.num }}     </td>
       </tr>
 
-    </table>        
-       
-      
+    </table>              
   </div>
 
+<h2>cupons:</h2>
+<div class="container-fluid">  
+    <table class="table table-striped">
+      <tr>
+        <th> Tipo de Documento    </th>
+        <th> Documento  </th>
+        <th> Data de cadastro     </th>
+        <th> hora do cadastro     </th>
+        <th> Tipo de envio       </th>
+      </tr>
+
+      {% for cupom in cupons %}
+      <tr>
+        <td>    {{cupom.tipo_documento}}    </td>
+        <td>    {{cupom.numero_documento}}  </td>
+        <td>    {{cupom.data_cadastro}}     </td>
+        <td>    {{cupom.hora_cadastro}}     </td>
+        <td>    {{cupom.tipo_envio}}        </td>
+
+         {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Nenhum cupom cadastrado.</td>
+            </tr>
+
+      </tr>
+      {% endfor %}
+
+
+    </table>
+  </div>
 
     
 
