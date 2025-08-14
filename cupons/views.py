@@ -2,6 +2,7 @@ from dataclasses import asdict
 import os
 import uuid
 import json
+import random
 from venv import logger
 import numpy as np
 import cv2
@@ -370,6 +371,7 @@ def validar_produto_cupom(cod_produto):
 
 
 def gerar_numero_sorte():
+    # Garante que temos uma série aberta
     try:
         serie_atual = Serie.objects.get(status='Aberta')
     except Serie.DoesNotExist:
@@ -379,24 +381,29 @@ def gerar_numero_sorte():
             status='Aberta'
         )
 
-    num_atual = serie_atual.numero_atual
-    nome_serie = serie_atual.nome_serie.replace('serie_', '')
+    # Extrai o código numérico da série (dois dígitos)
+    try:
+        serie_num = int(serie_atual.nome_serie.replace('serie_', ''))
+    except Exception:
+        serie_num = 0
 
-    if num_atual < 99999:
-        novo_numero = num_atual + 1
-        edita_numero_serie(serie_atual.id, novo_numero, 'Aberta')
-        # Aqui concateno os números com zero à esquerda, formando uma string de 7 dígitos
-        numero_sorte = f"{int(nome_serie):02d}{novo_numero:05d}"
-        return numero_sorte
-    else:
-        edita_numero_serie(serie_atual.id, 0, 'Fechada')
-        nova_serie = Serie.objects.create(
-            nome_serie=f'serie_{int(nome_serie) + 1}',
-            numero_atual=0,
-            status='Aberta'
-        )
-        numero_sorte = f"{int(nome_serie) + 1:02d}00000"
-        return numero_sorte
+    # Gera 5 dígitos aleatórios e garante unicidade do número completo
+    max_tentativas = 100
+    for _ in range(max_tentativas):
+        ultimos_cinco = random.randint(0, 99999)
+        numero_sorte = f"{serie_num:02d}{ultimos_cinco:05d}"
+        if not NumeroDaSorte.objects.filter(numero=numero_sorte).exists():
+            return numero_sorte
+
+    # Se não conseguir um número único após várias tentativas, cria nova série e tenta mais uma vez
+    nova_serie_num = serie_num + 1
+    serie_atual = Serie.objects.create(
+        nome_serie=f'serie_{nova_serie_num:02d}',
+        numero_atual=0,
+        status='Aberta'
+    )
+    ultimos_cinco = random.randint(0, 99999)
+    return f"{nova_serie_num:02d}{ultimos_cinco:05d}"
 
 
 def edita_numero_serie(id, num_serie, status):
