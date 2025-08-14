@@ -14,6 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
+from campanha.views import Validar_regras_cupom
 from cupons.models.series import Serie
 from utils.get_modelo import identificar_chave_detalhada 
 
@@ -23,6 +24,8 @@ from participantes.models import Participantes
 from utils.funcoes_cupom import extrair_texto_ocr, extrair_numero_cupom, extrai_codigo_qrcode, validar_documento, get_dados_json
 from utils.api_sefaz import gerar_link_sefaz, consulta_nfe, consulta_api_nfce, consulta_api_CFeSat
 from decimal import Decimal, InvalidOperation
+
+
 
 def guardar_cupom(arquivo):
     """Salva a imagem do cupom no storage padrão e retorna o caminho salvo."""
@@ -178,98 +181,37 @@ def cadastrar_cupom(request, id_participante):
             # Serializa dados para JSON (string) para armazenar
             dados_cupom_json = json.dumps(asdict(dados_nota))
 
+            # Validar regras do cupom
+            is_cupom_valido = Validar_regras_cupom(dados_nota.mes_emissao, dados_nota.chave , id_participante)
+
+            if is_cupom_valido == True:
             # Criação do cupom no banco
-            novo_cupom = Cupom.objects.create(
-                participante=participante,
-                dados_cupom=dados_cupom_json,
-                tipo_envio='Codigo' if 'submit_codigo' in request.POST else 'Imagem',
-                status=status_nota,
-                numero_documento=dados_nota.codigo_numerico,
-                cnpj_loja=dados_nota.cnpj_emitente,
-                dados_json=validar,
-                tipo_documento=dados_nota.tipo_documento
-            )
+                novo_cupom = Cupom.objects.create(
+                    participante=participante,
+                    dados_cupom=dados_cupom_json,
+                    tipo_envio='Codigo' if 'submit_codigo' in request.POST else 'Imagem',
+                    status=status_nota,
+                    numero_documento=dados_nota.codigo_numerico,
+                    cnpj_loja=dados_nota.cnpj_emitente,
+                    dados_json=validar,
+                    tipo_documento=dados_nota.tipo_documento
+                )
 
-            # Cadastro dos produtos vinculados ao cupom
-            msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
-            contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
+                # Cadastro dos produtos vinculados ao cupom
+                msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
+                contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
 
-            # --- Chamada para gerar números da sorte ---
-            msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
-            contexto['msg_numeros'] = msg_numeros
+                # --- Chamada para gerar números da sorte ---
+                msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
+                contexto['msg_numeros'] = msg_numeros
+            else:
+                contexto['msg_erro'] = f'Cupom inválido:'
+
 
         except Exception as e:
             contexto['msg_erro'] = f'Erro ao processar o cadastro: {e}'
 
     return render(request, 'cad_cupom.html', contexto)
-
-
-"""
-@csrf_exempt
-def salvar_qrcode_ajax(request, id_participante):
-    if request.method != 'POST':
-        return JsonResponse({'status': 'erro', 'mensagem': 'Método inválido.'}, status=405)
-
-    try:
-        body = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'status': 'erro', 'mensagem': 'Requisição JSON malformada.'}, status=400)
-
-    dados_qr = body.get('dados_qr')
-    if not dados_qr:
-        return JsonResponse({'status': 'erro', 'mensagem': 'Nenhum dado de QR Code recebido.'}, status=400)
-
-    chave_acesso = extrai_codigo_qrcode(dados_qr)
-
-    if not chave_acesso or len(chave_acesso) != 44:
-        return JsonResponse({'status': 'erro', 'mensagem': 'Chave inválida extraída do QR Code.'}, status=400)
-
-    try:
-        participante = get_object_or_404(Participantes, id=id_participante)
-    except Participantes.DoesNotExist:
-        return JsonResponse({'status': 'erro', 'mensagem': 'Participante não encontrado.'}, status=404)
-
-    dados_nota = identificar_chave_detalhada(chave_acesso)
-
-    if not dados_nota.valida:
-        return JsonResponse({'status': 'erro', 'mensagem': f'Chave inválida: {dados_nota.mensagem}'}, status=400)
-
-    status_nota = 'Aprovado'  # validado acima
-
-    validar = validar_cupom(dados_nota.chave, dados_nota.tipo_documento)
-    dados_cupom_json = json.dumps(asdict(dados_nota))
-
-    try:
-        novo_cupom = Cupom.objects.create(
-            participante=participante,
-            dados_cupom=dados_cupom_json,
-            tipo_envio='QRCode',
-            status=status_nota,
-            numero_documento=dados_nota.codigo_numerico,
-            cnpj_loja=dados_nota.cnpj_emitente,
-            dados_json=validar,
-            tipo_documento=dados_nota.tipo_documento
-        )
-    except Exception as e:
-        return JsonResponse({'status': 'erro', 'mensagem': 'Erro ao salvar cupom no banco.'}, status=500)
-
-    try:
-        msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
-    except Exception as e:
-        return JsonResponse({'status': 'erro', 'mensagem': 'Erro ao cadastrar produtos.'}, status=500)
-
-    try:
-        msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
-    except Exception as e:
-        return JsonResponse({'status': 'erro', 'mensagem': 'Erro ao gerar números da sorte.'}, status=500)
-
-    return JsonResponse({
-        'status': 'sucesso',
-        'mensagem': f'Cupom cadastrado com sucesso! {msg_produto} {msg_numeros}',
-        'id_cupom': novo_cupom.id
-    })
-
-"""
 
 @csrf_exempt
 def salvar_qrcode_ajax(request, id_participante):
@@ -306,35 +248,47 @@ def salvar_qrcode_ajax(request, id_participante):
     validar = validar_cupom(dados_nota.chave, dados_nota.tipo_documento)
     dados_cupom_json = json.dumps(asdict(dados_nota))
 
-    try:
-        novo_cupom = Cupom.objects.create(
-            participante=participante,
-            dados_cupom=dados_cupom_json,
-            tipo_envio='QRCode',
-            status=status_nota,
-            numero_documento=dados_nota.codigo_numerico,
-            cnpj_loja=dados_nota.cnpj_emitente,
-            dados_json=validar,
-            tipo_documento=dados_nota.tipo_documento
-        )
-    except Exception as e:
-        return JsonResponse({'status': 'erro', 'mensagem': f'Erro ao salvar cupom no banco: {e}'}, status=500)
 
-    try:
-        msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
-    except Exception as e:
-        return JsonResponse({'status': 'erro', 'mensagem': f'Erro ao cadastrar produtos: {e}'}, status=500)
+    # Validar regras do cupom
+    is_cupom_valido = Validar_regras_cupom(dados_nota.mes_emissao, dados_nota.chave , id_participante)
 
-    try:
-        msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
-    except Exception as e:
-        return JsonResponse({'status': 'erro', 'mensagem': f'Erro ao gerar números da sorte: {e}'}, status=500)
+    if is_cupom_valido == True:
+        try:
+            novo_cupom = Cupom.objects.create(
+                participante=participante,
+                dados_cupom=dados_cupom_json,
+                tipo_envio='QRCode',
+                status=status_nota,
+                numero_documento=dados_nota.codigo_numerico,
+                cnpj_loja=dados_nota.cnpj_emitente,
+                dados_json=validar,
+                tipo_documento=dados_nota.tipo_documento
+            )
+        except Exception as e:
+            return JsonResponse({'status': 'erro', 'mensagem': f'Erro ao salvar cupom no banco: {e}'}, status=500)
 
-    return JsonResponse({
-        'status': 'ok',
-        'mensagem': f'Cupom cadastrado com sucesso! {msg_produto} {msg_numeros}',
-        'id_cupom': novo_cupom.id
-    })
+        try:
+            msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
+        except Exception as e:
+            return JsonResponse({'status': 'erro', 'mensagem': f'Erro ao cadastrar produtos: {e}'}, status=500)
+
+        try:
+            msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
+        except Exception as e:
+            return JsonResponse({'status': 'erro', 'mensagem': f'Erro ao gerar números da sorte: {e}'}, status=500)
+
+        return JsonResponse({
+            'status': 'ok',
+            'mensagem': f'Cupom cadastrado com sucesso! {msg_produto} {msg_numeros}',
+            'id_cupom': novo_cupom.id
+        })
+    else:
+        return JsonResponse({
+            'status': '',
+            'mensagem': 'Cupom inválido, nãopode ser cadastrado.',
+            'id_cupom': ''
+        })
+        
 
 
 def validar_cupom(chave, tipo):
