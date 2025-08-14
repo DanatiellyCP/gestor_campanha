@@ -4,78 +4,83 @@
   Participante detalhado {{ participante.nome }} 
 {% endblock %}
 
- {% block cabecalho %}
-    <h2> Participante detalhado </h2>
- {% endblock %}
 
 {% block content %}  
   <h3> {{ participante.nome }} </h3> 
-  <div class="container mt-5">
-    <div class="row">
-      <div class="col-sm-5">
+  <div class="container-fluid">  
+    <table class="table table-striped">
+
+      <tr>
+        <th> ID </th>
+        <th> Nome </th>
+        <th> Status </th>
+        <th> CPF </th>
+        <th> Dt. Nasc. </th>
+        <th> celular </th>
+        <th> E-mail </th>          
+        <th> Estado </th>
+        <th> Cidade </th>
+        <th> CEP </th> 
+        <th> Logradouro </th>
+        <th> Bairro: </th>
+        <th> Número: </th>
+      </tr>
+
+      <tr> 
+        <td> {{ participante.id }} </td>
+        <td> {{ participante.nome }} </td>
       
-        <table class="table table-hover">
-            <tr> 
-              <td> <b> ID: </b> </td> <td>{{ participante.id }} </td>
-            </tr>
+        {% if participante.status == '1'%}
+          <td> Ativo </td>
+        {% else %}
+          <td> Inativo </td>
+        {% endif %}
+      
+        <td>  {{ participante.email }}  </td>            
+        <td>  {{ participante.cpf }}     </td>
+        <td>  {{ participante.celular }} </td>
+        <td>  {{ participante.email }}   </td>
+        <td>  {{ participante.uf }}     </td>
+        <td>  {{ participante.cidade }} </td>
+        <td>  {{ participante.cep }}    </td>
+        <td>  {{ participante.rua }}    </td>
+        <td>  {{ participante.thairro }} </td>
+        <td>  {{ participante.num }}     </td>
+      </tr>
 
-            <tr> 
-              <td> <b> Nome: </td> </b> <td> {{ participante.nome }} </td>
-            </tr> 
-
-             <tr> 
-              {% if participante.status == '1'%}
-                <td> <b> Status: </td> </b> <td> Ativo </td>
-              {% else %}
-                <td> <b> Status: </td> </b> <td> Inativo </td>
-              {% endif %}
-            </tr>
-
-            <tr> 
-              <td> <b> Data de Nascimento: </b> <td> {{ participante.email }} </td></td>
-            </tr>
-
-             <tr> 
-              <td> <b> Cpf: </b> <td> {{ participante.cpf }} </td></td>
-            </tr>
-
-             <tr> 
-              <td> <b> celular: </b> <td> {{ participante.celular }} </td></td>
-            </tr>
-
-             <tr> 
-              <td> <b> E-mail: </b> <td> {{ participante.email }} </td></td>
-            </tr>
-
-            <tr> 
-              <td> <b> Estado: </b> <td> {{ participante.uf }} </td></td>
-            </tr>
-
-            <tr> 
-              <td> <b> Cidade: </b> <td> {{ participante.cidade }} </td></td>
-            </tr>
-
-            <tr> 
-              <td>  <b> Cep: </b> <td> {{ participante.cep }} </td></td>
-            </tr>
-
-            <tr> 
-              <td> <b> Logradouro: </b> <td> {{ participante.rua }} </td></td>
-            </tr>
-
-             <tr> 
-              <td> <b> Bairro: </b> <td> {{ participante.bairro }} </td></td>
-            </tr>
-
-            <tr> 
-              <td> <b> Número: </b> <td> {{ participante.num }} </td></td>
-            </tr>
-        </table>        
-       
-      </div>
-    </div>
+    </table>              
   </div>
 
+<h2>cupons:</h2>
+<div class="container-fluid">  
+    <table class="table table-striped">
+      <tr>
+        <th> Tipo de Documento    </th>
+        <th> Documento  </th>
+        <th> Data de cadastro     </th>
+        <th> hora do cadastro     </th>
+        <th> Tipo de envio       </th>
+      </tr>
+
+      {% for cupom in cupons %}
+      <tr>
+        <td>    {{cupom.tipo_documento}}    </td>
+        <td>    {{cupom.numero_documento}}  </td>
+        <td>    {{cupom.data_cadastro}}     </td>
+        <td>    {{cupom.hora_cadastro}}     </td>
+        <td>    {{cupom.tipo_envio}}        </td>
+
+         {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Nenhum cupom cadastrado.</td>
+            </tr>
+
+      </tr>
+      {% endfor %}
+
+
+    </table>
+  </div>
 
     
 

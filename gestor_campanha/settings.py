@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "cupons",
     "skus_validos",
     "promocaobombril",
+    "log_sistema",
+    "campanha",
     "rest_framework",
     "rest_framework.authtoken",
     "widget_tweaks",

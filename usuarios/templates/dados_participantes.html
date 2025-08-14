@@ -1,78 +1,89 @@
 {% extends "master.html" %}
+
 {% load static %}
 
-{% block title %}
-  Sistema Gestor de Campanha - Lista de Participantes
-{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Lista de Participantes ({{ Total }})</h2>
 
-{% block cabecalho %}
-{% endblock %}
-
-{% block content %} 
-
-    <div class="container mt-2">
-        <div class="row">
-            <div class="centralizada">
-                <a href="{% url 'pesquisar_participante' %}"  class="btn btn-primary" style="position-align:center;">Pesquisar Participante</a>    
-            </div>
+    <!-- Formulário de pesquisa -->
+    <form method="get" class="row mb-3">
+        <div class="col-md-8">
+            <input type="text" name="q" class="form-control" placeholder="Buscar por nome, CPF ou e-mail..."
+                   value="{{ search_query }}">
         </div>
-    </div>
-    
-    <div class="container mt-2">
-        <div class="row">
-            <div class="centralizada">
-                <table class="table table-hover">
-                    <tr>
-                        <th> Nome </th>
-                        <th> Celular </th>
-                        <th> E-mail </th>
-                        <th> Status </th>
-                        <th> Editar </th>
-                        <th>Detalhar</th>
-                    </tr>
-                    {% for x in lista_participantes %}
-                    <form action="{% url 'editar_participante' x.id %}" method="POST"> {% csrf_token %}
-                        <tr>
-                             <td>
-                              <input type="text" value="{{ x.nome }}" name="nome"  class="form-control" >
-                            </td>
-
-                             <td>
-                                <input type="text" value="{{ x.celular }}" name="celular"  class="form-control" >
-                            </td>
-                           
-                            <td>
-                                <input type="text" value="{{ x.email }}" name="email"  class="form-control" >
-                            </td>
-
-                             <td>
-                                <select name="status" class="form-select">
-                                    <option value="1" {% if x.status == '1' %} selected {% endif %}>Ativo</option>
-                                    <option value="2" {% if x.status == '2' %}  selected {% endif %}>Inativo</option>
-                                </select>
-                             </td>
-
-                            
-                            <td>
-                              <button type="submit"  class="btn btn-light">
-                                 <img src="{% static 'imgs_sistema/file-edit.ico'  %}" alt="" style="width:20px;height:20px;"></imag>  
-                            </td>
-
-                             <td>
-                              <a href="{% url 'participante_detalhado' x.id %}"  class="btn btn-light">
-                                 <img src="{% static 'imgs_sistema/detalhe.ico'  %}" alt="" style="width:20px;height:20px;"></a>  
-                            </td>
-
-                        </tr>
-                    </form>
-                    {% endfor %}
-                </table>
-            </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary w-100">Pesquisar</button>
         </div>
-    </div>
+    </form>
 
-    
-    <script src="{% static 'js/script.js' %}"></script>
- 
+    <!-- Tabela de participantes -->
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>CPF</th>
+                <th>Email</th>
+                <th>Detalhar</th>
+                <th> Apagar </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for participante in page_obj %}
+            <tr>
+                <td>{{ participante.nome }}</td>
+                <td>{{ participante.cpf }}</td>
+                <td>{{ participante.email }}</td>
+                <td class="text-center">
+                    <a href="{% url 'participante_detalhado' participante.id %}" class="btn btn-outline-secondary btn-sm">
+                        <img src="{% static 'imgs_sistema/detalhe.ico' %}" alt="Detalhar" style="width:18px;height:18px;">
+                    </a>
+                </td>
+                <td>
+                    <a href="{% url 'deletar_participante' participante.id %}" class="btn btn-light">
+                        <img src="{% static 'imgs_sistema/file-delete.ico'  %}" alt="" style="width:20px;height:20px;"></imag>
+                    </a>
+                </td>  
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Nenhum participante encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Paginação -->
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?q={{ search_query }}&page=1">&laquo; Primeiro</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?q={{ search_query }}&page={{ page_obj.previous_page_number }}">Anterior</a>
+                </li>
+            {% endif %}
+
+            {% for p in page_range %}
+                {% if p == '...' %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% elif p == page_obj.number %}
+                    <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?q={{ search_query }}&page={{ p }}">{{ p }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?q={{ search_query }}&page={{ page_obj.next_page_number }}">Próximo</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?q={{ search_query }}&page={{ page_obj.paginator.num_pages }}">Último &raquo;</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>
 {% endblock %}
-

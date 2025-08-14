@@ -24,6 +24,7 @@ urlpatterns = [
     path('editar_participante/<int:id>', views.editar_participante, name='editar_participante'),
     path('participante_detalhado/<int:id>', views.participante_detalhado, name='participante_detalhado'),
     path('pesquisar_participante/', views.pesquisar_participante, name='pesquisar_participante'),
+    path('deletar_participante/<int:id>', views.deletar_participante, name='deletar_participante'),
 
     # parte de gestão de SKUs
     path('deletar_skus/', views.deletar_skus, name='deletar_skus'),

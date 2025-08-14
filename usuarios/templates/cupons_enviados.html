@@ -1,56 +1,83 @@
 {% extends "master.html" %}
 {% load static %}
 
-{% block title %}
-   Cupons Enviados
-{% endblock %}
+{% block title %}Cupons Enviados{% endblock %}
 
 {% block cabecalho %}
-    <h3>Cupons Enviados</h3>
-    
+<h3>Cupons Enviados</h3>
 {% endblock %}
 
-{% block TextoBtn%} 
-    {% url 'login'  %}
+{% block TextoBtn %}
+{% url 'login' %}
 {% endblock %}
 
+{% block content %}
+<div class="container">
+    <p>Lista de cupons enviados - (Total: {{ Total }} )</p>
 
-{% block content %} 
-    <div class="container">
-        <p>
-            Lista de cupons enviados - (Total: {{ Total }} )
-        </p>
-
-        <div>
-            <table class="table table-hover">
+    <div>
+        <table class="table table-hover">
             <tr>
-                <th> Documento          </th>
-                <th> Número             </th>
-                <th> Data Cadastro      </th>
-                <th> Hora Cadastro      </th>
-                <th> Status             </th>
-                <th> Participante       </th>
+                <th>Documento</th>
+                <th>Número</th>
+                <th>Data Cadastro</th>
+                <th>Hora Cadastro</th>
+                <th>Status</th>
+                <th>Detalhar</th>
             </tr>
-
-            {% for x in lista_cupons %}
-               <tr>
-                    <td>    {{ x.tipo_documento }}     </td>
-                    <td>    {{ x.numero_documento}}    </td>
-                    <td>    {{ x.data_cadastro}}       </td>
-                    <td>    {{ x.hora_cadastro}}       </td>
-                    <td>    {{ x.status }}             </td>
-                    <td>    {{ x.participante}}        </td>
-                </tr> 
-
-
+            {% for x in page_obj %}
+            <tr>
+                <td>{{ x.tipo_documento }}</td>
+                <td>{{ x.numero_documento }}</td>
+                <td>{{ x.data_cadastro }}</td>
+                <td>{{ x.hora_cadastro }}</td>
+                <td>{{ x.status }}</td>
+                
+                <td class="text-center">
+                    <a href="{% url 'participante_detalhado' x.id %}" class="btn btn-outline-secondary btn-sm">
+                        <img src="{% static 'imgs_sistema/detalhe.ico' %}" alt="Detalhar" style="width:18px;height:18px;">
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">Nenhum cupom encontrado.</td>
+            </tr>
             {% endfor %}
-            </table>
-        </div>
-
+        </table>
     </div>
 
+    <!-- Paginação -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Navegação de páginas">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            {% endif %}
 
+            {% for p in page_range %}
+                {% if p == "..." %}
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                {% elif p == page_obj.number %}
+                    <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ p }}">{{ p }}</a></li>
+                {% endif %}
+            {% endfor %}
 
- 
-  
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
 {% endblock %}
