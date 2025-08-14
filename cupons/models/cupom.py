@@ -19,11 +19,11 @@ class Cupom(models.Model):
 
     
     TIPO_ENVIO = [
-        ('Sistema', 'Sistema'),
-        ('WhatsApp', 'WhatsApp')
+        ('1', 'whatsapp'),
+        ('2', 'hotsite')
     ]
     
-    tipo_envio = models.CharField(max_length=50, default='Sistema')
+    tipo_envio = models.CharField(max_length=50)
     
      # Status do participante
     STATUS = [
