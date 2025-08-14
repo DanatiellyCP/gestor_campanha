@@ -18,4 +18,7 @@ urlpatterns = [
     path('cadastrar-cupom/<int:id_participante>/', views.cadastrar_cupom, name='cadastrar_cupom'),
     path('tutorial/', views.tutorial, name='tutorial'),
     path('cpf-invalido/', views.cpf_invalido_check, name='cpf_invalido_check'),
+    # Password recovery
+    path('recuperar-senha/', views.recuperar_senha, name='recuperar_senha'),
+    path('reset-senha/<str:token>/', views.reset_senha, name='reset_senha'),
 ]

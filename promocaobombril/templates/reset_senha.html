@@ -58,7 +58,7 @@
 
   <div class="topo topo-login" role="img" aria-label="Topo do site">
     <div class="inner">
-      <h1 class="topo-title">FAÇA SEU LOGIN</h1>
+      <h1 class="topo-title">RECUPERAR SENHA</h1>
       <img src="{% static 'responsive/images/ROBOM-BRIL_NAVE.png' %}" alt="" class="topo-robot" aria-hidden="true" />
     </div>
   </div>
@@ -68,30 +68,25 @@
         <div class="robot" aria-hidden="true">
           <img src="{% static 'responsive/images/mascote_login.png' %}" alt="" />
         </div>
-        <form id="loginForm" class="login" method="post" action="{% url 'logar' %}">
-          {% if msg_sucesso %}
-            <p class="form-success" role="status" aria-live="polite" style="background:#e6ffed; border:1px solid #b7ebc6; color:#096b2c; padding:10px 12px; border-radius:6px; font-weight:700; margin-bottom:10px;">{{ msg_sucesso }}</p>
-          {% endif %}
-          {% if erro %}
-            <p class="form-error" style="color:#c00; font-weight:700; margin-top:6px;">{{ erro }}</p>
-          {% endif %}     
+        {% if erro %}
+          <p class="form-error" style="color:#c00; font-weight:700; margin: 0 auto 16px;">{{ erro }}</p>
+        {% else %}
+        <form class="login" method="post">
           {% csrf_token %}
           <div class="field">
-            <label for="cpf">CPF</label>
-            <input id="cpf" name="cpf" type="text" inputmode="numeric" autocomplete="username" placeholder="000.000.000-00" maxlength="14" required />
+            <label for="senha">Nova senha</label>
+            <input id="senha" name="senha" type="password" minlength="8" placeholder="********" required />
           </div>
           <div class="field">
-            <label for="senha">Senha</label>
-            <input id="senha" name="senha" class="pass" type="password" placeholder="********" minlength="8" required />
-            <!-- <button type="button" class="toggle-pass" data-target="senha" aria-label="Mostrar/ocultar senha">👁️</button> -->
-            <div class="forgot"><a href="{% url 'recuperar_senha' %}">Esqueci minha senha.</a></div>
+            <label for="confirmar">Confirmar nova senha</label>
+            <input id="confirmar" name="confirmar" type="password" minlength="8" placeholder="********" required />
           </div>
-
           <div class="login-actions">
-            <button type="submit" class="btn btn-red">Fazer meu login</button>
-            <a href="/cadastrar/" style="text-decoration: none;" class="btn btn-yellow" id="goRegister">Quero me cadastrar</a>
+            <button type="submit" class="btn btn-red">Salvar nova senha</button>
+            <a href="{% url 'logar' %}" class="btn btn-yellow" style="text-decoration:none">Cancelar</a>
           </div>
         </form>
+        {% endif %}
       </div>
     </div>
   </div>

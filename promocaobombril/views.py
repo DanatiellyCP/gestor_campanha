@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.hashers import check_password, make_password
+from django.core.mail import send_mail
+from django.conf import settings
+from django.core import signing
+import logging
 from participantes.models import Participantes
 from cupons.models.cupom import Cupom
 from datetime import datetime
@@ -11,6 +15,14 @@ from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
+
+# Brevo (Sendinblue) SDK — import opcional
+try:
+    import sib_api_v3_sdk
+    from sib_api_v3_sdk.rest import ApiException
+except Exception:
+    sib_api_v3_sdk = None
+    ApiException = Exception
 
 # Lista de CPFs inválidos (importada do módulo dedicado)
 from cpfs_invalidos import CPFS_INVALIDOS
@@ -212,11 +224,14 @@ def logar(request):
             # Log opcional: print(e)
             return render(request, 'logar.html', {'erro': 'Não foi possível autenticar. Tente novamente.'})
 
-    # GET: renderiza página de login e, se houver, mensagem de sucesso pós-cadastro
+    # GET: renderiza página de login e, se houver, mensagem de sucesso
     sucesso = request.GET.get('signup') == '1'
+    reset_ok = request.GET.get('reset') == '1'
     contexto = {}
     if sucesso:
         contexto['msg_sucesso'] = 'Cadastro realizado com sucesso! Faça login para continuar.'
+    if reset_ok:
+        contexto['msg_sucesso'] = 'Senha redefinida com sucesso! Faça seu login.'
     return render(request, 'logar.html', contexto)
 
 # Logout: limpa sessão e volta ao login
@@ -227,6 +242,128 @@ def logout_view(request):
     except Exception:
         request.session.pop('participante_id', None)
     return redirect('logar')
+
+
+# ============================
+# Recuperação de senha
+# ============================
+def recuperar_senha(request):
+    """Fluxo de recuperação via CPF: envia e-mail com link temporário de redefinição."""
+    if request.method == 'POST':
+        cpf_raw = (request.POST.get('cpf') or '').strip()
+        cpf = re.sub(r'\D', '', cpf_raw)
+        if not cpf:
+            return render(request, 'recuperar_senha.html', {'erro': 'Informe seu CPF.'})
+
+        participante = Participantes.objects.filter(cpf=cpf).order_by('-id').first()
+        if not participante:
+            return render(request, 'recuperar_senha.html', {'erro': 'CPF não encontrado.'})
+        if not participante.email:
+            return render(request, 'recuperar_senha.html', {'erro': 'Não há e-mail cadastrado para este CPF.'})
+
+        # Gera token assinado com expiração (ex.: 2 horas)
+        data = {'pid': participante.id}
+        token = signing.dumps(data, salt='reset-senha')
+
+        # Monta URL absoluta
+        try:
+            host = settings.DOMAIN_NAME or request.get_host()
+            scheme = 'https' if request.is_secure() else 'http'
+            reset_url = f"{scheme}://{host}{reverse('reset_senha', args=[token])}"
+        except Exception:
+            reset_url = request.build_absolute_uri(reverse('reset_senha', args=[token]))
+        # URL absoluta para o banner do e-mail (imagem pública nos estáticos)
+        try:
+            # Usa o mesmo host/scheme quando possível
+            banner_url = f"{scheme}://{host}/static/responsive/banner_mobile.png"
+        except Exception:
+            # Fallback simples caso as variáveis não existam neste ponto
+            banner_url = request.build_absolute_uri('/static/responsive/banner_mobile.png')
+
+        assunto = 'Recuperação de senha – Promoção Bombril'
+        corpo = (
+            f"Olá, {participante.nome}.\n\n"
+            f"Recebemos uma solicitação para redefinir sua senha.\n"
+            f"Para continuar, acesse o link abaixo (válido por 2 horas):\n"
+            f"{reset_url}\n\n"
+            f"Se você não solicitou, ignore esta mensagem."
+        )
+        html_corpo = (
+            f"<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;padding:16px 12px;\">"
+            f"  <div style=\"text-align:center;margin-bottom:16px;\">"
+            f"    <img src=\"{banner_url}\" alt=\"Promoção Bombril\" style=\"max-width:100%;height:auto;border:0;display:block;margin:0 auto;\">"
+            f"  </div>"
+            f"  <p style=\"font-size:16px;color:#111;\">Olá, {participante.nome}.</p>"
+            f"  <p style=\"font-size:14px;color:#111;\">Recebemos uma solicitação para redefinir sua senha.</p>"
+            f"  <p style=\"font-size:14px;color:#111;\">Para continuar, clique no botão abaixo (válido por 2 horas):</p>"
+            f"  <p style=\"text-align:center;margin:24px 0;\">"
+            f"    <a href=\"{reset_url}\" target=\"_blank\" style=\"background:#e30613;color:#fff;text-decoration:none;padding:12px 20px;border-radius:4px;display:inline-block;font-weight:bold;\">Redefinir minha senha</a>"
+            f"  </p>"
+            f"  <p style=\"font-size:12px;color:#555;\">Se você não solicitou, ignore esta mensagem.</p>"
+            f"</div>"
+        )
+
+        try:
+            # Preferência: Brevo Transactional Emails API, se configurada
+            if getattr(settings, 'BREVO_API_KEY', '') and sib_api_v3_sdk is not None:
+                configuration = sib_api_v3_sdk.Configuration()
+                configuration.api_key['api-key'] = settings.BREVO_API_KEY
+                api_client = sib_api_v3_sdk.ApiClient(configuration)
+                api_instance = sib_api_v3_sdk.TransactionalEmailsApi(api_client)
+                from_name = getattr(settings, 'DEFAULT_FROM_NAME', 'Promoção Bombril')
+                sender_email = settings.DEFAULT_FROM_EMAIL
+                send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+                    to=[{"email": participante.email, "name": participante.nome or ''}],
+                    sender={"name": from_name, "email": sender_email},
+                    subject=assunto,
+                    html_content=html_corpo,
+                )
+                api_instance.send_transac_email(send_smtp_email)
+            else:
+                # Fallback SMTP padrão do Django
+                send_mail(
+                    assunto,
+                    corpo,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [participante.email],
+                    fail_silently=False,
+                )
+        except Exception as e:
+            logging.getLogger(__name__).exception("Falha ao enviar e-mail de recuperação de senha")
+            return render(request, 'recuperar_senha.html', {'erro': 'Não foi possível enviar o e-mail. Tente novamente mais tarde.'})
+
+        return render(request, 'recuperar_senha.html', {
+            'msg': 'Enviamos um e-mail com o link para redefinir sua senha. Verifique sua caixa de entrada e o spam.'
+        })
+
+    return render(request, 'recuperar_senha.html')
+
+
+def reset_senha(request, token):
+    """Página para definir nova senha a partir do token."""
+    # Valida token (expira em 2 horas = 7200s)
+    try:
+        data = signing.loads(token, salt='reset-senha', max_age=7200)
+        pid = int(data.get('pid'))
+    except Exception:
+        return render(request, 'reset_senha.html', {'erro': 'Link inválido ou expirado.'})
+
+    participante = get_object_or_404(Participantes, id=pid)
+
+    if request.method == 'POST':
+        senha = request.POST.get('senha') or ''
+        confirmar = request.POST.get('confirmar') or ''
+        if len(senha) < 8:
+            return render(request, 'reset_senha.html', {'erro': 'A senha deve ter ao menos 8 caracteres.'})
+        if senha != confirmar:
+            return render(request, 'reset_senha.html', {'erro': 'As senhas não conferem.'})
+
+        participante.senha = make_password(senha)
+        participante.save()
+        # Redireciona ao login com mensagem de sucesso
+        return redirect(f"{reverse('logar')}?signup=0&reset=1")
+
+    return render(request, 'reset_senha.html')
 
 @require_login
 def painel_home(request):

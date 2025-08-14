@@ -713,7 +713,8 @@ nav{ margin-left: 68px; flex:1 1 auto; }
 .login-page .field + .field{ margin-top:12px; }
 .login-page label{ display:block; font-weight:800; font-size:16px; color:#555; margin:6px 2px; }
 .login-page input#cpf,
-.login-page input#senha{ width:100%; background:#e9e9e9; border:none; border-radius:999px; padding:18px 20px; font-size:16px; color:#222; outline:none; }
+.login-page input#senha,
+.login-page input#confirmar{ width:100%; background:#e9e9e9; border:none; border-radius:999px; padding:18px 20px; font-size:16px; color:#222; outline:none; }
 .login-page .pass{ padding-right:52px; }
 .login-page .hint{ font-size:12px; color:#9aa0a6; margin-top:4px; }
 .login-page .toggle-pass{ position:absolute; right:10px; top:50%; transform:translateY(-50%); width:34px; height:34px; border:none; background:transparent; cursor:pointer; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; color:#666; }
