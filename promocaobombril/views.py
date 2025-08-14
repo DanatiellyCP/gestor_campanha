@@ -439,11 +439,24 @@ def painel_detalhes_cupom(request):
     numeros_objs = list(NumeroDaSorte.objects.filter(cupom=cupom).order_by('id'))
     numeros = [n.numero for n in numeros_objs]
 
-    # Tenta extrair dados detalhados caso necessários no futuro
+    # Extrai dados detalhados do cupom
+    # 1) Prioriza JSON bruto salvo em `cupom.dados_cupom` (string JSON)
+    # 2) Faz fallback para o formato normalizado via `get_dados_json(cupom.dados_json, tipo)`
     dados_extra = None
     try:
-        if cupom.dados_json:
-            dados_extra = get_dados_json(cupom.dados_json, cupom.tipo_documento)
+        if getattr(cupom, 'dados_cupom', None):
+            raw = cupom.dados_cupom
+            if isinstance(raw, str) and raw.strip():
+                try:
+                    dados_extra = json.loads(raw)
+                except Exception:
+                    dados_extra = None
+        # Fallback para dados_json normalizado
+        if dados_extra is None and cupom.dados_json:
+            try:
+                dados_extra = get_dados_json(cupom.dados_json, cupom.tipo_documento)
+            except Exception:
+                dados_extra = None
     except Exception:
         dados_extra = None
 
@@ -562,6 +575,7 @@ def cadastrar_cupom(request, id_participante):
 
             # Criação do cupom no banco (ajustando campos ao modelo)
             try:
+                print("[INFO] Criando cupom no banco...")
                 novo_cupom = Cupom.objects.create(
                     participante=participante,
                     dados_cupom=dados_cupom_json,
@@ -582,16 +596,21 @@ def cadastrar_cupom(request, id_participante):
             msg_numeros = ''
             if validar:
                 try:
+                    print("[INFO] Cadastro de produtos...")
                     msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
                 except Exception as e_prod:
+                    print("[ERRO] Falha ao processar produtos do cupom:", e_prod)
                     msg_produto = f'Erro ao processar produtos do cupom.'
 
                 try:
+                    print("[INFO] Cadastro de números da sorte...")
                     # --- Chamada para gerar números da sorte ---
                     msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
                 except Exception as e_num:
+                    print("[ERRO] Falha ao gerar números da sorte:", e_num)
                     msg_numeros = 'Falha ao gerar números da sorte.'
             else:
+                print("[INFO] Dados do cupom indisponíveis; produtos não processados.")
                 msg_produto = 'Dados do cupom indisponíveis; produtos não processados.'
 
             contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
