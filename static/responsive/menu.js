@@ -105,9 +105,14 @@
     qsa('.toggle-pass', form).forEach(btn => {
       const target = qs('#' + btn.dataset.target);
       if (!target) return;
+      // initialize ARIA state
+      try { btn.setAttribute('aria-pressed', 'false'); } catch(_) {}
       btn.addEventListener('click', () => {
         const showing = target.type === 'text';
         target.type = showing ? 'password' : 'text';
+        // reflect visual/ARIA state like wizard/global handlers
+        try { btn.classList.toggle('show', !showing); } catch(_) {}
+        try { btn.setAttribute('aria-pressed', String(!showing)); } catch(_) {}
         try { target.focus({ preventScroll: true }); } catch(_) { target.focus(); }
       });
     });
@@ -189,6 +194,8 @@
       v = v.replace(/(\d{2})(\d)/, '$1/$2').replace(/(\d{2})(\d)/, '$1/$2');
       e.target.value = v;
     });
+    // Validar maioridade ao concluir a edição
+    f.nasc.addEventListener('change', ()=>{ try{ validateAdult(); }catch(_){/* noop */} });
   }
 
   // CEP lookup with debounce
@@ -289,6 +296,36 @@
   if (f.senha){ f.senha.addEventListener('input', evalPass); }
   if (f.senha2){ f.senha2.addEventListener('input', ()=>{}); }
 
+  // Maioridade: helpers
+  function parseDMY(v){
+    // v esperado: dd/mm/aaaa
+    if (!v || typeof v !== 'string') return null;
+    const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return null;
+    const d = parseInt(m[1],10), mo = parseInt(m[2],10)-1, y = parseInt(m[3],10);
+    const dt = new Date(y, mo, d);
+    if (dt.getFullYear() !== y || dt.getMonth() !== mo || dt.getDate() !== d) return null; // data inválida
+    return dt;
+  }
+  function isAdultDMY(v){
+    const dt = parseDMY(v);
+    if (!dt) return false;
+    const today = new Date();
+    let age = today.getFullYear() - dt.getFullYear();
+    const mDiff = today.getMonth() - dt.getMonth();
+    if (mDiff < 0 || (mDiff === 0 && today.getDate() < dt.getDate())) age--;
+    return age >= 18;
+  }
+  function validateAdult(){
+    if (!f.nasc) return true;
+    const ok = isAdultDMY(f.nasc.value);
+    try{
+      f.nasc.setCustomValidity(ok ? '' : 'É necessário ser maior de 18 anos.');
+      if (!ok) f.nasc.reportValidity();
+    }catch(_){/* noop */}
+    return ok;
+  }
+
   // Navigation
   const next1 = qs('#next1');
   const next2 = qs('#next2');
@@ -322,7 +359,7 @@
     for (const el of controls){ if (!el.checkValidity()){ el.reportValidity(); return false; } }
     return true;
   }
-  if (next1) next1.addEventListener('click', ()=> goTo(2, ()=> validateNative(1)));
+  if (next1) next1.addEventListener('click', ()=> goTo(2, ()=> validateNative(1) && validateAdult()));
   if (back2) back2.addEventListener('click', ()=> goTo(1));
   if (next2) next2.addEventListener('click', ()=> goTo(3, ()=> validateNative(2)));
   if (back3) back3.addEventListener('click', ()=> goTo(2));
@@ -332,7 +369,7 @@
 
   // Submit: permitir envio nativo ao servidor (sem interceptar)
   wizard.addEventListener('submit', (e)=>{
-    if (!wizard.checkValidity()){ wizard.reportValidity(); e.preventDefault(); return; }
+    if (!wizard.checkValidity() || !validateAdult()){ wizard.reportValidity(); e.preventDefault(); return; }
     // não chamar preventDefault: deixa o form enviar para o backend Django
   });
 })();

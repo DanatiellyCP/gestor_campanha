@@ -25,6 +25,7 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.core.files.base import ContentFile
 import base64
 import re as _re
+from django.db import IntegrityError
 
 
 from rest_framework.views import APIView
@@ -300,17 +301,27 @@ class EnviarNotaView(APIView):
         dados_cupom_json = json.dumps(asdict(dados_nota))
 
         # Cria cupom
-        novo_cupom = Cupom.objects.create(
-            participante=participante,
-            dados_cupom=dados_cupom_json,
-            tipo_envio='API',
-            status='Validado',
-            numero_documento=getattr(dados_nota, 'codigo_numerico', ''),
-            cnpj_loja=getattr(dados_nota, 'cnpj_emitente', ''),
-            nome_loja=getattr(dados_nota, 'nome_emitente', 'Desconhecido'),
-            dados_json=validar,
-            tipo_documento=getattr(dados_nota, 'tipo_documento', ''),
-        )
+        try:
+            novo_cupom = Cupom.objects.create(
+                participante=participante,
+                dados_cupom=dados_cupom_json,
+                tipo_envio='API',
+                status='Validado',
+                numero_documento=getattr(dados_nota, 'codigo_numerico', ''),
+                cnpj_loja=getattr(dados_nota, 'cnpj_emitente', ''),
+                nome_loja=getattr(dados_nota, 'nome_emitente', 'Desconhecido'),
+                dados_json=validar,
+                tipo_documento=getattr(dados_nota, 'tipo_documento', ''),
+            )
+        except IntegrityError:
+            return Response(
+                {
+                    "success": False,
+                    "message": "cupom já cadastrado",
+                    "data": [],
+                },
+                status=status.HTTP_200_OK,
+            )
 
         # Produtos e números da sorte
         msg_produto = ''

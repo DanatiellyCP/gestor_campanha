@@ -11,7 +11,7 @@
     <script src="https://kit.fontawesome.com/f0d3945d17.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
     <link rel="icon" type="image/png" href="{% static 'responsive/images/Favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}?v=2025-08-13-1">
 </head>
 <body class="login-page">
   <div class="wrap">
@@ -77,13 +77,13 @@
           {% endif %}     
           {% csrf_token %}
           <div class="field">
-            <label for="email">E-mail:</label>
-            <input id="email" name="email" type="email" placeholder="Informe seu e-mail" required />
+            <label for="cpf">CPF</label>
+            <input id="cpf" name="cpf" type="text" inputmode="numeric" autocomplete="username" placeholder="000.000.000-00" maxlength="14" required />
           </div>
           <div class="field">
             <label for="senha">Senha</label>
             <input id="senha" name="senha" class="pass" type="password" placeholder="********" minlength="8" required />
-            <button type="button" class="toggle-pass" data-target="senha" aria-label="Mostrar/ocultar senha">👁️</button>
+            <!-- <button type="button" class="toggle-pass" data-target="senha" aria-label="Mostrar/ocultar senha">👁️</button> -->
             <div class="forgot"><a href="#">Esqueci minha senha.</a></div>
           </div>
 
@@ -110,10 +110,17 @@
       <p class="footer-legal">
         PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
       </p>
+      <p class="footer-legal">
+        Em caso de dúvidas, entre em contato com nosso SAC:<br/>
+
+        E-mail: faleconosco@promocaobombril.com.br<br/>
+
+        Telefone: 0800 7076161
+      </p>
     </div>
   </footer>
 
-<script src="{% static 'responsive/menu.js' %}"></script>
+<script src="{% static 'responsive/menu.js' %}?v=2025-08-13-1"></script>
 <!-- Privacy/Cookie banner -->
 <div class="cookie-banner" id="cookieBanner" role="region" aria-label="Aviso de cookies e privacidade">
   <div class="cookie-inner">
