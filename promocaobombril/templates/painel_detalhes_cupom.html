@@ -77,11 +77,11 @@
               <div class="info-grid">
                 <div class="info-item">
                   <span class="info-label">Loja:</span>
-                  <span class="info-value">{{ cupom.nome_loja }}</span>
+                  <span class="info-value">{{ dados_extra.emitente.nome|default:cupom.nome_loja }}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">CNPJ:</span>
-                  <span class="info-value">{{ cupom.cnpj_loja }}</span>
+                  <span class="info-value">{{ dados_extra.emitente.cnpj|default:cupom.cnpj_loja }}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">Documento:</span>
@@ -89,7 +89,7 @@
                 </div>
                 <div class="info-item">
                   <span class="info-label">Número/Chave:</span>
-                  <span class="info-value">{{ cupom.numero_documento }}</span>
+                  <span class="info-value">{{ dados_extra.chave_acesso|default:cupom.numero_documento }}</span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">Status:</span>
@@ -99,10 +99,16 @@
                   <span class="info-label">Cadastro:</span>
                   <span class="info-value">{{ cupom.data_cadastro|date:"d/m/Y" }} {{ cupom.hora_cadastro|time:"H:i" }}</span>
                 </div>
-                <div class="info-item">
+                <!-- <div class="info-item">
                   <span class="info-label">Total:</span>
-                  <span class="info-value">{% if cupom.valor_total %}R$ {{ cupom.valor_total }}{% else %}-{% endif %}</span>
-                </div>
+                  <span class="info-value">
+                    {% if dados_extra and dados_extra.nfe and dados_extra.nfe.valor_total %}
+                      R$ {{ dados_extra.nfe.valor_total }}
+                    {% elif cupom.valor_total %}
+                      R$ {{ cupom.valor_total }}
+                    {% else %}-{% endif %}
+                  </span>
+                </div> -->
                 {% if dados_extra %}
                 <div class="info-item">
                   <span class="info-label">Emitente:</span>
@@ -113,10 +119,21 @@
             </div>
 
             <!-- Coluna 2: Lista de Produtos -->
-            <div class="products-list">
+            <div class="products-list" style="max-height: 50vh; overflow-y: auto; overscroll-behavior: contain; padding-right: 8px;">
               <h3 class="section-title">Produtos</h3>
               <div class="products-container">
-                {% if produtos %}
+                {% if dados_extra and dados_extra.produtos %}
+                  {% for p in dados_extra.produtos %}
+                  <div class="product-item">
+                    <div class="product-name">{{ p.descricao }}</div>
+                    <div class="product-details">
+                      <span>Qtd: {{ p.qtd }}</span>
+                      <span>R$ {{ p.valor_unitario }}</span>
+                      <span>R$ {{ p.valor_total_item }}</span>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% elif produtos %}
                   {% for p in produtos %}
                   <div class="product-item">
                     <div class="product-name">{{ p.nome }}</div>
