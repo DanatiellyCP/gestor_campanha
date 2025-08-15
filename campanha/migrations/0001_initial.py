@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Soteios',
+            name='Sorteios',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('status', models.CharField(blank=True, choices=[('1', 'Aberto'), ('2', 'Finalizado')], max_length=1, null=True)),

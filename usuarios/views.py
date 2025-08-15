@@ -1,9 +1,10 @@
 from django.http import HttpResponse
 from django.template import loader
+
 from .models import Usuarios
 from participantes.models import Participantes
-from datetime import date
-from django.shortcuts import render, redirect
+from datetime import date, datetime
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
@@ -13,6 +14,15 @@ from utils.link_sefaz import gerar_link_sefaz
 from django.core.paginator import Paginator
 from django.db.models import Q
 from cupons.models import Cupom, NumeroDaSorte
+from campanha.models import Regras
+
+
+from campanha.models import Sorteios
+from django.http import JsonResponse
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
+
+ 
 
 ## Função para restringir acessos por niveis - Danny - 27-06-2025
 def nivel_required(nivel_permitido):
@@ -103,8 +113,100 @@ def usuarios(request):
 # dash
 @login_required
 def dash(request):
+  # pegar os dados que serão exibidos 
+  participantes = Participantes.objects.all().count
+  cupons =  Cupom.objects.all().count
+  numeros_sorte = NumeroDaSorte.objects.all().count
+  sorteios = Sorteios.objects.all().count
+
+  context = {
+     'participantes' : participantes,
+     'cupons' : cupons,
+     'numeros_sorte': numeros_sorte,
+     'sorteios' : sorteios
+  }
+
+
   template = loader.get_template('dash.html')
-  return HttpResponse(template.render())
+  return HttpResponse(template.render(context, request))
+
+@login_required
+def dashboard(request):
+    return render(request, 'dashboard.html', {
+        'regioes': REGIOES.keys()
+    })
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
+from datetime import datetime
+from participantes.models import Participantes
+
+# Mapeamento de estados por região
+REGIOES = {
+    'Norte': ['AC', 'AP', 'AM', 'PA', 'RO', 'RR', 'TO'],
+    'Nordeste': ['AL', 'BA', 'CE', 'MA', 'PB', 'PE', 'PI', 'RN', 'SE'],
+    'Centro-Oeste': ['DF', 'GO', 'MT', 'MS'],
+    'Sudeste': ['ES', 'MG', 'RJ', 'SP'],
+    'Sul': ['PR', 'RS', 'SC']
+}
+
+# Página de gráficos
+def graficos_participantes(request):
+    return render(request, 'graficos_participantes.html', {
+        'regioes': REGIOES.keys()
+    })
+
+# Dados para os gráficos (AJAX)
+def participantes_dados(request):
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    regiao = request.GET.get('regiao')
+
+    participantes = Participantes.objects.all()
+
+    # Filtrar por data_cadastro
+    if data_inicio and data_fim:
+        try:
+            inicio = datetime.strptime(data_inicio, "%Y-%m-%d")
+            fim = datetime.strptime(data_fim, "%Y-%m-%d")
+            participantes = participantes.filter(data_cadastro__range=[inicio, fim])
+        except:
+            pass
+
+    # Filtrar por região
+    if regiao in REGIOES:
+        participantes = participantes.filter(uf__in=REGIOES[regiao])
+
+    # Gráfico de barras: participantes por mês
+    participantes_mes = (
+        participantes
+        .annotate(mes=TruncMonth('data_cadastro'))
+        .values('mes')
+        .annotate(total=Count('id'))
+        .order_by('mes')
+    )
+    labels_mes = [p['mes'].strftime('%m/%Y') for p in participantes_mes]
+    dados_mes = [p['total'] for p in participantes_mes]
+
+    # Gráfico de pizza: participantes por região
+    dados_estado = []
+    labels_estado = []
+    for reg, estados in REGIOES.items():
+        count = participantes.filter(uf__in=estados).count()
+        if count > 0:
+            labels_estado.append(reg)
+            dados_estado.append(count)
+
+    return JsonResponse({
+        'labels_mes': labels_mes,
+        'dados_mes': dados_mes,
+        'labels_estado': labels_estado,
+        'dados_estado': dados_estado
+    })
+
 
 @login_required
 def relatorios(request):
@@ -181,13 +283,17 @@ def perfil(request, id):
 @login_required
 def dados_participantes(request):
     search_query = request.GET.get('q', '')
-    participantes = Participantes.objects.all()
+
+    participantes = Participantes.objects.annotate(
+        total_cupons=Count('cupom')  # 'cupom' = related_name do FK em Cupom
+    )
 
     if search_query:
         participantes = participantes.filter(
             Q(nome__icontains=search_query) |
             Q(cpf__icontains=search_query) |
-            Q(email__icontains=search_query)
+            Q(email__icontains=search_query)|
+            Q(celular__icontains=search_query)
         )
 
     total_part = participantes.count()
@@ -214,7 +320,8 @@ def dados_participantes(request):
         'page_obj': page_obj,
         'page_range': page_range,
         'Total': total_part,
-        'search_query': search_query
+        'search_query': search_query,
+        'msg': ''
     })
 
 
@@ -249,22 +356,25 @@ def sorteios(request):
 
 # Editar Participantes
 @login_required
-def editar_participante(request, id):
-  if request.method == "GET": 
-    return render(request, 'dados_participantes.html')
-  elif request.method == "POST":
-    participante = Participantes.objects.get(id=id)
-    nome    =  request.POST.get('nome')
-    celular = request.POST.get('celular')
-    email   = request.POST.get('email')
-    status  = request.POST.get('status')
-    
-    participante.nome     = nome 
-    participante.celular  = celular
-    participante.email    = email
-    participante.status   = status
-    
-    participante.save()
+def editar_participante(request):
+    if request.method == "POST":
+        # Pegamos o ID do participante enviado pelo botão Salvar
+        participante_id = request.POST.get('id_participante')
+
+        participante = get_object_or_404(Participantes, id=participante_id)
+
+        # Capturamos os campos editáveis (note o uso do ID no nome dos campos)
+        participante.nome = request.POST.get(f'nome_{participante_id}')
+        participante.cpf = request.POST.get(f'cpf_{participante_id}')
+        participante.email = request.POST.get(f'email_{participante_id}')
+        participante.celular = request.POST.get(f'celular_{participante_id}')
+        # A coluna cupons é só leitura, então não alteramos aqui
+
+        participante.save()
+
+        return redirect('dados_participantes')
+
+    # Se cair em GET, apenas redireciona
     return redirect('dados_participantes')
 
 
@@ -386,7 +496,104 @@ def deletar_participante(request, id):
   return redirect('dados_participantes')  
 
 
+# gerar a lista csv com os dados do sorteio
+@login_required
+def gerar_lista_csv(request):
+  ...
+    
+@login_required
+def editar_regra(request):
+    # Se tiver apenas uma regra, pega ela, senão pega a primeira
+    regra = Regras.objects.first()
+    if not regra:
+        regra = Regras.objects.create(
+            min_data_cupom_aceito="01/01/2025",
+            max_data_cupom_aceito="31/12/2025",
+            qtd_cupom_dia=1
+        )
+
+    if request.method == "POST":
+        regra.min_data_cupom_aceito = request.POST.get("min_data_cupom_aceito")
+        regra.max_data_cupom_aceito = request.POST.get("max_data_cupom_aceito")
+        regra.qtd_cupom_dia = request.POST.get("qtd_cupom_dia")
+        regra.save()
+        return redirect("editar_regra")
+
+    context = {
+        "regra": regra
+    }
+    return render(request, "regras.html", context)
+
+
+# - CAMPANHA
+# usuarios/views.py
+def sorteios(request):
+  if request.method == 'POST':
+      data_sorteio = request.POST.get('data_sorteio')
+      hora_sorteio = request.POST.get('hora_sorteio')
+      usuario_id = request.POST.get('usuario_id')
+      status = request.POST.get('status')
+      observacoes = request.POST.get('observacoes')
+      resultado_sorteio = request.POST.get('resultado_sorteio')
+
+      current_user = request.user
    
+      Sorteios.objects.create(
+        data_cadastro=date.today(),
+        hora_cadastro=datetime.now().time(),
+        usuario_id=current_user,
+        data_sorteio=data_sorteio,
+        hora_sorteio=hora_sorteio,
+        status=status,
+        observacoes=observacoes,
+        resultado_sorteio=resultado_sorteio
+      )
+      return redirect("sorteios")
+  else:
+      sorteios = Sorteios.objects.all().values()
+      context = {
+        "sorteios": sorteios
+      } 
+      return render(request, "sorteios.html", context)
+  
+
+
+# LISTA EM FORMATO CSV PARA SORTEIO
+def filtrar_lista_sorteio(data_inicio, data_fim):
+   # Query ORM equivalente à sua SQL com WHERE entre datas
+  numeros = NumeroDaSorte.objects.select_related('participante', 'cupom').filter(
+      cupom__data_cadastro__range=(data_inicio, data_fim)
+  ).values(
+      'numero',
+      'participante__cpf',
+      'participante__email',
+      'participante__celular',
+      'participante__nome',
+      'cupom__data_cadastro',
+      'cupom__hora_cadastro'
+  )
+
+  # Exemplo de como percorrer os resultados
+  #for n in numeros:
+      #print(n)
+  return numeros
+
+def listagem_sorteio(request):
+   context = {'':''}
+   if request.method == 'POST':
+      data_inicio = request.POST.get('data_inicio')
+      data_fim = request.POST.get('data_fim')
+      
+      numeros = filtrar_lista_sorteio(data_inicio, data_fim)
+      context = {
+        "numeros": numeros
+      } 
+      return render(request, "listagem_sorteio.html", context)
+   else:
+      return render(request, "listagem_sorteio.html", context)
+     
+
+
+
 
     
-

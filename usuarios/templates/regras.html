@@ -1,0 +1,51 @@
+{% extends "master.html" %}
+{% load static %}
+
+{% block title %}Editar Regras{% endblock %}
+
+{% block cabecalho %}
+    <h2> Regras </h2>
+{% endblock %}
+
+{% block content %}   
+    
+    <div class="col-md-9 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <form action="{% url 'editar_regra' %}" method="POST">
+                    {% csrf_token %}
+                    <table class="table table-hover">
+                        <tr>
+                           <th>Cupons aceitos a partir do dia</th>
+                           <th>Até o dia</th>
+                           <th>Qtd. cupons por dia por participante</th>
+                           <th>Editar</th>
+                        </tr>
+                        <tr>
+                          <td>
+                                <input type="date"
+                                       value="{{ regra.min_data_cupom_aceito|date:'Y-m-d' }}"
+                                       name="min_data_cupom_aceito"
+                                       class="form-control">
+                            </td>  
+                            
+                            <td>
+                                <input type="date"
+                                       value="{{ regra.max_data_cupom_aceito|date:'Y-m-d' }}"
+                                       name="max_data_cupom_aceito"
+                                       class="form-control">
+                            </td>
+
+                           <td><input type="text" value="{{ regra.qtd_cupom_dia }}" name="qtd_cupom_dia" class="form-control"></td>
+                           <td>
+                               <button type="submit" class="btn btn-light">
+                                   <img src="{% static 'imgs_sistema/file-edit.ico' %}" alt="" style="width:20px;height:20px;">
+                               </button>
+                           </td>
+                        </tr>
+                    </table>
+               </form> 
+            </div>
+        </div>
+    </div>
+{% endblock %}

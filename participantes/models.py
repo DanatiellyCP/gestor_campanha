@@ -35,4 +35,5 @@ class Participantes(models.Model):
         ('2', 'Hotsite')
     ]
   cadastro = models.CharField(max_length=1, choices=CADASTRO, default='2') 
-  
+  data_cadastro = models.DateField(auto_now_add=True)
+

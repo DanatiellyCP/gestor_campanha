@@ -1,0 +1,77 @@
+{% extends "master.html" %}
+{% block content %}
+
+<h3>Dashboard de Participantes</h3>
+
+<!-- Filtros -->
+<form id="filtroForm" class="row mb-4">
+  <div class="col-md-3">
+    <label>Data Início</label>
+    <input type="date" name="data_inicio" class="form-control">
+  </div>
+  <div class="col-md-3">
+    <label>Data Fim</label>
+    <input type="date" name="data_fim" class="form-control">
+  </div>
+  <div class="col-md-3">
+    <label>Região</label>
+    <select name="regiao" class="form-control">
+      <option value="">Todas</option>
+      {% for r in regioes %}
+        <option value="{{ r }}">{{ r }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+  </div>
+</form>
+
+<!-- Gráfico -->
+<div class="card">
+  <div class="card-body">
+    <canvas id="graficoParticipantes"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let ctx = document.getElementById('graficoParticipantes').getContext('2d');
+let grafico = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Participantes',
+            data: [],
+            backgroundColor: 'rgba(54, 162, 235, 0.7)'
+        }]
+    }
+});
+
+// Função para buscar dados e atualizar gráfico
+function carregarGrafico(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    fetch(`/participantes-grafico/?${query}`)
+        .then(res => res.json())
+        .then(json => {
+            grafico.data.labels = json.labels;
+            grafico.data.datasets[0].data = json.data;
+            grafico.update();
+        });
+}
+
+// Carregar inicial
+carregarGrafico();
+
+// Filtro via AJAX
+document.getElementById('filtroForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const params = {};
+    formData.forEach((v, k) => { if(v) params[k] = v });
+    carregarGrafico(params);
+});
+</script>
+
+{% endblock %}

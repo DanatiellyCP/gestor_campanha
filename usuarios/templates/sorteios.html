@@ -1,14 +1,72 @@
 {% extends "master.html" %}
 {% load static %}
 
-{% block title %}
-  Sistema Gestor de Campanha - Dashboard
-{% endblock %}
-
-{% block cabecalho %}
-    <h3>Sorteios</h3>
-{% endblock %}
+{% block title %}Sorteios{% endblock %}
 
 {% block content %}
+<div class="container mt-4">
 
+  <h2 class="mb-4">Sorteios</h2>
+  <form method="post" action="{% url 'sorteios' %}"> 
+     {% csrf_token %}
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label for="data_sorteio" class="form-label">Data do Sorteio</label>
+                <input type="date" name="data_sorteio" id="data_sorteio" class="form-control" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="hora_sorteio" class="form-label">Hora do Sorteio</label>
+                <input type="time" name="hora_sorteio" id="hora_sorteio" class="form-control" required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-select" required>
+                    <option value="1">Aberto</option>
+                    <option value="2">Finalizado</option>
+                </select>
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="observacoes" class="form-label">Observações</label>
+            <textarea name="observacoes" id="observacoes" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="resultado_sorteio" class="form-label">Resultado do Sorteio</label>
+            <input type="text" name="resultado_sorteio" id="resultado_sorteio" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar Sorteio</button>
+  </form>
+
+    <h2 class="mb-4 mt-5">Lista de Sorteios</h2>
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Data Sorteio</th>
+                <th>Hora Sorteio</th>
+                <th>Usuário</th>
+                <th>Status</th>
+                <th>Observações</th>
+                <th>Resultado</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sorteio in sorteios %}
+            <tr>
+                <td>{{ sorteio.id }}</td>
+                <td>{{ sorteio.data_sorteio|date:"d/m/Y" }}</td>
+                <td>{{ sorteio.hora_sorteio|time:"H:i:s" }}</td>
+                <td>{{ sorteio.usuario_id }}</td>
+                <td>{% if sorteio.status == '1' %}Aberto{% else %}Finalizado{% endif %}</td>
+                <td>{{ sorteio.observacoes }}</td>
+                <td>{{ sorteio.resultado_sorteio }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center">Nenhum sorteio cadastrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

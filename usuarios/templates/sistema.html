@@ -85,7 +85,9 @@
   <div class="col-md-4 mb-3">
     <div class="card">
       <div class="card-body">
-        <p> <b>Produtos: SKU Ativos</b></p>
+        <h3> Links rápidos: </h3>
+
+        <p> <b>SKUs Ativos</b></p>
         <p>
           <a href="{% url 'skus' %}">
               Listar SKUs
@@ -96,6 +98,31 @@
               Importar SKUs
           </a>
         </p> <!--  Deixei fixo no banco- danny 19-07 -2025   -->
+
+        <p> <b>Sistema:</b> </p>
+        <p>
+          <a href="{% url 'editar_regra' %}">
+              Editar Regras
+          </a>
+        </p>
+        <p>
+          <a href="{% url 'listagem_sorteio' %}">
+              Listar Números da Sorte para Sorteio
+          </a>
+        </p>
+
+        <p>
+          <a href="{% url 'listagem_sorteio' %}">
+              Editar FAQ
+          </a>
+        </p>
+
+         <p>
+          <a href="{% url 'listagem_sorteio' %}">
+              Log Sistema
+          </a>
+        </p>
+
       </div>
     </div>
   </div>

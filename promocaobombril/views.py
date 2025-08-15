@@ -493,6 +493,110 @@ def painel_detalhes_cupom(request):
     return render(request, 'painel_detalhes_cupom.html', contexto)
 
 
+
+# ------------------------------------------------------------------------
+
+
+def cadastrar_cupom(request, id_participante):
+    participante = get_object_or_404(Participantes, id=id_participante)
+    contexto = {'id_participante': id_participante}
+
+    if request.method == 'POST':
+        chave_acesso = None
+        dados_ocr = ""
+        imagem_path = None
+        erro = None
+
+        try:
+            # --- Captura código manual ou via imagem ---
+            if 'submit_codigo' in request.POST:
+                chave_acesso = request.POST.get('cod_cupom')
+
+            elif 'submit_imagem' in request.FILES:
+                arquivo = request.FILES.get('img_cupom')
+                if not arquivo:
+                    erro = 'Nenhum arquivo de imagem foi selecionado.'
+                else:
+                    imagem_path = guardar_cupom(arquivo)
+                    imagem_local_path = default_storage.path(imagem_path)
+
+                    with open(imagem_local_path, "rb") as f_img:
+                        chave_acesso = extrai_codigo_qrcode(f_img)
+
+                    if not chave_acesso:
+                        dados_ocr = extrair_texto_ocr(imagem_local_path)
+                        chave_acesso = extrair_numero_cupom(dados_ocr)
+
+            if erro:
+                contexto['msg_erro'] = erro
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+            if not chave_acesso:
+                contexto['msg_erro'] = "Informe o código do cupom."
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+            # --- Consulta dados da nota ---
+            dados_nota = identificar_chave_detalhada(chave_acesso)
+            if not dados_nota.valida:
+                contexto['msg_erro'] = f"Chave inválida: {dados_nota.mensagem}"
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+            status_nota = 'Em Análise'
+            validar = validar_cupom(dados_nota.chave, dados_nota.tipo_documento)
+
+            # pegar a data do retorno da api
+            primeiro_cupom = validar[0]
+            data_emissao = primeiro_cupom['data_hora_emissao']
+            print(data_emissao)
+
+
+
+            # Serializa dados originais
+            dados_cupom_json = json.dumps(asdict(dados_nota))
+           
+            novo_cupom = Cupom.objects.create(
+                participante=participante,
+                dados_cupom=dados_cupom_json,
+                tipo_envio='Codigo' if 'submit_codigo' in request.POST else 'Imagem',
+                status=status_nota,
+                numero_documento=dados_nota.codigo_numerico,
+                cnpj_loja=dados_nota.cnpj_emitente,
+                dados_json=validar,
+                tipo_documento=dados_nota.tipo_documento
+            )
+            novo_cupom.save()
+
+            msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
+            contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
+            msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
+            contexto['msg_numeros'] = msg_numeros
+
+            # --- Validação de regras ---
+            valido, msg_validacao = Validar_regras_cupom(
+                novo_cupom.data_cadastro,
+                dados_nota.chave,
+                id_participante
+            )
+
+            contexto['msg_erro'] = msg_validacao
+
+            if valido:
+                novo_cupom.status = 'Pendente'
+            else:
+               novo_cupom.status = 'Invalido'
+
+            novo_cupom.save() 
+
+        except Exception as e:
+            contexto['msg_erro'] = f'Erro ao processar o cadastro: {e}'
+
+    return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+
+
+
+# comentei a função abaixo, vou colocar ela atualizada, para teste
+"""
 def cadastrar_cupom(request, id_participante):
     participante = get_object_or_404(Participantes, id=id_participante)
     contexto = {'id_participante': id_participante}
@@ -716,4 +820,5 @@ def cadastrar_cupom(request, id_participante):
             contexto['msg_erro'] = 'Não foi possível concluir o cadastro do seu cupom no momento. Tente novamente mais tarde.'
 
     return render(request, 'painel_cadastrar_cupom.html', contexto)
+    """
 

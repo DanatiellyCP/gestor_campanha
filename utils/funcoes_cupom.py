@@ -293,4 +293,3 @@ def get_dados_json(dados_json, tipo_cupom):
     }
 
     return resultado
-
