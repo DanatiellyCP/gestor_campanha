@@ -6,8 +6,15 @@ import re
 import base64
 from io import BytesIO
 
-from PIL import Image
-import pytesseract
+try:
+    from PIL import Image  # type: ignore
+except Exception:
+    Image = None  # type: ignore
+
+try:
+    import pytesseract  # type: ignore
+except Exception:
+    pytesseract = None  # type: ignore
 
 # OpenCV e numpy para leitura de QR a partir de imagem
 try:
@@ -29,13 +36,16 @@ def extrair_texto_ocr(imagem_path):
     """
     Recebe o caminho da imagem e retorna o texto extraído via OCR.
     """
+    # Se dependências de OCR não estiverem disponíveis no servidor, não quebre o fluxo
+    if Image is None or pytesseract is None:
+        return ""
     try:
         imagem = Image.open(imagem_path)
         texto = pytesseract.image_to_string(imagem, lang="por")
         return texto
     except Exception as e:
         print(f"Erro ao processar OCR: {e}")
-        return f"Erro ao processar OCR: {e}"
+        return ""
 
 
 
