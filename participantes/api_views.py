@@ -340,6 +340,52 @@ class EnviarNotaView(APIView):
         except Exception:
             validar = None
 
+        # Regra de campanha baseada na data de emissão da nota em dados_json (nfe.data_emissao)
+        try:
+            if str(getattr(settings, 'CAMPANHA', '')).upper() == 'ON':
+                inicio = datetime(2025, 8, 15).date()
+                fim = datetime(2025, 10, 15).date()
+                data_emissao_str = None
+                if isinstance(validar, dict):
+                    nfe = validar.get('nfe') or {}
+                    if isinstance(nfe, dict):
+                        data_emissao_str = nfe.get('data_emissao')
+                # Faz o parse da data
+                data_emissao_dt = None
+                if data_emissao_str:
+                    try:
+                        data_emissao_dt = datetime.fromisoformat(str(data_emissao_str).replace('Z', '+00:00'))
+                    except Exception:
+                        from datetime import datetime as _dt
+                        for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%Y-%m-%dT%H:%M:%S', '%d/%m/%Y %H:%M:%S'):
+                            try:
+                                data_emissao_dt = _dt.strptime(str(data_emissao_str), fmt)
+                                break
+                            except Exception:
+                                continue
+                if not data_emissao_dt:
+                    return Response(
+                        {
+                            "success": False,
+                            "message": "Não foi possível validar a data de emissão da nota para a campanha.",
+                            "data": [],
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+                data_emissao_date = data_emissao_dt.date()
+                if not (inicio <= data_emissao_date <= fim):
+                    return Response(
+                        {
+                            "success": False,
+                            "message": "Período de participação: 15/08/2025 a 15/10/2025. A data de emissão da nota está fora do período.",
+                            "data": [],
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+        except Exception:
+            # Em caso de erro inesperado nessa checagem, não bloquear o fluxo
+            pass
+
         # Serializa dados para JSON
         dados_cupom_json = json.dumps(asdict(dados_nota))
 
