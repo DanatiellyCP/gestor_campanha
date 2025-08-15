@@ -250,3 +250,27 @@ def area_cupom(request, id):
 
 
 
+
+def excluir_cupom(request, id):
+    """
+    Exclui um cupom do participante autenticado, somente se o status for
+    'Pendente' ou 'Invalidado'. Apenas via POST.
+    """
+    participante_id = request.session.get('participante_id')
+    if not participante_id:
+        return redirect('login_participante')
+
+    if request.method != 'POST':
+        return redirect('painel_participante')
+
+    cupom = get_object_or_404(Cupom, id=id)
+
+    # Verifica propriedade do cupom e status permitido
+    if (
+        cupom.participante_id == participante_id and
+        cupom.status in ('Pendente', 'Invalidado')
+    ):
+        cupom.delete()
+
+    # Independente do resultado, volta ao painel
+    return redirect('painel_participante')

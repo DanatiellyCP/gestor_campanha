@@ -15,6 +15,7 @@ from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
+from django.utils import timezone
 
 # Brevo (Sendinblue) SDK — import opcional
 try:
@@ -99,6 +100,28 @@ def duvidas(request):
 
 def regulamento(request):    
     return render(request, 'regulamentos.html')
+
+def excluir_cupom(request, id):
+    """
+    Exclui um cupom do participante autenticado, somente se o status for
+    'Pendente' ou 'Invalidado'. Apenas via POST.
+    """
+    participante_id = request.session.get('participante_id')
+    if not participante_id:
+        return redirect('logar')
+
+    if request.method != 'POST':
+        return redirect('painel_home')
+
+    cupom = get_object_or_404(Cupom, id=id)
+
+    if (
+        getattr(cupom, 'participante_id', None) == participante_id and
+        cupom.status in ('Pendente', 'Invalidado')
+    ):
+        cupom.delete()
+
+    return redirect('painel_home')
 
 def cadastrar(request):
     if request.method == 'POST':
@@ -475,12 +498,32 @@ def cadastrar_cupom(request, id_participante):
     contexto = {'id_participante': id_participante}
 
     if request.method == 'POST':
+        # Regra de campanha: aceitar cadastro somente entre 15/08/2025 e 15/10/2025
+        # (somente quando a variável de ambiente CAMPANHA estiver ON)
+        try:
+            if str(getattr(settings, 'CAMPANHA', '')).upper() == 'ON':
+                hoje_campanha = timezone.localdate()
+                inicio = datetime(2025, 8, 15).date()
+                fim = datetime(2025, 10, 15).date()
+                if not (inicio <= hoje_campanha <= fim):
+                    contexto['msg_erro'] = 'Período de participação: 15/08/2025 a 15/10/2025. Tente novamente dentro do período válido.'
+                    return render(request, 'painel_cadastrar_cupom.html', contexto)
+        except Exception:
+            # Em caso de erro inesperado nessa checagem, não bloquear o fluxo
+            pass
+
         chave_acesso = None
         dados_ocr = ""
         imagem_path = None
         erro = None
 
         try:
+            # Regra: limitar a 1 cupom por dia por participante
+            hoje = timezone.localdate()
+            if Cupom.objects.filter(participante=participante, data_cadastro=hoje).exists():
+                contexto['msg_erro'] = 'Você já cadastrou um cupom hoje. Tente novamente amanhã.'
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
             if 'submit_codigo' in request.POST:
                 # Captura e normaliza código digitado manualmente
                 raw = (request.POST.get('cod_cupom') or '').strip()
@@ -559,9 +602,6 @@ def cadastrar_cupom(request, id_participante):
                 contexto['msg_erro'] = msg
                 return render(request, 'painel_cadastrar_cupom.html', contexto)
 
-            # Status compatível com o modelo
-            status_nota = 'Validado'
-
             # Validação adicional (ex: consulta externa)
             validar = None
             try:
@@ -569,6 +609,10 @@ def cadastrar_cupom(request, id_participante):
             except Exception as _e:
                 # Mantém validar = None; trataremos abaixo
                 validar = None
+
+            # Define status do cupom conforme sucesso da comunicação
+            # Se houve falha na comunicação (validar é None/falsy), status deve ser 'Pendente'
+            status_nota = 'Validado' if validar else 'Pendente'
 
             # Serializa dados para JSON (string) para armazenar
             dados_cupom_json = json.dumps(asdict(dados_nota))
@@ -609,6 +653,18 @@ def cadastrar_cupom(request, id_participante):
                 except Exception as e_num:
                     print("[ERRO] Falha ao gerar números da sorte:", e_num)
                     msg_numeros = 'Falha ao gerar números da sorte.'
+
+                # Se nenhum número da sorte foi gerado, o cupom deve ficar como 'Invalidado'
+                try:
+                    total_nums = NumeroDaSorte.objects.filter(cupom=novo_cupom).count()
+                    if total_nums == 0:
+                        novo_cupom.status = 'Invalidado'
+                        novo_cupom.save(update_fields=['status'])
+                        if not msg_numeros:
+                            msg_numeros = 'Cupom inválido: nenhum número da sorte gerado.'
+                except Exception as _e_check:
+                    # Não bloqueia fluxo por erro de verificação
+                    pass
             else:
                 print("[INFO] Dados do cupom indisponíveis; produtos não processados.")
                 msg_produto = 'Dados do cupom indisponíveis; produtos não processados.'

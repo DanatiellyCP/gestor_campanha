@@ -14,6 +14,7 @@ from django.core.files.base import ContentFile
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 
 from campanha.views import Validar_regras_cupom
 from cupons.models.series import Serie
@@ -48,6 +49,12 @@ def cadastrar_cupom(request, id_participante):
         erro = None
 
         try:
+            # Regra: limitar a 1 cupom por dia por participante
+            hoje = timezone.localdate()
+            if Cupom.objects.filter(participante=participante, data_cadastro=hoje).exists():
+                contexto['msg_erro'] = 'Você já cadastrou um cupom hoje. Tente novamente amanhã.'
+                return render(request, 'cad_cupom.html', contexto)
+
             if 'submit_codigo' in request.POST:
                 # Captura código digitado manualmente
                 chave_acesso = request.POST.get('cod_cupom')
@@ -371,39 +378,48 @@ def validar_produto_cupom(cod_produto):
 
 
 def gerar_numero_sorte():
-    # Garante que temos uma série aberta
-    try:
-        serie_atual = Serie.objects.get(status='Aberta')
-    except Serie.DoesNotExist:
-        serie_atual = Serie.objects.create(
-            nome_serie='serie_00',
-            numero_atual=0,
-            status='Aberta'
-        )
+    """
+    Escolhe aleatoriamente uma série entre 00 e 99, mas evitando repetir
+    qualquer uma das últimas 95 séries utilizadas. Em seguida, gera os 5
+    dígitos finais aleatórios e garante unicidade do número completo.
+    """
+    # Coleta as últimas 95 séries usadas (prefixos dos números existentes)
+    recentes = list(NumeroDaSorte.objects.order_by('-id').values_list('numero', flat=True)[:95])
+    series_bloqueadas = set()
+    for n in recentes:
+        pref = str(n)[:2]
+        if pref.isdigit():
+            try:
+                series_bloqueadas.add(int(pref))
+            except Exception:
+                continue
 
-    # Extrai o código numérico da série (dois dígitos)
-    try:
-        serie_num = int(serie_atual.nome_serie.replace('serie_', ''))
-    except Exception:
-        serie_num = 0
+    # Candidatas são todas as séries 0..99 que não estão entre as bloqueadas
+    candidatas = [s for s in range(100) if s not in series_bloqueadas]
+    if not candidatas:
+        # Segurança: caso extremo, libera todas
+        candidatas = list(range(100))
+
+    proxima_serie = random.choice(candidatas)
 
     # Gera 5 dígitos aleatórios e garante unicidade do número completo
-    max_tentativas = 100
+    max_tentativas = 300
     for _ in range(max_tentativas):
         ultimos_cinco = random.randint(0, 99999)
-        numero_sorte = f"{serie_num:02d}{ultimos_cinco:05d}"
+        numero_sorte = f"{proxima_serie:02d}{ultimos_cinco:05d}"
         if not NumeroDaSorte.objects.filter(numero=numero_sorte).exists():
             return numero_sorte
 
-    # Se não conseguir um número único após várias tentativas, cria nova série e tenta mais uma vez
-    nova_serie_num = serie_num + 1
-    serie_atual = Serie.objects.create(
-        nome_serie=f'serie_{nova_serie_num:02d}',
-        numero_atual=0,
-        status='Aberta'
-    )
+    # Fallback extremo: tenta com outra série disponível, se houver
+    for s in candidatas:
+        ultimos_cinco = random.randint(0, 99999)
+        numero_sorte = f"{s:02d}{ultimos_cinco:05d}"
+        if not NumeroDaSorte.objects.filter(numero=numero_sorte).exists():
+            return numero_sorte
+
+    # Último fallback: retorna mesmo que exista (chance ínfima de colisão)
     ultimos_cinco = random.randint(0, 99999)
-    return f"{nova_serie_num:02d}{ultimos_cinco:05d}"
+    return f"{proxima_serie:02d}{ultimos_cinco:05d}"
 
 
 def edita_numero_serie(id, num_serie, status):
@@ -446,6 +462,15 @@ def cadastrar_numeros_da_sorte(cupom):
     if total_numeros == 0:
         return "Cupom não tem direito a números da sorte."
 
+    # Impõe limite de no máximo 2 números por cupom, considerando os já existentes
+    existentes = NumeroDaSorte.objects.filter(cupom=cupom).count()
+    disponiveis = max(0, 2 - existentes)
+
+    if disponiveis == 0:
+        return "Cupom já possui o limite de 2 números da sorte."
+
+    total_numeros = min(total_numeros, disponiveis)
+
     for _ in range(total_numeros):
         num_sorte = gerar_numero_sorte()
         NumeroDaSorte.objects.create(
@@ -455,4 +480,4 @@ def cadastrar_numeros_da_sorte(cupom):
             status='ativo'
         )
 
-    return f"{total_numeros} número(s) da sorte gerado(s) com sucesso."
+    return f"Foram cadastrados {total_numeros} números da sorte."
