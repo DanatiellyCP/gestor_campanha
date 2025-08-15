@@ -18,6 +18,7 @@ class Participantes(models.Model):
   aceita_termos = models.BooleanField(default=False)
   aceita_msg_whatsapp = models.BooleanField(default=False)
   aceita_info_bombril = models.BooleanField(default=False)
+  data_cadastro = models.DateTimeField(auto_now_add=True)
 
   # Status do participante
   STATUS = [
