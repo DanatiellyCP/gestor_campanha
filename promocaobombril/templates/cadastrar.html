@@ -42,12 +42,12 @@
       <div class="drawer" id="drawer">
         <ul class="links">
           <br/>
-          <li><a href="/home_responsive/">Início</a></li>
-          <li><a href="/como-participar">Como participar</a></li>
-          <li><a href="/produtos/">Produtos</a></li>
-          <li><a href="/lista-resultados">Resultados</a></li>
-          <li><a href="/regulamento/">Regulamentos</a></li>
-          <li><a href="/duvidas/">Dúvidas</a></li>
+          <li><a href="{% url 'home_responsive' %}">Início</a></li>
+          <li><a href="{% url 'como_participar' %}">Como participar</a></li>
+          <li><a href="{% url 'produtos' %}">Produtos</a></li>
+          <li><a href="{% url 'lista_resultado' %}">Resultados</a></li>
+          <li><a href="{% url 'regulamento' %}">Regulamentos</a></li>
+          <li><a href="{% url 'duvidas' %}">Dúvidas</a></li>
         </ul>
         <div class="actions">
           <a href="/cadastrar/" class="btn btn-participe" id="mParticipar">CADASTRAR</a>
@@ -289,7 +289,7 @@
   <footer class="footer">
     <div class="inner">
       <div class="footer-top">
-        <h2 class="footer-title">É MAIS QUE BOM. É DA</h2>
+        <h2 class="footer-title">É MAIS DO QUE BOM. É DA</h2>
         <img class="footer-logo" src="{% static 'responsive/images/LOGO_BOMBRIL.png' %}" alt="Bombril" />
       </div>
       <ul class="footer-links">
