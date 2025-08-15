@@ -498,19 +498,9 @@ def cadastrar_cupom(request, id_participante):
     contexto = {'id_participante': id_participante}
 
     if request.method == 'POST':
-        # Regra de campanha: aceitar cadastro somente entre 15/08/2025 e 15/10/2025
+        # Regra de campanha: aceitar cadastro somente se a data de autorização da nota
+        # (dados_json.data_autorizacao) estiver entre 15/08/2025 e 15/10/2025
         # (somente quando a variável de ambiente CAMPANHA estiver ON)
-        try:
-            if str(getattr(settings, 'CAMPANHA', '')).upper() == 'ON':
-                hoje_campanha = timezone.localdate()
-                inicio = datetime(2025, 8, 15).date()
-                fim = datetime(2025, 10, 15).date()
-                if not (inicio <= hoje_campanha <= fim):
-                    contexto['msg_erro'] = 'Período de participação: 15/08/2025 a 15/10/2025. Tente novamente dentro do período válido.'
-                    return render(request, 'painel_cadastrar_cupom.html', contexto)
-        except Exception:
-            # Em caso de erro inesperado nessa checagem, não bloquear o fluxo
-            pass
 
         chave_acesso = None
         dados_ocr = ""
@@ -609,6 +599,46 @@ def cadastrar_cupom(request, id_participante):
             except Exception as _e:
                 # Mantém validar = None; trataremos abaixo
                 validar = None
+
+            # Regra de campanha baseada na data de emissão da nota (dados_json.nfe.data_emissao)
+            try:
+                if str(getattr(settings, 'CAMPANHA', '')).upper() == 'ON':
+                    inicio = datetime(2025, 8, 15).date()
+                    fim = datetime(2025, 10, 15).date()
+                    # Extrai nfe.data_emissao de validar (que será salvo em dados_json)
+                    data_emissao_str = None
+                    if isinstance(validar, dict):
+                        nfe = validar.get('nfe') or {}
+                        if isinstance(nfe, dict):
+                            data_emissao_str = nfe.get('data_emissao')
+                    # Faz o parse robusto da data
+                    data_emissao_dt = None
+                    if data_emissao_str:
+                        try:
+                            # Tenta ISO8601 completo
+                            data_emissao_dt = datetime.fromisoformat(str(data_emissao_str).replace('Z', '+00:00'))
+                        except Exception:
+                            try:
+                                # Tenta apenas data dd/mm/aaaa ou aaaa-mm-dd
+                                from datetime import datetime as _dt
+                                for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%Y-%m-%dT%H:%M:%S', '%d/%m/%Y %H:%M:%S'):
+                                    try:
+                                        data_emissao_dt = _dt.strptime(str(data_emissao_str), fmt)
+                                        break
+                                    except Exception:
+                                        continue
+                            except Exception:
+                                data_emissao_dt = None
+                    if not data_emissao_dt:
+                        contexto['msg_erro'] = 'Não foi possível validar a data de emissão da nota para a campanha.'
+                        return render(request, 'painel_cadastrar_cupom.html', contexto)
+                    data_emissao_date = data_emissao_dt.date()
+                    if not (inicio <= data_emissao_date <= fim):
+                        contexto['msg_erro'] = 'Período de participação: 15/08/2025 a 15/10/2025. A data de emissão da nota está fora do período.'
+                        return render(request, 'painel_cadastrar_cupom.html', contexto)
+            except Exception:
+                # Em caso de erro inesperado nessa checagem, não bloquear o fluxo
+                pass
 
             # Define status do cupom conforme sucesso da comunicação
             # Se houve falha na comunicação (validar é None/falsy), status deve ser 'Pendente'
