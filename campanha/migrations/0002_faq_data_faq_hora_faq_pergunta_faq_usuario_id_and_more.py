@@ -35,27 +35,27 @@ class Migration(migrations.Migration):
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='soteios',
+            model_name='sorteios',
             name='data_cadastro',
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='soteios',
+            model_name='',
             name='data_sorteio',
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='soteios',
+            model_name='',
             name='hora_cadastro',
             field=models.TimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='soteios',
+            model_name='sorteios',
             name='hora_sorteio',
             field=models.TimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='soteios',
+            model_name='sorteios',
             name='usuario_id',
             field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
             preserve_default=False,

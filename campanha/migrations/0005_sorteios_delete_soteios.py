@@ -28,6 +28,6 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.DeleteModel(
-            name='Soteios',
+            name='Sorteios',
         ),
     ]
