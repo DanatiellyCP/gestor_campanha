@@ -9,7 +9,7 @@
     <!-- Formulário de pesquisa -->
     <form method="get" class="row mb-3">
         <div class="col-md-8">
-            <input type="text" name="q" class="form-control" placeholder="Buscar por nome, CPF ou e-mail..."
+            <input type="text" name="q" class="form-control" placeholder="Buscar por nome, CPF, celular ou e-mail..."
                    value="{{ search_query }}">
         </div>
         <div class="col-md-4">
@@ -17,41 +17,96 @@
         </div>
     </form>
 
-    <!-- Tabela de participantes -->
+   <form method="POST" action="{% url 'editar_participante' %}" onsubmit="return confirmarEdicao();">
+    {% csrf_token %}
     <table class="table table-striped table-bordered">
         <thead>
             <tr>
+                <th>Origem Cd.</th>
                 <th>Nome</th>
                 <th>CPF</th>
-                <th>Email</th>
+                <th>E-mail</th>
+                <th>Celular</th>
+                <th>Cupons</th>
+                <th>Salvar</th>
                 <th>Detalhar</th>
-                <th> Apagar </th>
+                <th>Apagar</th>
             </tr>
         </thead>
         <tbody>
             {% for participante in page_obj %}
             <tr>
-                <td>{{ participante.nome }}</td>
-                <td>{{ participante.cpf }}</td>
-                <td>{{ participante.email }}</td>
+                <!-- Campos editáveis -->
+                 
+                <td> 
+                    {% if participante.cadastro == 1 %}
+                        <input type="text" value="Whatsapp" class="form-control" readonly>
+                    {% else %}
+                        <input type="text" value="Sistema" class="form-control" readonly>
+                    {% endif %}
+                </td>
+                <td>
+                    <input type="text" name="nome_{{ participante.id }}" value="{{ participante.nome }}" class="form-control">
+                </td>
+                <td>
+                    <input type="text" name="cpf_{{ participante.id }}" value="{{ participante.cpf }}" class="form-control">
+                </td>
+                <td>
+                    <input type="email" name="email_{{ participante.id }}" value="{{ participante.email }}" class="form-control">
+                </td>
+                <td>
+                    <input type="text" name="celular_{{ participante.id }}" value="{{ participante.celular }}" class="form-control">
+                </td>
+
+                <!-- Campo só leitura -->
+                <td>
+                    <input type="text" value="{{ participante.total_cupons }}" class="form-control" readonly>
+                </td>
+
+                <!-- Botão de salvar alterações -->
+                <td class="text-center">
+                    <button type="submit" name="id_participante" value="{{ participante.id }}" class="btn btn-outline-secondary btn-sm">
+                        <img src="{% static 'imgs_sistema/file-edit.ico' %}" alt="Salvar" style="width:18px;height:18px;">
+                    </button>
+                </td>
+
+                <!-- Detalhar -->
                 <td class="text-center">
                     <a href="{% url 'participante_detalhado' participante.id %}" class="btn btn-outline-secondary btn-sm">
                         <img src="{% static 'imgs_sistema/detalhe.ico' %}" alt="Detalhar" style="width:18px;height:18px;">
                     </a>
                 </td>
+
+                <!-- Apagar -->
                 <td>
-                    <a href="{% url 'deletar_participante' participante.id %}" class="btn btn-light">
-                        <img src="{% static 'imgs_sistema/file-delete.ico'  %}" alt="" style="width:20px;height:20px;"></imag>
+                    <a href="{% url 'deletar_participante' participante.id %}" class="btn btn-light" onclick="return confirmarExclusao();">
+                        <img src="{% static 'imgs_sistema/file-delete.ico' %}" alt="" style="width:20px;height:20px;">
                     </a>
-                </td>  
+                </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="3" class="text-center">Nenhum participante encontrado.</td>
+                <td colspan="8" class="text-center">Nenhum participante encontrado.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</form>
+
+<script>
+    function confirmarEdicao() {
+        return confirm("Tem certeza que deseja salvar as alterações deste participante?");
+    }
+
+    function confirmarExclusao() {
+        return confirm("Tem certeza que deseja Excluir este participante?");
+    }
+
+    function AlertMsg(msg){
+        alert(msg)
+    }
+
+</script>
 
     <!-- Paginação -->
     <nav aria-label="Page navigation">

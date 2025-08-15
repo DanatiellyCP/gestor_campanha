@@ -14,7 +14,7 @@ class Faq(models.Model):
         return f"Pergunta  {self.pergunta} - Resposta {self.resposta}"
 
 
-class Soteios(models.Model):
+class Sorteios(models.Model):
     data_cadastro = models.DateField(blank=True, null=True)
     hora_cadastro =  models.TimeField(blank=True, null=True)
     usuario_id = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
@@ -28,7 +28,7 @@ class Soteios(models.Model):
     ]
     status = models.CharField(max_length=1, choices=STATUS, blank=True, null=True)
 
-    observacoes = models.TextField(blank=True, null=True),
+    observacoes = models.TextField(blank=True, null=True)
     resultado_sorteio = models.CharField(max_length=200)
     def __str__(self):
         return f"log - {self.data_sorteio} - {self.hora_sorteio} - {self.status}"

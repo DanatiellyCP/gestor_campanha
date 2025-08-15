@@ -21,7 +21,8 @@ urlpatterns = [
     # parte de Participantes e sorteios
     path('dados_participantes/', views.dados_participantes, name='dados_participantes'),
     path('sorteios/', views.sorteios, name='sorteios'),
-    path('editar_participante/<int:id>', views.editar_participante, name='editar_participante'),
+    #path('editar_participante/<int:id>', views.editar_participante, name='editar_participante'),
+    path('editar_participante/', views.editar_participante, name='editar_participante'),
     path('participante_detalhado/<int:id>', views.participante_detalhado, name='participante_detalhado'),
     path('pesquisar_participante/', views.pesquisar_participante, name='pesquisar_participante'),
     path('deletar_participante/<int:id>', views.deletar_participante, name='deletar_participante'),
@@ -40,6 +41,12 @@ urlpatterns = [
 
     # gestão da campanha
     path('gerar_lista_csv/', views.gerar_lista_csv, name='gerar_lista_csv'),
-     path('editar_regra/', views.editar_regra, name='editar_regra'),
-    
+    path('editar_regra/', views.editar_regra, name='editar_regra'),
+
+    path('sorteios/', views.sorteios, name='sorteios'),
+
+    path('dashboard/', views.dash, name='dashboard'),
+    path('graficos_participantes/', views.graficos_participantes, name='graficos_participantes'),
+    path('participantes-dados/', views.participantes_dados, name='participantes_dados'),
+    path('listagem_sorteio/', views.listagem_sorteio, name='listagem_sorteio'),
 ]
