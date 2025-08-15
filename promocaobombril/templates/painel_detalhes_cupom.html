@@ -23,10 +23,10 @@
           </a>
           <nav aria-label="Seções">
             <ul class="links">
-              <li><a href="/painel-home/">Inicio</a></li>
-              <li><a target="_blank" href="/lista-resultados/">Sorteios</a></li>
-              <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
-              <li><a href="/painel-home/">Editar perfil</a></li>
+              <li><a href="{% url 'painel_home' %}">Inicio</a></li>
+              <li><a target="_blank" href="{% url 'lista_resultado' %}">Sorteios</a></li>
+              <li><a href="{% url 'painel_cadastrar_cupom' %}">Cadastrar cupons</a></li>
+              <li><a href="{% url 'painel_home' %}">Editar perfil</a></li>
             </ul>
           </nav>
           <div class="actions">

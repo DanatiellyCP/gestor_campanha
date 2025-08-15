@@ -323,7 +323,7 @@ body{ margin:0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cant
 .panel-hero .topo-robot{ position:static; right:auto; bottom:auto; width: clamp(70px, 18vw, 190px); }
 /* Home only: video background in hero */
 .home-hero{ position: relative; height: 700px; background: none; overflow: hidden; }
-.home-hero .background-video{ position: absolute; margin: 0 auto; inset: 0; width: 1200px; height: 100%; object-fit: cover; z-index: 0; }
+.home-hero .background-video{ position: absolute; margin: 0 auto; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
 .home-hero .inner{ position: relative; z-index: 1; }
 /* Apenas na Home: fundo amarelo no topo */
 .home-page .topo.home-hero{ background-color: #ddc704; }
