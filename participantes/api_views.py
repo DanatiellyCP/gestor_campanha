@@ -7,19 +7,6 @@ from promocaobombril.api_auth import FixedTokenPermission
 from cupons.models.cupom import Cupom
 from cupons.models.numero_sorte import NumeroDaSorte
 from utils.get_modelo import identificar_chave_detalhada
-from utils.funcoes_cupom import (
-    extrair_texto_ocr,
-    extrair_numero_cupom,
-    extrai_codigo_qrcode,
-    get_dados_json,
-)
-from cupons.views import (
-    guardar_cupom,
-    validar_cupom,
-    cadastrar_produto,
-    cadastrar_numeros_da_sorte,
-)
-from dataclasses import asdict
 import json
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.core.files.base import ContentFile
