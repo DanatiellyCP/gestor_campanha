@@ -81,9 +81,11 @@
           <strong>{{ msg_erro|capfirst }}</strong>
           {% endif %}
           {% endwith %}
-          {% if msg_erro|lower != 'cupom já cadastrado' %}
+          {% with msg_lower=msg_erro|lower %}
+          {% if msg_lower != 'cupom já cadastrado' and msg_lower != 'você já cadastrou um cupom hoje. tente novamente amanhã.' %}
           <span class="alert-msg"> Tente ler o QR Code ou digite o código. Se persistir, aguarde alguns instantes e tente novamente. </span>
           {% endif %}
+          {% endwith %}
         </div>
         {% endif %}
         {% if msg_sucesso %}

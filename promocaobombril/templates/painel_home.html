@@ -89,7 +89,15 @@
                       <td data-label="Status"><span class="badge {% if cupom.status == 'Validado' %}status-ok{% elif cupom.status == 'Pendente' %}status-wait{% else %}status-bad{% endif %}">{{ cupom.status }}</span></td>
                       <td data-label="Data">{{ cupom.data_cadastro|date:"d/m/Y" }}</td>
                       <td data-label="Hora">{{ cupom.hora_cadastro|time:"H:i" }}</td>
-                      <td data-label="Detalhar" class="detail"> <a href="{% url 'painel_detalhes_cupom' %}?id={{ cupom.id }}"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Exibir</a></td>
+                      <td data-label="Detalhar" class="detail">
+                        <a href="{% url 'painel_detalhes_cupom' %}?id={{ cupom.id }}"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Exibir</a>
+                        {% if cupom.status == 'Pendente' or cupom.status == 'Invalidado' %}
+                          &nbsp;|&nbsp;
+                          <button type="button" class="link-delete" data-cupom-id="{{ cupom.id }}" aria-haspopup="dialog">
+                            <i class="fa-solid fa-trash" aria-hidden="true"></i> Excluir
+                          </button>
+                        {% endif %}
+                      </td>
                     </tr>
                   {% endfor %}
                 {% else %}
@@ -165,5 +173,51 @@
     </div>
    </div>
   <script src="{% static 'responsive/menu.js' %}?v=2025-08-13-1"></script>
+  <style>
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
+    .modal{background:#fff;border-radius:8px;max-width:420px;width:90%;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+    .modal h4{margin:0 0 10px 0;color:#263A7C}
+    .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+    .btn-cancel{background:#e0e0e0;border:none;padding:8px 14px;border-radius:6px;cursor:pointer}
+    .btn-confirm{background:#c0392b;color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer}
+    .detail .link-delete{background:none;border:none;color:#c0392b;cursor:pointer;font:inherit;padding:0}
+    .detail .link-delete i{margin-right:4px}
+  </style>
+  <div class="modal-overlay" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+    <div class="modal">
+      <h4 id="deleteTitle">Confirmar exclusão</h4>
+      <p>Tem certeza que deseja excluir este cupom? Esta ação não pode ser desfeita.</p>
+      <form id="deleteForm" method="post">
+        {% csrf_token %}
+        <div class="actions">
+          <button type="button" class="btn-cancel" id="cancelDelete">Cancelar</button>
+          <button type="submit" class="btn-confirm">Excluir</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    (function(){
+      const modal = document.getElementById('deleteModal');
+      const form = document.getElementById('deleteForm');
+      const cancelBtn = document.getElementById('cancelDelete');
+      function openModal(cupomId){
+        // Define action para endpoint de exclusão
+        form.action = '/excluir-cupom/' + cupomId + '/';
+        modal.style.display = 'flex';
+      }
+      function closeModal(){ modal.style.display = 'none'; }
+      document.addEventListener('click', function(e){
+        const btn = e.target.closest('.link-delete');
+        if(btn){
+          const id = btn.getAttribute('data-cupom-id');
+          if(id){ openModal(id); }
+        }
+      });
+      cancelBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', function(e){ if(e.target === modal){ closeModal(); } });
+      document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ closeModal(); } });
+    })();
+  </script>
 </body>
 </html>
