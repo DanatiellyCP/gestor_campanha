@@ -24,6 +24,7 @@ urlpatterns = [
     path('cupons_participante/<int:id_cupom>/', views.cupons_participante, name='cupons_participante'),
     path('dados_cupons/<int:id_cupom>/', views.dados_cupom, name='dados_cupom'),
      path('area_cupom/<int:id>/', views.area_cupom, name="area_cupom"),
+     path('excluir_cupom/<int:id>/', views.excluir_cupom, name='excluir_cupom'),
 
     # --- URLs para a API ---
     path(

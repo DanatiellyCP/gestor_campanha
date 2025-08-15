@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
 
     <link rel="icon" type="image/png" href="{% static 'responsive/images/Favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}?v=2025-08-13-1">
 </head>
 <body>
   <div class="wrap">
@@ -23,10 +23,10 @@
         </a>
         <nav aria-label="Seções">
           <ul class="links">
-            <li><a href="/painel-home/">Inicio</a></li>
-            <li><a target="_blank" href="/lista-resultados/">Sorteios</a></li>
-            <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
-            <li><a href="/painel-home/">Editar perfil</a></li>
+            <li><a href="{% url 'painel_home' %}">Inicio</a></li>
+            <li><a target="_blank" href="{% url 'lista_resultado' %}">Sorteios</a></li>
+            <li><a href="{% url 'painel_cadastrar_cupom' %}">Cadastrar cupons</a></li>
+            <li><a href="{% url 'painel_home' %}">Editar perfil</a></li>
           </ul>
         </nav>
         <div class="actions">
@@ -74,8 +74,18 @@
         {% if msg_erro %}
         <div id="alertErroCupom" role="alert" class="alert alert-error alert-error--strong" tabindex="-1" aria-live="assertive">
           <span class="alert-ico" aria-hidden="true">⚠️</span>
-          <strong>Não foi possível processar seu cupom. {{ msg_erro }}</strong>
+          {% with msg_lower=msg_erro|lower %}
+          {% if msg_lower|slice:":14" == 'chave inválida' %}
+          <strong>Não foi possivel processar seu cupom agora.</strong>
+          {% else %}
+          <strong>{{ msg_erro|capfirst }}</strong>
+          {% endif %}
+          {% endwith %}
+          {% with msg_lower=msg_erro|lower %}
+          {% if msg_lower != 'cupom já cadastrado' and msg_lower != 'você já cadastrou um cupom hoje. tente novamente amanhã.' %}
           <span class="alert-msg"> Tente ler o QR Code ou digite o código. Se persistir, aguarde alguns instantes e tente novamente. </span>
+          {% endif %}
+          {% endwith %}
         </div>
         {% endif %}
         {% if msg_sucesso %}
@@ -153,6 +163,13 @@
       <p class="footer-legal">
         PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
       </p>
+      <p class="footer-legal">
+        Em caso de dúvidas, entre em contato com nosso SAC:<br/>
+
+        E-mail: faleconosco@promocaobombril.com.br<br/>
+
+        Telefone: 0800 7076161
+      </p>
     </div>
   </footer>
 
@@ -163,7 +180,7 @@
       <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
     </div>
    </div>
-  <script src="{% static 'responsive/menu.js' %}"></script>
+  <script src="{% static 'responsive/menu.js' %}?v=2025-08-13-1"></script>
   <!-- jsQR para decodificar QR Codes no cliente -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <!-- Overlay de carregamento -->
@@ -386,11 +403,62 @@
           if (!this.files || this.files.length === 0){
             filePh.textContent = 'Carregar arquivo';
             if (lbl) lbl.classList.remove('selected');
-          } else {
-            const name = this.files[0].name;
-            filePh.textContent = name;
-            if (lbl) lbl.classList.add('selected');
+            return;
           }
+
+          const file = this.files[0];
+          const name = file.name;
+          filePh.textContent = name;
+          if (lbl) lbl.classList.add('selected');
+
+          // Tenta decodificar QR localmente com jsQR para acelerar a experiência
+          try {
+            const reader = new FileReader();
+            reader.onload = function(ev){
+              try {
+                const img = new Image();
+                img.onload = function(){
+                  try {
+                    const off = document.createElement('canvas');
+                    const MAX = 1080; // limita tamanho para performance
+                    let w = img.naturalWidth || img.width;
+                    let h = img.naturalHeight || img.height;
+                    if (w > MAX || h > MAX){
+                      const scale = Math.min(MAX / w, MAX / h);
+                      w = Math.max(1, Math.round(w * scale));
+                      h = Math.max(1, Math.round(h * scale));
+                    }
+                    off.width = w; off.height = h;
+                    const ctx = off.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const imageData = ctx.getImageData(0, 0, w, h);
+                    const qr = jsQR(imageData.data, imageData.width, imageData.height);
+                    if (qr && qr.data){
+                      const codigo = extractCodigoFromText(qr.data);
+                      if (codigo && codigo.length === 44){
+                        // Preenche o formulário de código e envia
+                        input.value = codigo;
+                        let hidden = form.querySelector('input[name="submit_codigo"]');
+                        if (!hidden) {
+                          hidden = document.createElement('input');
+                          hidden.type = 'hidden';
+                          hidden.name = 'submit_codigo';
+                          hidden.value = '1';
+                          form.appendChild(hidden);
+                        }
+                        showOverlay();
+                        form.submit();
+                        return;
+                      }
+                    }
+                  } catch(e) { /* ignora e deixa backend tentar OCR/QR */ }
+                };
+                img.onerror = function(){ /* sem preview, segue fluxo padrão */ };
+                img.src = ev.target.result;
+              } catch(e){ /* fallback para servidor */ }
+            };
+            reader.readAsDataURL(file);
+          } catch(e) { /* navegador sem FileReader: segue fluxo padrão */ }
         });
       }
     })();

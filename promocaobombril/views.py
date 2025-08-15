@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.hashers import check_password, make_password
+from django.core.mail import send_mail
+from django.conf import settings
+from django.core import signing
+import logging
 from participantes.models import Participantes
 from cupons.models.cupom import Cupom
 from datetime import datetime
@@ -8,7 +12,24 @@ import re
 import json
 from dataclasses import asdict
 from django.core.files.storage import default_storage
-from campanha.views import Validar_regras_cupom
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db import IntegrityError
+from django.utils import timezone
+
+# Brevo (Sendinblue) SDK — import opcional
+try:
+    import sib_api_v3_sdk
+    from sib_api_v3_sdk.rest import ApiException
+except Exception:
+    sib_api_v3_sdk = None
+    ApiException = Exception
+
+# Lista de CPFs inválidos (importada do módulo dedicado)
+from cpfs_invalidos import CPFS_INVALIDOS
+
+# Conjunto para busca mais rápida (O(1))
+CPFS_INVALIDOS_SET = set(CPFS_INVALIDOS)
 
 # Helpers de cupom e validação
 from utils.get_modelo import identificar_chave_detalhada
@@ -39,6 +60,26 @@ def participe(request):
     # lógica da view
     return render(request, 'participe.html')
 
+@csrf_exempt
+def cpf_invalido_check(request):
+    """
+    Endpoint para verificar se um CPF está na lista de inválidos.
+    Aceita CPF via querystring (?cpf=xxx) ou corpo POST (form/json).
+    Retorna JSON apenas com booleano: true (existe) ou false (não existe)
+    """
+    cpf_raw = (
+        request.GET.get('cpf')
+        or request.POST.get('cpf')
+        or ''
+    )
+    cpf = re.sub(r'\D', '', cpf_raw)
+    if not cpf:
+        # Sem CPF, respondemos false para manter contrato simples (apenas true/false)
+        return JsonResponse(False, safe=False)
+
+    exists = cpf in CPFS_INVALIDOS_SET
+    return JsonResponse(exists, safe=False)
+
 def home_responsive(request):    
     return render(request, 'home_responsive.html')
 
@@ -59,6 +100,28 @@ def duvidas(request):
 
 def regulamento(request):    
     return render(request, 'regulamentos.html')
+
+def excluir_cupom(request, id):
+    """
+    Exclui um cupom do participante autenticado, somente se o status for
+    'Pendente' ou 'Invalidado'. Apenas via POST.
+    """
+    participante_id = request.session.get('participante_id')
+    if not participante_id:
+        return redirect('logar')
+
+    if request.method != 'POST':
+        return redirect('painel_home')
+
+    cupom = get_object_or_404(Cupom, id=id)
+
+    if (
+        getattr(cupom, 'participante_id', None) == participante_id and
+        cupom.status in ('Pendente', 'Invalidado')
+    ):
+        cupom.delete()
+
+    return redirect('painel_home')
 
 def cadastrar(request):
     if request.method == 'POST':
@@ -90,6 +153,17 @@ def cadastrar(request):
                 return render(request, 'cadastrar.html', {'erro': 'Data de nascimento inválida. Use o formato dd/mm/aaaa.'})
         else:
             dt_nasc = None
+
+        # Regra: impedir cadastro de menor de 18 anos
+        if dt_nasc is not None:
+            try:
+                today = datetime.today().date()
+                age = today.year - dt_nasc.year - ((today.month, today.day) < (dt_nasc.month, dt_nasc.day))
+                if age < 18:
+                    return render(request, 'cadastrar.html', {'erro': 'É necessário ser maior de 18 anos para se cadastrar.'})
+            except Exception:
+                # Em caso de qualquer falha inesperada no cálculo, retornar erro genérico de data
+                return render(request, 'cadastrar.html', {'erro': 'Data de nascimento inválida.'})
 
         # Criptografa a senha
         senha_hash = make_password(senha)
@@ -144,16 +218,17 @@ def cadastrar(request):
 
 def logar(request):
     if request.method == 'POST':
-        email = (request.POST.get('email') or '').strip()
+        cpf_raw = (request.POST.get('cpf') or '').strip()
+        cpf = re.sub(r'\D', '', cpf_raw)
         senha = request.POST.get('senha') or ''
 
-        if not email or not senha:
-            return render(request, 'logar.html', {'erro': 'Informe e-mail e senha.'})
+        if not cpf or not senha:
+            return render(request, 'logar.html', {'erro': 'Informe CPF e senha.'})
 
         try:
-            # Evita 500 com e-mails duplicados: pega o mais recente
+            # Busca por CPF normalizado (somente dígitos); pega o mais recente por segurança
             participante = (
-                Participantes.objects.filter(email=email).order_by('-id').first()
+                Participantes.objects.filter(cpf=cpf).order_by('-id').first()
             )
             if not participante:
                 return render(request, 'logar.html', {'erro': 'Participante não encontrado.'})
@@ -172,11 +247,14 @@ def logar(request):
             # Log opcional: print(e)
             return render(request, 'logar.html', {'erro': 'Não foi possível autenticar. Tente novamente.'})
 
-    # GET: renderiza página de login e, se houver, mensagem de sucesso pós-cadastro
+    # GET: renderiza página de login e, se houver, mensagem de sucesso
     sucesso = request.GET.get('signup') == '1'
+    reset_ok = request.GET.get('reset') == '1'
     contexto = {}
     if sucesso:
         contexto['msg_sucesso'] = 'Cadastro realizado com sucesso! Faça login para continuar.'
+    if reset_ok:
+        contexto['msg_sucesso'] = 'Senha redefinida com sucesso! Faça seu login.'
     return render(request, 'logar.html', contexto)
 
 # Logout: limpa sessão e volta ao login
@@ -187,6 +265,128 @@ def logout_view(request):
     except Exception:
         request.session.pop('participante_id', None)
     return redirect('logar')
+
+
+# ============================
+# Recuperação de senha
+# ============================
+def recuperar_senha(request):
+    """Fluxo de recuperação via CPF: envia e-mail com link temporário de redefinição."""
+    if request.method == 'POST':
+        cpf_raw = (request.POST.get('cpf') or '').strip()
+        cpf = re.sub(r'\D', '', cpf_raw)
+        if not cpf:
+            return render(request, 'recuperar_senha.html', {'erro': 'Informe seu CPF.'})
+
+        participante = Participantes.objects.filter(cpf=cpf).order_by('-id').first()
+        if not participante:
+            return render(request, 'recuperar_senha.html', {'erro': 'CPF não encontrado.'})
+        if not participante.email:
+            return render(request, 'recuperar_senha.html', {'erro': 'Não há e-mail cadastrado para este CPF.'})
+
+        # Gera token assinado com expiração (ex.: 2 horas)
+        data = {'pid': participante.id}
+        token = signing.dumps(data, salt='reset-senha')
+
+        # Monta URL absoluta
+        try:
+            host = settings.DOMAIN_NAME or request.get_host()
+            scheme = 'https' if request.is_secure() else 'http'
+            reset_url = f"{scheme}://{host}{reverse('reset_senha', args=[token])}"
+        except Exception:
+            reset_url = request.build_absolute_uri(reverse('reset_senha', args=[token]))
+        # URL absoluta para o banner do e-mail (imagem pública nos estáticos)
+        try:
+            # Usa o mesmo host/scheme quando possível
+            banner_url = f"{scheme}://{host}/static/responsive/banner_mobile.png"
+        except Exception:
+            # Fallback simples caso as variáveis não existam neste ponto
+            banner_url = request.build_absolute_uri('/static/responsive/banner_mobile.png')
+
+        assunto = 'Recuperação de senha – Promoção Bombril'
+        corpo = (
+            f"Olá, {participante.nome}.\n\n"
+            f"Recebemos uma solicitação para redefinir sua senha.\n"
+            f"Para continuar, acesse o link abaixo (válido por 2 horas):\n"
+            f"{reset_url}\n\n"
+            f"Se você não solicitou, ignore esta mensagem."
+        )
+        html_corpo = (
+            f"<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;padding:16px 12px;\">"
+            f"  <div style=\"text-align:center;margin-bottom:16px;\">"
+            f"    <img src=\"{banner_url}\" alt=\"Promoção Bombril\" style=\"max-width:100%;height:auto;border:0;display:block;margin:0 auto;\">"
+            f"  </div>"
+            f"  <p style=\"font-size:16px;color:#111;\">Olá, {participante.nome}.</p>"
+            f"  <p style=\"font-size:14px;color:#111;\">Recebemos uma solicitação para redefinir sua senha.</p>"
+            f"  <p style=\"font-size:14px;color:#111;\">Para continuar, clique no botão abaixo (válido por 2 horas):</p>"
+            f"  <p style=\"text-align:center;margin:24px 0;\">"
+            f"    <a href=\"{reset_url}\" target=\"_blank\" style=\"background:#e30613;color:#fff;text-decoration:none;padding:12px 20px;border-radius:4px;display:inline-block;font-weight:bold;\">Redefinir minha senha</a>"
+            f"  </p>"
+            f"  <p style=\"font-size:12px;color:#555;\">Se você não solicitou, ignore esta mensagem.</p>"
+            f"</div>"
+        )
+
+        try:
+            # Preferência: Brevo Transactional Emails API, se configurada
+            if getattr(settings, 'BREVO_API_KEY', '') and sib_api_v3_sdk is not None:
+                configuration = sib_api_v3_sdk.Configuration()
+                configuration.api_key['api-key'] = settings.BREVO_API_KEY
+                api_client = sib_api_v3_sdk.ApiClient(configuration)
+                api_instance = sib_api_v3_sdk.TransactionalEmailsApi(api_client)
+                from_name = getattr(settings, 'DEFAULT_FROM_NAME', 'Promoção Bombril')
+                sender_email = settings.DEFAULT_FROM_EMAIL
+                send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
+                    to=[{"email": participante.email, "name": participante.nome or ''}],
+                    sender={"name": from_name, "email": sender_email},
+                    subject=assunto,
+                    html_content=html_corpo,
+                )
+                api_instance.send_transac_email(send_smtp_email)
+            else:
+                # Fallback SMTP padrão do Django
+                send_mail(
+                    assunto,
+                    corpo,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [participante.email],
+                    fail_silently=False,
+                )
+        except Exception as e:
+            logging.getLogger(__name__).exception("Falha ao enviar e-mail de recuperação de senha")
+            return render(request, 'recuperar_senha.html', {'erro': 'Não foi possível enviar o e-mail. Tente novamente mais tarde.'})
+
+        return render(request, 'recuperar_senha.html', {
+            'msg': 'Enviamos um e-mail com o link para redefinir sua senha. Verifique sua caixa de entrada e o spam.'
+        })
+
+    return render(request, 'recuperar_senha.html')
+
+
+def reset_senha(request, token):
+    """Página para definir nova senha a partir do token."""
+    # Valida token (expira em 2 horas = 7200s)
+    try:
+        data = signing.loads(token, salt='reset-senha', max_age=7200)
+        pid = int(data.get('pid'))
+    except Exception:
+        return render(request, 'reset_senha.html', {'erro': 'Link inválido ou expirado.'})
+
+    participante = get_object_or_404(Participantes, id=pid)
+
+    if request.method == 'POST':
+        senha = request.POST.get('senha') or ''
+        confirmar = request.POST.get('confirmar') or ''
+        if len(senha) < 8:
+            return render(request, 'reset_senha.html', {'erro': 'A senha deve ter ao menos 8 caracteres.'})
+        if senha != confirmar:
+            return render(request, 'reset_senha.html', {'erro': 'As senhas não conferem.'})
+
+        participante.senha = make_password(senha)
+        participante.save()
+        # Redireciona ao login com mensagem de sucesso
+        return redirect(f"{reverse('logar')}?signup=0&reset=1")
+
+    return render(request, 'reset_senha.html')
 
 @require_login
 def painel_home(request):
@@ -262,11 +462,24 @@ def painel_detalhes_cupom(request):
     numeros_objs = list(NumeroDaSorte.objects.filter(cupom=cupom).order_by('id'))
     numeros = [n.numero for n in numeros_objs]
 
-    # Tenta extrair dados detalhados caso necessários no futuro
+    # Extrai dados detalhados do cupom
+    # 1) Prioriza JSON bruto salvo em `cupom.dados_cupom` (string JSON)
+    # 2) Faz fallback para o formato normalizado via `get_dados_json(cupom.dados_json, tipo)`
     dados_extra = None
     try:
-        if cupom.dados_json:
-            dados_extra = get_dados_json(cupom.dados_json, cupom.tipo_documento)
+        if getattr(cupom, 'dados_cupom', None):
+            raw = cupom.dados_cupom
+            if isinstance(raw, str) and raw.strip():
+                try:
+                    dados_extra = json.loads(raw)
+                except Exception:
+                    dados_extra = None
+        # Fallback para dados_json normalizado
+        if dados_extra is None and cupom.dados_json:
+            try:
+                dados_extra = get_dados_json(cupom.dados_json, cupom.tipo_documento)
+            except Exception:
+                dados_extra = None
     except Exception:
         dados_extra = None
 
@@ -389,12 +602,22 @@ def cadastrar_cupom(request, id_participante):
     contexto = {'id_participante': id_participante}
 
     if request.method == 'POST':
+        # Regra de campanha: aceitar cadastro somente se a data de autorização da nota
+        # (dados_json.data_autorizacao) estiver entre 15/08/2025 e 15/10/2025
+        # (somente quando a variável de ambiente CAMPANHA estiver ON)
+
         chave_acesso = None
         dados_ocr = ""
         imagem_path = None
         erro = None
 
         try:
+            # Regra: limitar a 1 cupom por dia por participante
+            hoje = timezone.localdate()
+            if Cupom.objects.filter(participante=participante, data_cadastro=hoje).exists():
+                contexto['msg_erro'] = 'Você já cadastrou um cupom hoje. Tente novamente amanhã.'
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
             if 'submit_codigo' in request.POST:
                 # Captura e normaliza código digitado manualmente
                 raw = (request.POST.get('cod_cupom') or '').strip()
@@ -473,9 +696,6 @@ def cadastrar_cupom(request, id_participante):
                 contexto['msg_erro'] = msg
                 return render(request, 'painel_cadastrar_cupom.html', contexto)
 
-            # Status compatível com o modelo
-            status_nota = 'Validado'
-
             # Validação adicional (ex: consulta externa)
             validar = None
             try:
@@ -484,37 +704,103 @@ def cadastrar_cupom(request, id_participante):
                 # Mantém validar = None; trataremos abaixo
                 validar = None
 
+            # Regra de campanha baseada na data de emissão da nota (dados_json.nfe.data_emissao)
+            try:
+                if str(getattr(settings, 'CAMPANHA', '')).upper() == 'ON':
+                    inicio = datetime(2025, 8, 15).date()
+                    fim = datetime(2025, 10, 15).date()
+                    # Extrai nfe.data_emissao de validar (que será salvo em dados_json)
+                    data_emissao_str = None
+                    if isinstance(validar, dict):
+                        nfe = validar.get('nfe') or {}
+                        if isinstance(nfe, dict):
+                            data_emissao_str = nfe.get('data_emissao')
+                    # Faz o parse robusto da data
+                    data_emissao_dt = None
+                    if data_emissao_str:
+                        try:
+                            # Tenta ISO8601 completo
+                            data_emissao_dt = datetime.fromisoformat(str(data_emissao_str).replace('Z', '+00:00'))
+                        except Exception:
+                            try:
+                                # Tenta apenas data dd/mm/aaaa ou aaaa-mm-dd
+                                from datetime import datetime as _dt
+                                for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%Y-%m-%dT%H:%M:%S', '%d/%m/%Y %H:%M:%S'):
+                                    try:
+                                        data_emissao_dt = _dt.strptime(str(data_emissao_str), fmt)
+                                        break
+                                    except Exception:
+                                        continue
+                            except Exception:
+                                data_emissao_dt = None
+                    if not data_emissao_dt:
+                        contexto['msg_erro'] = 'Não foi possível validar a data de emissão da nota para a campanha.'
+                        return render(request, 'painel_cadastrar_cupom.html', contexto)
+                    data_emissao_date = data_emissao_dt.date()
+                    if not (inicio <= data_emissao_date <= fim):
+                        contexto['msg_erro'] = 'Período de participação: 15/08/2025 a 15/10/2025. A data de emissão da nota está fora do período.'
+                        return render(request, 'painel_cadastrar_cupom.html', contexto)
+            except Exception:
+                # Em caso de erro inesperado nessa checagem, não bloquear o fluxo
+                pass
+
+            # Define status do cupom conforme sucesso da comunicação
+            # Se houve falha na comunicação (validar é None/falsy), status deve ser 'Pendente'
+            status_nota = 'Validado' if validar else 'Pendente'
+
             # Serializa dados para JSON (string) para armazenar
             dados_cupom_json = json.dumps(asdict(dados_nota))
 
             # Criação do cupom no banco (ajustando campos ao modelo)
-            novo_cupom = Cupom.objects.create(
-                participante=participante,
-                dados_cupom=dados_cupom_json,
-                tipo_envio='Sistema',
-                status=status_nota,
-                numero_documento=getattr(dados_nota, 'codigo_numerico', ''),
-                cnpj_loja=getattr(dados_nota, 'cnpj_emitente', ''),
-                nome_loja=getattr(dados_nota, 'nome_emitente', 'Desconhecido'),
-                dados_json=validar,
-                tipo_documento=getattr(dados_nota, 'tipo_documento', '')
-            )
+            try:
+                print("[INFO] Criando cupom no banco...")
+                novo_cupom = Cupom.objects.create(
+                    participante=participante,
+                    dados_cupom=dados_cupom_json,
+                    tipo_envio='Sistema',
+                    status=status_nota,
+                    numero_documento=getattr(dados_nota, 'codigo_numerico', ''),
+                    cnpj_loja=getattr(dados_nota, 'cnpj_emitente', ''),
+                    nome_loja=getattr(dados_nota, 'nome_emitente', 'Desconhecido'),
+                    dados_json=validar,
+                    tipo_documento=getattr(dados_nota, 'tipo_documento', '')
+                )
+            except IntegrityError:
+                contexto['msg_erro'] = 'cupom já cadastrado'
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
 
             # Cadastro dos produtos vinculados ao cupom (somente se houver dados válidos)
             msg_produto = ''
             msg_numeros = ''
             if validar:
                 try:
+                    print("[INFO] Cadastro de produtos...")
                     msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
                 except Exception as e_prod:
+                    print("[ERRO] Falha ao processar produtos do cupom:", e_prod)
                     msg_produto = f'Erro ao processar produtos do cupom.'
 
                 try:
+                    print("[INFO] Cadastro de números da sorte...")
                     # --- Chamada para gerar números da sorte ---
                     msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
                 except Exception as e_num:
+                    print("[ERRO] Falha ao gerar números da sorte:", e_num)
                     msg_numeros = 'Falha ao gerar números da sorte.'
+
+                # Se nenhum número da sorte foi gerado, o cupom deve ficar como 'Invalidado'
+                try:
+                    total_nums = NumeroDaSorte.objects.filter(cupom=novo_cupom).count()
+                    if total_nums == 0:
+                        novo_cupom.status = 'Invalidado'
+                        novo_cupom.save(update_fields=['status'])
+                        if not msg_numeros:
+                            msg_numeros = 'Cupom inválido: nenhum número da sorte gerado.'
+                except Exception as _e_check:
+                    # Não bloqueia fluxo por erro de verificação
+                    pass
             else:
+                print("[INFO] Dados do cupom indisponíveis; produtos não processados.")
                 msg_produto = 'Dados do cupom indisponíveis; produtos não processados.'
 
             contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'

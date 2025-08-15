@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
 
     <link rel="icon" type="image/png" href="{% static 'responsive/images/Favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}?v=2025-08-13-1">
 </head>
 <body>
   <div class="wrap">
@@ -23,10 +23,10 @@
           </a>
           <nav aria-label="Seções">
             <ul class="links">
-              <li><a href="/painel-home/">Inicio</a></li>
-              <li><a target="_blank" href="/lista-resultados/">Sorteios</a></li>
-              <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
-              <li><a href="/painel-home/">Editar perfil</a></li>
+              <li><a href="{% url 'painel_home' %}">Inicio</a></li>
+              <li><a target="_blank" href="{% url 'lista_resultado' %}">Sorteios</a></li>
+              <li><a href="{% url 'painel_cadastrar_cupom' %}">Cadastrar cupons</a></li>
+              <li><a href="{% url 'painel_home' %}">Editar perfil</a></li>
             </ul>
           </nav>
           <div class="actions">
@@ -68,6 +68,15 @@
         <header class="panel-header">
           <h2 class="panel-title">Detalhes do Cupom</h2>
         </header>
+        <div class="status-banner">
+          <span class="badge {% if cupom.status == 'Validado' %}status-ok{% elif cupom.status == 'Pendente' %}status-wait{% else %}status-bad{% endif %}">{{ cupom.status }}</span>
+          {% if cupom.status == 'Pendente' %}
+            <div class="pending-note">
+              <i class="fa-solid fa-clock" aria-hidden="true"></i>
+              Seu cupom está em análise. Aguarde a conclusão da validação.
+            </div>
+          {% endif %}
+        </div>
 
         <div class="coupon-details">
           <div class="details-container">
@@ -77,11 +86,27 @@
               <div class="info-grid">
                 <div class="info-item">
                   <span class="info-label">Loja:</span>
-                  <span class="info-value">{{ cupom.nome_loja }}</span>
+                  <span class="info-value">
+                    {% if dados_extra and dados_extra.emitente and dados_extra.emitente.nome %}
+                      {{ dados_extra.emitente.nome }}
+                    {% elif dados_extra and dados_extra.data and dados_extra.data.0 and dados_extra.data.0.emitente and dados_extra.data.0.emitente.nome_razao_social %}
+                      {{ dados_extra.data.0.emitente.nome_razao_social }}
+                    {% else %}
+                      {{ cupom.nome_loja }}
+                    {% endif %}
+                  </span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">CNPJ:</span>
-                  <span class="info-value">{{ cupom.cnpj_loja }}</span>
+                  <span class="info-value">
+                    {% if dados_extra and dados_extra.emitente and dados_extra.emitente.cnpj %}
+                      {{ dados_extra.emitente.cnpj }}
+                    {% elif dados_extra and dados_extra.data and dados_extra.data.0 and dados_extra.data.0.emitente and dados_extra.data.0.emitente.cnpj %}
+                      {{ dados_extra.data.0.emitente.cnpj }}
+                    {% else %}
+                      {{ cupom.cnpj_loja }}
+                    {% endif %}
+                  </span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">Documento:</span>
@@ -89,7 +114,17 @@
                 </div>
                 <div class="info-item">
                   <span class="info-label">Número/Chave:</span>
-                  <span class="info-value">{{ cupom.numero_documento }}</span>
+                  <span class="info-value">
+                    {% if dados_extra and dados_extra.chave_acesso %}
+                      {{ dados_extra.chave_acesso }}
+                    {% elif dados_extra and dados_extra.nfe and dados_extra.nfe.chave_acesso %}
+                      {{ dados_extra.nfe.chave_acesso }}
+                    {% elif dados_extra and dados_extra.data and dados_extra.data.0 and dados_extra.data.0.informacoes_nota and dados_extra.data.0.informacoes_nota.chave_acesso %}
+                      {{ dados_extra.data.0.informacoes_nota.chave_acesso }}
+                    {% else %}
+                      {{ cupom.numero_documento }}
+                    {% endif %}
+                  </span>
                 </div>
                 <div class="info-item">
                   <span class="info-label">Status:</span>
@@ -101,29 +136,65 @@
                 </div>
                 <div class="info-item">
                   <span class="info-label">Total:</span>
-                  <span class="info-value">{% if cupom.valor_total %}R$ {{ cupom.valor_total }}{% else %}-{% endif %}</span>
+                  <span class="info-value">
+                    {% if dados_extra and dados_extra.nfe and dados_extra.nfe.valor_total %}
+                      R$ {{ dados_extra.nfe.valor_total }}
+                    {% elif dados_extra and dados_extra.total %}
+                      R$ {{ dados_extra.total }}
+                    {% elif dados_extra and dados_extra.data and dados_extra.data.0 %}
+                      {% with d0=dados_extra.data.0 %}
+                        {% if d0.normalizado_valor_a_pagar %}
+                          R$ {{ d0.normalizado_valor_a_pagar }}
+                        {% elif d0.valor_a_pagar %}
+                          R$ {{ d0.valor_a_pagar }}
+                        {% elif d0.normalizado_valor_total %}
+                          R$ {{ d0.normalizado_valor_total }}
+                        {% elif d0.valor_total %}
+                          R$ {{ d0.valor_total }}
+                        {% else %}-{% endif %}
+                      {% endwith %}
+                    {% elif cupom.valor_total %}
+                      R$ {{ cupom.valor_total }}
+                    {% else %}-{% endif %}
+                  </span>
                 </div>
-                {% if dados_extra %}
-                <div class="info-item">
-                  <span class="info-label">Emitente:</span>
-                  <span class="info-value">{{ dados_extra.emitente.nome|default:cupom.nome_loja }}</span>
-                </div>
-                {% endif %}
               </div>
             </div>
 
             <!-- Coluna 2: Lista de Produtos -->
-            <div class="products-list">
-              <h3 class="section-title">Produtos</h3>
+            <div class="products-list" style="max-height: 50vh; overflow-y: auto; overscroll-behavior: contain; padding-right: 8px;">
+              <h3 class="section-title">Produtos Elegíveis</h3>
               <div class="products-container">
-                {% if produtos %}
+                {% if dados_extra and dados_extra.data and dados_extra.data.0 and dados_extra.data.0.produtos %}
+                  {% for p in dados_extra.data.0.produtos %}
+                  <div class="product-item">
+                    <div class="product-name">{{ p.nome }}</div>
+                    <div class="product-details">
+                      <span>Qtd: {{ p.qtd|default:p.quantidade|default:p.normalizado_quantidade }}</span>
+                      <span>R$ {{ p.valor_unitario|default:p.normalizado_valor_unitario }}</span>
+                      <span>R$ {{ p.valor_total_item|default:p.valor_total|default:p.valor_total_produto|default:p.normalizado_valor_total_produto }}</span>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% elif dados_extra and dados_extra.produtos %}
+                  {% for p in dados_extra.produtos %}
+                  <div class="product-item">
+                    <div class="product-name">{{ p.nome }}</div>
+                    <div class="product-details">
+                      <span>Qtd: {{ p.qtd|default:p.quantidade }}</span>
+                      <span>R$ {{ p.valor_unitario }}</span>
+                      <span>R$ {{ p.valor_total_item|default:p.valor_total }}</span>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% elif produtos %}
                   {% for p in produtos %}
                   <div class="product-item">
                     <div class="product-name">{{ p.nome }}</div>
                     <div class="product-details">
-                      <span>Qtd: {{ p.quantidade }}</span>
+                      <span>Qtd: {{ p.qtd|default:p.quantidade }}</span>
                       <span>R$ {{ p.valor_unitario }}</span>
-                      <span>R$ {{ p.valor_total }}</span>
+                      <span>R$ {{ p.valor_total_item|default:p.valor_total }}</span>
                     </div>
                   </div>
                   {% endfor %}
@@ -196,6 +267,13 @@
       <p class="footer-legal">
         PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
       </p>
+      <p class="footer-legal">
+        Em caso de dúvidas, entre em contato com nosso SAC:<br/>
+
+        E-mail: faleconosco@promocaobombril.com.br<br/>
+
+        Telefone: 0800 7076161
+      </p>
     </div>
   </footer>
 
@@ -206,7 +284,16 @@
       <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
     </div>
    </div>
-  <script src="{% static 'responsive/menu.js' %}"></script>
+  <script src="{% static 'responsive/menu.js' %}?v=2025-08-13-1"></script>
+  <style>
+    .status-banner{margin:10px 0 20px;display:flex;gap:12px;align-items:center}
+    .badge{display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600;font-size:14px}
+    .status-ok{background:#e9f7ef;color:#27ae60}
+    .status-wait{background:#fff6e5;color:#e67e22}
+    .status-bad{background:#fdecea;color:#c0392b}
+    .pending-note{font-size:14px;color:#6b7280}
+    .pending-note i{margin-right:6px;color:#e67e22}
+  </style>
 </body>
 </html>
 

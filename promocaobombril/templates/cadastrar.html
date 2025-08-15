@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
 
     <link rel="icon" type="image/png" href="{% static 'responsive/images/Favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}?v=2025-08-13-1">
 </head>
 <body class="wizard-page">
   <div class="wrap">
@@ -23,12 +23,12 @@
         </a>
         <nav aria-label="Seções">
           <ul class="links">
-            <li><a href="/home_responsive/">Início</a></li>
-            <li><a href="/como-participar">Como participar</a></li>
-            <li><a href="/produtos/">Produtos</a></li>
-            <li><a href="/lista-resultados">Resultados</a></li>
-            <li><a href="/regulamento/">Regulamentos</a></li>
-            <li><a href="/duvidas/">Dúvidas</a></li>
+            <li><a href="{% url 'home_responsive' %}">Início</a></li>
+            <li><a href="{% url 'como_participar' %}">Como participar</a></li>
+            <li><a href="{% url 'produtos' %}">Produtos</a></li>
+            <li><a href="{% url 'lista_resultado' %}">Resultados</a></li>
+            <li><a href="{% url 'regulamento' %}">Regulamentos</a></li>
+            <li><a href="{% url 'duvidas' %}">Dúvidas</a></li>
           </ul>
         </nav>
         <div class="actions">
@@ -92,6 +92,9 @@
           {% if erro %}
           <p class="form-error" style="color:#c00; font-weight:700; margin-top:6px;">{{ erro }}</p>
         {% endif %}   
+          {% if msg_erro %}
+          <p class="form-error" style="color:#c00; font-weight:700; margin-top:6px;">{{ msg_erro }}</p>
+          {% endif %}
           <section class="card step-pane active" data-step="1" aria-labelledby="step1-title">
             <div class="grid">
 
@@ -103,6 +106,13 @@
               <div class="col-6 field">
                 <label for="cpf">CPF:</label>
                 <input id="cpf" name="cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" required />
+                <div id="cpfInvalidMsg" class="cpf-alert" role="alert" aria-live="assertive" hidden>
+                  ⚠ Identificamos uma inconsistência no número de CPF informado no seu cadastro e, por isso, não é possível seguir por aqui.
+                  <br/><br/>
+                  Mas fique tranquilo! Acesse o site da promoção para continuar normalmente
+                  <br/><br/>
+                  Não deixe de finalizar o seu cadastro — você pode ser o próximo milionário! 🍀
+                </div>
               </div>
 
               <div class="col-6 field">
@@ -123,12 +133,12 @@
               <div class="col-6 field">
                 <label for="senha">senha</label>
                 <input id="senha" name="senha" class="pass" type="password" placeholder="********" minlength="8" required />
-                <button type="button" class="toggle-pass" data-target="senha" aria-label="Mostrar/ocultar senha" title="Mostrar/ocultar senha"></button>
+                <!-- <button type="button" class="toggle-pass" data-target="senha" aria-label="Mostrar/ocultar senha" title="Mostrar/ocultar senha"></button> -->
               </div>
               <div class="col-6 field">
                 <label for="senha2">confirme sua senha</label>
                 <input id="senha2" name="senha2" class="pass" type="password" placeholder="********" minlength="8" required />
-                <button type="button" class="toggle-pass" data-target="senha2" aria-label="Mostrar/ocultar senha" title="Mostrar/ocultar senha"></button>
+                <!-- <button type="button" class="toggle-pass" data-target="senha2" aria-label="Mostrar/ocultar senha" title="Mostrar/ocultar senha"></button> -->
               </div>
 
               <div class="col-6">
@@ -290,6 +300,13 @@
       <p class="footer-legal">
         PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
       </p>
+      <p class="footer-legal">
+        Em caso de dúvidas, entre em contato com nosso SAC:<br/>
+
+        E-mail: faleconosco@promocaobombril.com.br<br/>
+
+        Telefone: 0800 7076161
+      </p>
     </div>
   </footer>
 
@@ -307,8 +324,10 @@
     .spinner{width:24px;height:24px;border:3px solid #eee;border-top-color:#e30613;border-radius:50%;animation:spin 1s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .success-box{background:#e6ffed;border:1px solid #b7ebc6;color:#096b2c;padding:12px 14px;border-radius:8px;font-weight:700;margin-bottom:14px}
+    .cpf-alert{background:#fff3cd;border:1px solid #ffeeba;color:#856404;padding:10px;border-radius:8px;margin-top:6px;font-weight:600}
+    .cpf-alert[hidden]{display:none !important}
   </style>
-  <script src="{% static 'responsive/menu.js' %}"></script>
+  <script src="{% static 'responsive/menu.js' %}?v=2025-08-13-1"></script>
   <script>
     // Exibe overlay ao enviar o wizard
     (function(){
@@ -320,6 +339,68 @@
           try{ overlay.hidden = false; overlay.setAttribute('aria-hidden','false'); }catch(_){ overlay.style.display='flex'; }
         });
       }
+    })();
+  </script>
+  <script>
+    // Validação de CPF via backend: bloqueia progressão se CPF estiver na lista de inválidos
+    (function(){
+      var cpfInput = document.getElementById('cpf');
+      var nextBtn = document.getElementById('next1');
+      var msg = document.getElementById('cpfInvalidMsg');
+      if (!cpfInput || !nextBtn || !msg) return;
+
+      var cpfInvalido = false;
+
+      function setCpfInvalid(state){
+        cpfInvalido = !!state;
+        try{
+          msg.hidden = !cpfInvalido;
+          msg.setAttribute('aria-hidden', cpfInvalido ? 'false' : 'true');
+        }catch(_){ msg.style.display = cpfInvalido ? 'block' : 'none'; }
+        nextBtn.disabled = cpfInvalido;
+        nextBtn.setAttribute('aria-disabled', cpfInvalido ? 'true' : 'false');
+        if (cpfInvalido){
+          cpfInput.setCustomValidity('CPF inválido para esta promoção.');
+        } else {
+          cpfInput.setCustomValidity('');
+        }
+      }
+
+      function apenasDigitos(v){ return (v||'').replace(/\D+/g,''); }
+
+      var pendingController = null;
+      function verificarCpf(){
+        var raw = apenasDigitos(cpfInput.value);
+        // Só consulta se tiver tamanho de CPF completo
+        if (raw.length < 11){ setCpfInvalid(false); return; }
+
+        // Cancela solicitação anterior (se o navegador suportar)
+        try{ if (pendingController) pendingController.abort(); }catch(_){/* noop */}
+        pendingController = (window.AbortController ? new AbortController() : null);
+
+        fetch('/cpf-invalido/?cpf=' + encodeURIComponent(raw), {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          signal: pendingController ? pendingController.signal : undefined
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(isInvalid){
+          // Endpoint retorna booleano puro: true = inválido, false = válido
+          setCpfInvalid(!!isInvalid);
+        })
+        .catch(function(){
+          // Em caso de erro de rede, não bloquear o usuário
+          setCpfInvalid(false);
+        });
+      }
+
+      // Dispara verificação ao alterar/campo perder foco e durante a digitação limpa o estado
+      cpfInput.addEventListener('change', verificarCpf);
+      cpfInput.addEventListener('blur', verificarCpf);
+      cpfInput.addEventListener('input', function(){
+        // Ao editar, remove bloqueio até nova verificação
+        setCpfInvalid(false);
+      });
     })();
   </script>
 </body>

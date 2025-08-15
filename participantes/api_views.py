@@ -25,12 +25,16 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.core.files.base import ContentFile
 import base64
 import re as _re
+from django.db import IntegrityError
 
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.conf import settings
+from django.utils import timezone
+from datetime import datetime
 
 class ParticipantesViewSet(viewsets.ModelViewSet):
     queryset = Participantes.objects.all()
@@ -195,10 +199,34 @@ class EnviarNotaView(APIView):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request):
+        # Regra de campanha: aceitar cadastro somente entre 15/08/2025 e 15/10/2025
+        # (somente quando a variável de ambiente CAMPANHA estiver ON)
+        try:
+            if str(getattr(settings, 'CAMPANHA', '')).upper() == 'ON':
+                hoje_campanha = timezone.localdate()
+                inicio = datetime(2025, 8, 15).date()
+                fim = datetime(2025, 10, 15).date()
+                if not (inicio <= hoje_campanha <= fim):
+                    return Response(
+                        {
+                            "success": False,
+                            "message": "Período de participação: 15/08/2025 a 15/10/2025. Tente novamente dentro do período válido.",
+                            "data": [],
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+        except Exception:
+            # Em caso de erro inesperado nessa checagem, não bloquear o fluxo da API
+            pass
+
         celular = request.data.get('celular')
         if not celular:
             return Response(
-                {"success": False, "message": "Campo 'celular' é obrigatório.", "data": []},
+                {
+                    "success": False,
+                    "message": "Campo 'celular' é obrigatório.",
+                    "data": []
+                },
                 status=status.HTTP_200_OK,
             )
 
@@ -221,6 +249,22 @@ class EnviarNotaView(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
+
+        # Limite diário: 1 cupom por participante por dia (também na API)
+        try:
+            hoje = timezone.localdate()
+            if Cupom.objects.filter(participante=participante, data_cadastro=hoje).exists():
+                return Response(
+                    {
+                        "success": False,
+                        "message": "Você já cadastrou um cupom hoje. Tente novamente amanhã.",
+                        "data": [],
+                    },
+                    status=status.HTTP_200_OK,
+                )
+        except Exception:
+            # Em caso de erro inesperado, não bloquear o fluxo
+            pass
 
         # Determina a origem da chave de acesso
         chave_acesso = request.data.get('chave_acesso') or request.data.get('chave')
@@ -296,33 +340,100 @@ class EnviarNotaView(APIView):
         except Exception:
             validar = None
 
+        # Regra de campanha baseada na data de emissão da nota em dados_json (nfe.data_emissao)
+        try:
+            if str(getattr(settings, 'CAMPANHA', '')).upper() == 'ON':
+                inicio = datetime(2025, 8, 15).date()
+                fim = datetime(2025, 10, 15).date()
+                data_emissao_str = None
+                if isinstance(validar, dict):
+                    nfe = validar.get('nfe') or {}
+                    if isinstance(nfe, dict):
+                        data_emissao_str = nfe.get('data_emissao')
+                # Faz o parse da data
+                data_emissao_dt = None
+                if data_emissao_str:
+                    try:
+                        data_emissao_dt = datetime.fromisoformat(str(data_emissao_str).replace('Z', '+00:00'))
+                    except Exception:
+                        from datetime import datetime as _dt
+                        for fmt in ('%Y-%m-%d', '%d/%m/%Y', '%Y-%m-%dT%H:%M:%S', '%d/%m/%Y %H:%M:%S'):
+                            try:
+                                data_emissao_dt = _dt.strptime(str(data_emissao_str), fmt)
+                                break
+                            except Exception:
+                                continue
+                if not data_emissao_dt:
+                    return Response(
+                        {
+                            "success": False,
+                            "message": "Não foi possível validar a data de emissão da nota para a campanha.",
+                            "data": [],
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+                data_emissao_date = data_emissao_dt.date()
+                if not (inicio <= data_emissao_date <= fim):
+                    return Response(
+                        {
+                            "success": False,
+                            "message": "Período de participação: 15/08/2025 a 15/10/2025. A data de emissão da nota está fora do período.",
+                            "data": [],
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+        except Exception:
+            # Em caso de erro inesperado nessa checagem, não bloquear o fluxo
+            pass
+
         # Serializa dados para JSON
         dados_cupom_json = json.dumps(asdict(dados_nota))
 
-        # Cria cupom
-        novo_cupom = Cupom.objects.create(
-            participante=participante,
-            dados_cupom=dados_cupom_json,
-            tipo_envio='API',
-            status='Validado',
-            numero_documento=getattr(dados_nota, 'codigo_numerico', ''),
-            cnpj_loja=getattr(dados_nota, 'cnpj_emitente', ''),
-            nome_loja=getattr(dados_nota, 'nome_emitente', 'Desconhecido'),
-            dados_json=validar,
-            tipo_documento=getattr(dados_nota, 'tipo_documento', ''),
-        )
+        # Cria cupom com status conforme validação externa disponível
+        try:
+            status_inicial = 'Validado' if validar else 'Pendente'
+            novo_cupom = Cupom.objects.create(
+                participante=participante,
+                dados_cupom=dados_cupom_json,
+                tipo_envio='API',
+                status=status_inicial,
+                numero_documento=getattr(dados_nota, 'codigo_numerico', ''),
+                cnpj_loja=getattr(dados_nota, 'cnpj_emitente', ''),
+                nome_loja=getattr(dados_nota, 'nome_emitente', 'Desconhecido'),
+                dados_json=validar,
+                tipo_documento=getattr(dados_nota, 'tipo_documento', ''),
+            )
+        except IntegrityError:
+            return Response(
+                {
+                    "success": False,
+                    "message": "cupom já cadastrado",
+                    "data": [],
+                },
+                status=status.HTTP_200_OK,
+            )
 
         # Produtos e números da sorte
         msg_produto = ''
+        downstream_failed = False
         if validar:
             try:
                 msg_produto = cadastrar_produto(novo_cupom.id, participante.id)
             except Exception:
                 msg_produto = 'Erro ao processar produtos do cupom.'
+                downstream_failed = True
         try:
             cadastrar_numeros_da_sorte(novo_cupom)
         except Exception:
-            pass
+            downstream_failed = True
+
+        # Se houve falha em processos downstream e o status não estiver pendente, ajusta para 'Pendente'
+        if downstream_failed and novo_cupom.status != 'Pendente':
+            try:
+                novo_cupom.status = 'Pendente'
+                novo_cupom.save(update_fields=['status'])
+            except Exception:
+                pass
 
         # Coleta números da sorte gerados
         numeros = list(

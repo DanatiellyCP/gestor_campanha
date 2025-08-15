@@ -3,7 +3,32 @@ import requests
 import json
 import os
 import re
-from datetime import datetime
+import base64
+from io import BytesIO
+
+try:
+    from PIL import Image  # type: ignore
+except Exception:
+    Image = None  # type: ignore
+
+try:
+    import pytesseract  # type: ignore
+except Exception:
+    pytesseract = None  # type: ignore
+
+# OpenCV e numpy para leitura de QR a partir de imagem
+try:
+    import cv2  # type: ignore
+    import numpy as np  # type: ignore
+except Exception:  # mantém import opcional para ambientes sem cv2
+    cv2 = None  # type: ignore
+    np = None  # type: ignore
+
+# Fallback com pyzbar
+try:
+    from pyzbar.pyzbar import decode as zbar_decode  # type: ignore
+except Exception:
+    zbar_decode = None  # type: ignore
 
 from utils.get_modelo import identificar_chave_detalhada
 
@@ -11,13 +36,16 @@ def extrair_texto_ocr(imagem_path):
     """
     Recebe o caminho da imagem e retorna o texto extraído via OCR.
     """
+    # Se dependências de OCR não estiverem disponíveis no servidor, não quebre o fluxo
+    if Image is None or pytesseract is None:
+        return ""
     try:
         imagem = Image.open(imagem_path)
         texto = pytesseract.image_to_string(imagem, lang="por")
         return texto
     except Exception as e:
         print(f"Erro ao processar OCR: {e}")
-        return f"Erro ao processar OCR: {e}"
+        return ""
 
 
 
@@ -55,22 +83,107 @@ def parse_dados_cupom(texto):
 
     return dados
 
-def extrai_codigo_qrcode(texto):
-    #pegar o texto extraido pela camera e separa a parte do codigo do cupom - danny - 07-08-2025
+def _to_pil_image(source):
+    """
+    Aceita vários formatos de entrada e retorna um PIL.Image.
+    - source pode ser: caminho (str), bytes, BytesIO, ContentFile (Django) ou já uma Image.
+    """
+    if isinstance(source, Image.Image):
+        return source
+    if isinstance(source, (bytes, bytearray)):
+        return Image.open(BytesIO(source))
+    # ContentFile tem atributo 'read' e possivelmente 'name'
+    if hasattr(source, 'read') and callable(source.read):
+        try:
+            data = source.read()
+            # reseta ponteiro se possível, pois o chamador pode reutilizar
+            try:
+                source.seek(0)
+            except Exception:
+                pass
+            return Image.open(BytesIO(data))
+        except Exception:
+            pass
+    # Caminho de arquivo
+    if isinstance(source, str) and os.path.exists(source):
+        return Image.open(source)
+    # Último recurso: tentar interpretar como data URL base64
+    if isinstance(source, str) and source.startswith('data:'):
+        try:
+            head, b64 = source.split(',', 1)
+            raw = base64.b64decode(b64)
+            return Image.open(BytesIO(raw))
+        except Exception:
+            pass
+    raise ValueError("Formato de imagem não suportado para leitura de QR.")
 
-    # copiar do 0 até a pos 77 #chave: CFe35250845495694001942590013611591810634041386|20250804173321|68.17|
-    pos = texto.find("|")
 
-    texto_qr_code = texto[0:pos]
-    
-    codigo = texto_qr_code.replace("CFe", "")
-    codigo = codigo.replace(" ", "")
+def decode_qr_image(source):
+    """
+    Decodifica QR Code a partir de uma imagem (arquivo/bytes/ContentFile/PIL.Image).
+    Tenta primeiro com OpenCV; se falhar, tenta pyzbar.
+    Retorna o texto do QR ou string vazia.
+    """
+    try:
+        pil_img = _to_pil_image(source).convert('RGB')
+    except Exception:
+        return ''
 
-    print('pos ' + str(pos))
-    print('texto_qr_code' + texto_qr_code)
-    print('codigo: ' + codigo)
+    # OpenCV
+    if cv2 is not None and np is not None:
+        try:
+            arr = np.array(pil_img)
+            # PIL RGB -> BGR
+            img_bgr = arr[:, :, ::-1]
+            detector = cv2.QRCodeDetector()
+            data, points, _ = detector.detectAndDecode(img_bgr)
+            if data:
+                return data.strip()
+        except Exception:
+            pass
 
-    return codigo
+    # pyzbar fallback
+    if zbar_decode is not None:
+        try:
+            results = zbar_decode(pil_img)
+            if results:
+                # pega o primeiro
+                data = results[0].data.decode('utf-8', errors='ignore')
+                return data.strip()
+        except Exception:
+            pass
+
+    return ''
+
+
+def _parse_qr_payload_to_key(payload: str) -> str:
+    """
+    Recebe o texto contido no QR e tenta extrair a chave de acesso (44 dígitos).
+    Suporta SAT (CFe...|...) e NFE/NFCE (apenas 44 dígitos no texto/URL).
+    """
+    if not payload:
+        return ''
+    txt = str(payload).strip()
+    if txt.startswith('CFe'):
+        pos = txt.find('|')
+        head = txt[:pos] if pos > -1 else txt
+        somente_digitos = re.sub(r'\D', '', head)
+        return somente_digitos
+    # Tenta 44 dígitos
+    m = re.search(r"\b(\d{44})\b", txt)
+    return m.group(1) if m else ''
+
+
+def extrai_codigo_qrcode(source):
+    """
+    Lê um QR Code de uma imagem (arquivo/bytes/ContentFile/PIL.Image) e retorna a chave (44 dígitos)
+    quando possível. Caso não encontre, retorna string vazia.
+    """
+    payload = decode_qr_image(source)
+    if not payload:
+        return ''
+    chave = _parse_qr_payload_to_key(payload)
+    return chave
 
 
 def extrair_numero_cupom(texto):
@@ -108,35 +221,6 @@ def validar_documento(codigo_documento):
     dados = identificar_chave_detalhada(codigo_documento)
     return dados
 
-def formatar_data_emissao(raw_data):
-    """
-    Recebe a string de data de emissão de diferentes formatos e retorna no formato 'dd/mm/yyyy'.
-    """
-    if not raw_data:
-        return None
-
-    try:
-        raw_data = raw_data.strip()
-
-        # SAT-CFe: "25 de novembro de 2022, às 16:09:17"
-        if " de " in raw_data:
-            dt = datetime.strptime(raw_data.split(",")[0].strip(), "%d de %B de %Y")
-        # NF-e com hora e possível fuso: "11/11/1111 11:11:11-11:11"
-        elif " " in raw_data:
-            dt = datetime.strptime(raw_data.split(" ")[0], "%d/%m/%Y")
-        # NFC-e: "22/05/2025 - 17:03:53"
-        elif "-" in raw_data:
-            dt = datetime.strptime(raw_data.split(" - ")[0], "%d/%m/%Y")
-        else:
-            # Tenta interpretar direto dd/mm/yyyy
-            dt = datetime.strptime(raw_data, "%d/%m/%Y")
-
-        print(dt)
-        return dt.strftime("%d/%m/%Y")
-    except Exception as e:
-        print(f"Falha ao formatar data: {raw_data} ({e})")
-        return None
-    
 
 def get_dados_json(dados_json, tipo_cupom):
     import json

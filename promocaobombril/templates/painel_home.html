@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://use.typekit.net/nnt2jwc.css">
 
     <link rel="icon" type="image/png" href="{% static 'responsive/images/Favicon.png' %}">
-    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}">
+    <link rel="stylesheet" href="{% static 'responsive/menu.css' %}?v=2025-08-13-1">
 </head>
 <body>
   <div class="wrap">
@@ -23,10 +23,10 @@
         </a>
         <nav aria-label="Seções">
           <ul class="links">
-            <li><a href="/painel-home/">Inicio</a></li>
-            <li><a target="_blank" href="/lista-resultados/">Sorteios</a></li>
-            <li><a href="/painel-cadastrar-cupom/">Cadastrar cupons</a></li>
-            <li><a href="/painel-home/">Editar perfil</a></li>
+            <li><a href="{% url 'painel_home' %}">Inicio</a></li>
+            <li><a target="_blank" href="{% url 'lista_resultado' %}">Sorteios</a></li>
+            <li><a href="{% url 'painel_cadastrar_cupom' %}">Cadastrar cupons</a></li>
+            <li><a href="{% url 'painel_home' %}">Editar perfil</a></li>
           </ul>
         </nav>
         <div class="actions">
@@ -89,7 +89,15 @@
                       <td data-label="Status"><span class="badge {% if cupom.status == 'Validado' %}status-ok{% elif cupom.status == 'Pendente' %}status-wait{% else %}status-bad{% endif %}">{{ cupom.status }}</span></td>
                       <td data-label="Data">{{ cupom.data_cadastro|date:"d/m/Y" }}</td>
                       <td data-label="Hora">{{ cupom.hora_cadastro|time:"H:i" }}</td>
-                      <td data-label="Detalhar" class="detail"> <a href="{% url 'painel_detalhes_cupom' %}?id={{ cupom.id }}"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Exibir</a></td>
+                      <td data-label="Detalhar" class="detail">
+                        <a href="{% url 'painel_detalhes_cupom' %}?id={{ cupom.id }}"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> Exibir</a>
+                        {% if cupom.status == 'Pendente' or cupom.status == 'Invalidado' %}
+                          &nbsp;|&nbsp;
+                          <button type="button" class="link-delete" data-cupom-id="{{ cupom.id }}" aria-haspopup="dialog">
+                            <i class="fa-solid fa-trash" aria-hidden="true"></i> Excluir
+                          </button>
+                        {% endif %}
+                      </td>
                     </tr>
                   {% endfor %}
                 {% else %}
@@ -147,6 +155,13 @@
       <p class="footer-legal">
         PARTICIPAÇÃO: DE 15/08/2025 ÀS 23H59 DE 15/10/2025. SORTEIOS: 20/08/2025, 23/08/2025, 27/08/2025, 30/08/2025, 03/09/2025, 06/09/2025, 10/09/2025, 13/09/2025, 17/09/2025, 20/09/2025, 24/09/2025, 27/09/2025, 01/10/2025, 04/10/2025, 08/10/2025, 11/10/2025, 15/10/2025 e 18/10/2025 PELO RESULTADO DA LOTERIA FEDERAL. PROMOÇÃO VÁLIDA PARA MAIORES DE 18 ANOS. LIMITE DE 3 NÚMEROS DA SORTE POR CUPOM FISCAL CADASTRADO. CONSULTE REGULAMENTO COM Nº DO CERTIFICADO DE AUTORIZAÇÃO SPA/MF EM WWW.PROMOCAOBOMBRIL.COM.BR. *SUGESTÃO DE PRÊMIO. A PREMIAÇÃO SERÁ ENTREGUE EM CARTEIRA DIGITAL, SEM FUNÇÃO SAQUE E TRANSFERÊNCIA, CONFORME REGULAMENTO.
       </p>
+      <p class="footer-legal">
+        Em caso de dúvidas, entre em contato com nosso SAC:<br/>
+
+        E-mail: faleconosco@promocaobombril.com.br<br/>
+
+        Telefone: 0800 7076161
+      </p>
     </div>
   </footer>
 
@@ -157,6 +172,52 @@
       <button class="cookie-accept" id="cookieAccept">ACEITAR E FECHAR</button>
     </div>
    </div>
-  <script src="{% static 'responsive/menu.js' %}"></script>
+  <script src="{% static 'responsive/menu.js' %}?v=2025-08-13-1"></script>
+  <style>
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:1000}
+    .modal{background:#fff;border-radius:8px;max-width:420px;width:90%;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+    .modal h4{margin:0 0 10px 0;color:#263A7C}
+    .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+    .btn-cancel{background:#e0e0e0;border:none;padding:8px 14px;border-radius:6px;cursor:pointer}
+    .btn-confirm{background:#c0392b;color:#fff;border:none;padding:8px 14px;border-radius:6px;cursor:pointer}
+    .detail .link-delete{background:none;border:none;color:#c0392b;cursor:pointer;font:inherit;padding:0}
+    .detail .link-delete i{margin-right:4px}
+  </style>
+  <div class="modal-overlay" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle">
+    <div class="modal">
+      <h4 id="deleteTitle">Confirmar exclusão</h4>
+      <p>Tem certeza que deseja excluir este cupom? Esta ação não pode ser desfeita.</p>
+      <form id="deleteForm" method="post">
+        {% csrf_token %}
+        <div class="actions">
+          <button type="button" class="btn-cancel" id="cancelDelete">Cancelar</button>
+          <button type="submit" class="btn-confirm">Excluir</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    (function(){
+      const modal = document.getElementById('deleteModal');
+      const form = document.getElementById('deleteForm');
+      const cancelBtn = document.getElementById('cancelDelete');
+      function openModal(cupomId){
+        // Define action para endpoint de exclusão
+        form.action = '/excluir-cupom/' + cupomId + '/';
+        modal.style.display = 'flex';
+      }
+      function closeModal(){ modal.style.display = 'none'; }
+      document.addEventListener('click', function(e){
+        const btn = e.target.closest('.link-delete');
+        if(btn){
+          const id = btn.getAttribute('data-cupom-id');
+          if(id){ openModal(id); }
+        }
+      });
+      cancelBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', function(e){ if(e.target === modal){ closeModal(); } });
+      document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ closeModal(); } });
+    })();
+  </script>
 </body>
 </html>
