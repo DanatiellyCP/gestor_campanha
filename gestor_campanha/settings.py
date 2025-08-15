@@ -159,4 +159,4 @@ DEFAULT_FROM_NAME = os.getenv('DEFAULT_FROM_NAME', 'Promoção Bombril')
 
 # Brevo (Sendinblue) API configuration for transactional emails
 BREVO_API_KEY = os.getenv('BREVO_API_KEY', '')
-CAMPANHA = os.getenv('CAMPANHA', '')
+CAMPANHA = os.getenv('CAMPANHA', 'ON')
