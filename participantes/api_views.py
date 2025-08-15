@@ -250,6 +250,22 @@ class EnviarNotaView(APIView):
                 status=status.HTTP_200_OK,
             )
 
+        # Limite diário: 1 cupom por participante por dia (também na API)
+        try:
+            hoje = timezone.localdate()
+            if Cupom.objects.filter(participante=participante, data_cadastro=hoje).exists():
+                return Response(
+                    {
+                        "success": False,
+                        "message": "Você já cadastrou um cupom hoje. Tente novamente amanhã.",
+                        "data": [],
+                    },
+                    status=status.HTTP_200_OK,
+                )
+        except Exception:
+            # Em caso de erro inesperado, não bloquear o fluxo
+            pass
+
         # Determina a origem da chave de acesso
         chave_acesso = request.data.get('chave_acesso') or request.data.get('chave')
         imagem_qrcode = request.FILES.get('imagem_qrcode')
@@ -327,13 +343,14 @@ class EnviarNotaView(APIView):
         # Serializa dados para JSON
         dados_cupom_json = json.dumps(asdict(dados_nota))
 
-        # Cria cupom
+        # Cria cupom com status conforme validação externa disponível
         try:
+            status_inicial = 'Validado' if validar else 'Pendente'
             novo_cupom = Cupom.objects.create(
                 participante=participante,
                 dados_cupom=dados_cupom_json,
                 tipo_envio='API',
-                status='Validado',
+                status=status_inicial,
                 numero_documento=getattr(dados_nota, 'codigo_numerico', ''),
                 cnpj_loja=getattr(dados_nota, 'cnpj_emitente', ''),
                 nome_loja=getattr(dados_nota, 'nome_emitente', 'Desconhecido'),
@@ -352,15 +369,25 @@ class EnviarNotaView(APIView):
 
         # Produtos e números da sorte
         msg_produto = ''
+        downstream_failed = False
         if validar:
             try:
                 msg_produto = cadastrar_produto(novo_cupom.id, participante.id)
             except Exception:
                 msg_produto = 'Erro ao processar produtos do cupom.'
+                downstream_failed = True
         try:
             cadastrar_numeros_da_sorte(novo_cupom)
         except Exception:
-            pass
+            downstream_failed = True
+
+        # Se houve falha em processos downstream e o status não estiver pendente, ajusta para 'Pendente'
+        if downstream_failed and novo_cupom.status != 'Pendente':
+            try:
+                novo_cupom.status = 'Pendente'
+                novo_cupom.save(update_fields=['status'])
+            except Exception:
+                pass
 
         # Coleta números da sorte gerados
         numeros = list(
