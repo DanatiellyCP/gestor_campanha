@@ -32,6 +32,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django.conf import settings
+from django.utils import timezone
+from datetime import datetime
 
 class ParticipantesViewSet(viewsets.ModelViewSet):
     queryset = Participantes.objects.all()
@@ -196,10 +199,34 @@ class EnviarNotaView(APIView):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request):
+        # Regra de campanha: aceitar cadastro somente entre 15/08/2025 e 15/10/2025
+        # (somente quando a variável de ambiente CAMPANHA estiver ON)
+        try:
+            if str(getattr(settings, 'CAMPANHA', '')).upper() == 'ON':
+                hoje_campanha = timezone.localdate()
+                inicio = datetime(2025, 8, 15).date()
+                fim = datetime(2025, 10, 15).date()
+                if not (inicio <= hoje_campanha <= fim):
+                    return Response(
+                        {
+                            "success": False,
+                            "message": "Período de participação: 15/08/2025 a 15/10/2025. Tente novamente dentro do período válido.",
+                            "data": [],
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+        except Exception:
+            # Em caso de erro inesperado nessa checagem, não bloquear o fluxo da API
+            pass
+
         celular = request.data.get('celular')
         if not celular:
             return Response(
-                {"success": False, "message": "Campo 'celular' é obrigatório.", "data": []},
+                {
+                    "success": False,
+                    "message": "Campo 'celular' é obrigatório.",
+                    "data": []
+                },
                 status=status.HTTP_200_OK,
             )
 
