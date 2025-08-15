@@ -3,10 +3,6 @@ import os
 import uuid
 import json
 import random
-from venv import logger
-import numpy as np
-import cv2
-import ast
 import re
 
 from django.shortcuts import render, get_object_or_404
