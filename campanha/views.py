@@ -11,29 +11,38 @@ O sistema deve limitar o cadastro a um total de 60 (sessenta) cupons fiscais por
 
 """
 from django.shortcuts import render
-from datetime import date
+from datetime import date, datetime
+from .models import Regras
+from cupons.models import Cupom
+
+from datetime import datetime, date
 from .models import Regras
 from cupons.models import Cupom
 
 def Validar_regras_cupom(data_cupom, codigo_cupom, id_participante):
-    # Obter regras (assumindo que há apenas um registro ativo)
+    # Se data_cupom vier como string, converte para date
+    if isinstance(data_cupom, str):
+        '''try:
+            data_cupom = datetime.strptime(data_cupom, "dd/mm/yyyy").date()
+        except ValueError:
+            return False, "Data do cupom em formato inválido."'''
+    
+    
+
     regras = Regras.objects.first()
     if not regras:
         return False, "Nenhuma regra de validação foi configurada."
 
-    data_min = regras.min_data_cupom_aceito
-    data_max = regras.max_data_cupom_aceito
+    data_min = regras.min_data_cupom_aceito  # date
+    data_max = regras.max_data_cupom_aceito  # date
     qtd_dias = regras.qtd_cupom_dia
 
-    # 1. Validar data limite
     if not (data_min <= data_cupom <= data_max):
         return False, f"Cupom fora do período permitido ({data_min} até {data_max})."
 
-    # 2. Validar se cupom já existe
     if Cupom.objects.filter(numero_documento=codigo_cupom).exists():
         return False, "Este cupom já foi cadastrado anteriormente."
 
-    # 3. Validar quantidade de cupons por participante no dia
     data_atual = date.today()
     cupons_hoje = Cupom.objects.filter(
         participante=id_participante,
@@ -43,8 +52,9 @@ def Validar_regras_cupom(data_cupom, codigo_cupom, id_participante):
     if cupons_hoje >= qtd_dias:
         return False, f"Limite diário de {qtd_dias} cupons atingido."
 
-    # Se passou por todas as regras
     return True, "Cupom válido."
+
+
 
 
 

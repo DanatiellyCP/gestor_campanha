@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='participantes',
             name='data_cadastro',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            field=models.DateField(auto_now_add=True, default='2025-08-14'),
             preserve_default=False,
         ),
     ]

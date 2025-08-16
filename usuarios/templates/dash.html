@@ -12,15 +12,20 @@
     <div class="card text-white bg-primary">
       <div class="card-body">
         <h5 class="card-title">Participantes</h5>
-        <p class="card-text">1 Milhão</p>
+        <p class="card-text">
+          <a href="{% url 'graficos_participantes' %}" class="text-white" style="text-decoration:none;">
+            {{ participantes }}
+           </a>
+        </p>
       </div>
     </div>
+
   </div>
   <div class="col-lg-3 mb-3">
     <div class="card text-white bg-success">
       <div class="card-body">
         <h5 class="card-title">Cupons Cadastrados</h5>
-        <p class="card-text">100 Milhões</p>
+        <p class="card-text">{{ cupons }}</p>
       </div>
     </div>
   </div>
@@ -28,7 +33,7 @@
     <div class="card text-white bg-info">
       <div class="card-body">
         <h5 class="card-title">Números da Sorte</h5>
-        <p class="card-text">10 Milhões</p>
+        <p class="card-text">{{ numeros_sorte }}</p>
       </div>
     </div>
   </div>
@@ -36,7 +41,7 @@
     <div class="card text-white bg-warning">
       <div class="card-body">
         <h5 class="card-title">Sorteios</h5>
-        <p class="card-text">30%</p>
+        <p class="card-text">{{ sorteios }}</p>
       </div>
     </div>
   </div>
