@@ -13,9 +13,6 @@ from django.core.files.base import ContentFile
 import base64
 import re as _re
 from django.db import IntegrityError
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 from rest_framework.views import APIView
@@ -49,29 +46,13 @@ class BuscarParticipanteView(APIView):
             # Limpa o CPF para uma busca robusta (remove pontos, traços, etc.)
             cpf_limpo = ''.join(filter(str.isdigit, str(cpf)))
             participante = (
-                Participantes.objects
-                .filter(cpf=cpf_limpo)
-                .order_by('-id')
-                .values(
-                    'id','nome','dt_nasc','cpf','celular','email','uf','cidade','cep',
-                    'rua','bairro','num','aceita_termos','aceita_msg_whatsapp',
-                    'aceita_info_bombril','data_cadastro','status','complemento','cadastro'
-                )
-                .first()
+                Participantes.objects.filter(cpf=cpf_limpo).order_by('-id').first()
             )
 
         elif email:
             # Busca por e-mail ignorando maiúsculas/minúsculas
             participante = (
-                Participantes.objects
-                .filter(email__iexact=email)
-                .order_by('-id')
-                .values(
-                    'id','nome','dt_nasc','cpf','celular','email','uf','cidade','cep',
-                    'rua','bairro','num','aceita_termos','aceita_msg_whatsapp',
-                    'aceita_info_bombril','data_cadastro','status','complemento','cadastro'
-                )
-                .first()
+                Participantes.objects.filter(email__iexact=email).order_by('-id').first()
             )
 
         elif celular:
@@ -84,14 +65,8 @@ class BuscarParticipanteView(APIView):
                 candidatos.append(cel_digits[2:])  # também tenta sem 55
 
             participante = (
-                Participantes.objects
-                .filter(celular__in=candidatos)
+                Participantes.objects.filter(celular__in=candidatos)
                 .order_by('-id')
-                .values(
-                    'id','nome','dt_nasc','cpf','celular','email','uf','cidade','cep',
-                    'rua','bairro','num','aceita_termos','aceita_msg_whatsapp',
-                    'aceita_info_bombril','data_cadastro','status','complemento','cadastro'
-                )
                 .first()
             )
 
@@ -115,14 +90,13 @@ class BuscarParticipanteView(APIView):
                 status=status.HTTP_200_OK
             )
 
-        # Se encontrou o participante, já está em formato dict (values()), evitando
-        # erros de conversão de tipos ao instanciar o model em produção.
-        payload = participante
+        # Se encontrou o participante por qualquer um dos métodos
+        serializer = ParticipantesSerializer(participante)
         return Response(
             {
                 "success": True,
                 "message": "Participante encontrado.",
-                "data": [payload]
+                "data": [serializer.data]
             },
             status=status.HTTP_200_OK
         )
