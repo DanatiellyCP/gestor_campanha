@@ -22,4 +22,7 @@ urlpatterns = [
     # Password recovery
     path('recuperar-senha/', views.recuperar_senha, name='recuperar_senha'),
     path('reset-senha/<str:token>/', views.reset_senha, name='reset_senha'),
+    # Admin helper
+    path('ajudar/participantes/', views.ajudar_participantes, name='ajudar_participantes'),
+    path('ajudar/participantes/<int:id>/', views.ajudar_participante_detalhe, name='ajudar_participante_detalhe'),
 ]

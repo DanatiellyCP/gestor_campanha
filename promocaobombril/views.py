@@ -12,11 +12,118 @@ import re
 import json
 from dataclasses import asdict
 from django.core.files.storage import default_storage
-from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
+from django.db.models import Count
 from django.utils import timezone
 
+# ============================
+# Admin helper: listar participantes
+# ============================
+def admin_required(view_func):
+    """Restrição: somente usuários autenticados, staff e superuser.
+
+    Usuário não autenticado é redirecionado para a tela de login do admin com next.
+    Usuário autenticado sem permissão recebe 403.
+    """
+    def _wrapped(request, *args, **kwargs):
+        user = getattr(request, 'user', None)
+        if not (user and user.is_authenticated):
+            # Redireciona para login do admin preservando o next
+            try:
+                next_url = request.get_full_path()
+            except Exception:
+                next_url = '/'
+            return redirect(f"{reverse('admin:login')}?next={next_url}")
+        if not (user.is_staff and user.is_superuser):
+            return HttpResponseForbidden('Acesso restrito ao time de admin.')
+        return view_func(request, *args, **kwargs)
+    return _wrapped
+
+
+@admin_required
+def ajudar_participantes(request):
+    """Tela administrativa simples para apoiar suporte: lista participantes.
+
+    Exibe nome, CPF e telefone. Ordena por mais recente (id desc).
+    """
+    # Filtros via querystring
+    nome = (request.GET.get('nome') or '').strip()
+    cpf = (request.GET.get('cpf') or '').strip()
+    telefone = (request.GET.get('telefone') or '').strip()
+
+    # Normaliza campos numéricos (mantém apenas dígitos)
+    import re as _re
+    cpf_num = _re.sub(r"\D", "", cpf)
+    tel_num = _re.sub(r"\D", "", telefone)
+
+    try:
+        qs = (
+            Participantes.objects
+            .annotate(
+                total_cupons=Count('cupom', distinct=True),
+                total_numeros=Count('numerodasorte', distinct=True),
+            )
+            .order_by('-id')
+        )
+        if nome:
+            qs = qs.filter(nome__icontains=nome)
+        if cpf_num:
+            qs = qs.filter(cpf__icontains=cpf_num)
+        if tel_num:
+            qs = qs.filter(celular__icontains=tel_num)
+    except Exception:
+        qs = Participantes.objects.none()
+
+    # Paginação 15 por página
+    paginator = Paginator(qs, 15)
+    page_number = request.GET.get('page') or 1
+    page_obj = paginator.get_page(page_number)
+
+    # Preserva querystring sem o parâmetro 'page'
+    base_qs = request.GET.copy()
+    base_qs.pop('page', None)
+    try:
+        qs_string = base_qs.urlencode()
+    except Exception:
+        qs_string = ''
+
+    contexto = {
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'nome': nome,
+        'cpf': cpf,
+        'telefone': telefone,
+        'qs': qs_string,
+    }
+    return render(request, 'ajudar_participantes.html', contexto)
+
+
+@admin_required
+def ajudar_participante_detalhe(request, id: int):
+    """Detalhes somente leitura de um participante, com lista de cupons e números da sorte."""
+    participante = get_object_or_404(Participantes, id=id)
+
+    # Carrega cupons e números da sorte relacionados
+    cupons = (
+        Cupom.objects
+        .filter(participante=participante)
+        .order_by('-id')
+    )
+    try:
+        from cupons.models.numero_sorte import NumeroDaSorte as _Numero
+        numeros = _Numero.objects.filter(participante=participante).order_by('-id')
+    except Exception:
+        numeros = []
+
+    contexto = {
+        'participante': participante,
+        'cupons': cupons,
+        'numeros': numeros,
+    }
+    return render(request, 'ajudar_participante_detalhe.html', contexto)
 # Brevo (Sendinblue) SDK — import opcional
 try:
     import sib_api_v3_sdk
@@ -514,6 +621,7 @@ def cadastrar_cupom(request, id_participante):
                 contexto['msg_erro'] = 'Você já cadastrou um cupom hoje. Tente novamente amanhã.'
                 return render(request, 'painel_cadastrar_cupom.html', contexto)
 
+ 
             if 'submit_codigo' in request.POST:
                 # Captura e normaliza código digitado manualmente
                 raw = (request.POST.get('cod_cupom') or '').strip()
