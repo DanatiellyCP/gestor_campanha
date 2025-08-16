@@ -15,7 +15,9 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "34.95.220.242",
-    "1bcd75d3982d.ngrok-free.app"
+    "1bcd75d3982d.ngrok-free.app",
+    "promocaobombril.com.br",
+    "www.promocaobombril.com.br"
 ]
 
 CSRF_TRUSTED_ORIGINS = [
