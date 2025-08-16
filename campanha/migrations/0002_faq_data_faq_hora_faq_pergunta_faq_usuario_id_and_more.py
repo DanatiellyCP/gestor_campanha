@@ -40,12 +40,12 @@ class Migration(migrations.Migration):
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='',
+            model_name='sorteios',
             name='data_sorteio',
             field=models.DateField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='',
+            model_name='sorteios',
             name='hora_cadastro',
             field=models.TimeField(blank=True, null=True),
         ),
