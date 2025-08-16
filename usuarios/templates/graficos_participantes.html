@@ -1,0 +1,103 @@
+{% extends "master.html" %}
+{% block title %}Gráficos - Participantes{% endblock %}
+
+{% block content %}
+<h3>Gráficos de Participantes</h3>
+
+<!-- Filtros -->
+<form id="filtroForm" class="row mb-4">
+  <div class="col-md-3">
+    <label>Data Início</label>
+    <input type="date" name="data_inicio" class="form-control">
+  </div>
+  <div class="col-md-3">
+    <label>Data Fim</label>
+    <input type="date" name="data_fim" class="form-control">
+  </div>
+  <div class="col-md-3">
+    <label>Região</label>
+    <select name="regiao" class="form-control">
+      <option value="">Todas</option>
+      {% for r in regioes %}
+        <option value="{{ r }}">{{ r }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+  </div>
+</form>
+
+<!-- Gráficos -->
+<div class="row">
+  <!-- Gráfico de barras por mês -->
+  <div class="col-md-8 mb-3">
+    <div class="card">
+      <div class="card-header">Participantes por Mês</div>
+      <div class="card-body">
+        <canvas id="graficoMes"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de pizza por região -->
+  <div class="col-md-4 mb-3">
+    <div class="card">
+      <div class="card-header">Participantes por Região</div>
+      <div class="card-body">
+        <canvas id="graficoPizza"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let ctxMes = document.getElementById('graficoMes').getContext('2d');
+let ctxPizza = document.getElementById('graficoPizza').getContext('2d');
+
+let graficoMes = new Chart(ctxMes, {
+    type: 'bar',
+    data: { labels: [], datasets: [{ label: 'Participantes', data: [], backgroundColor: 'rgba(54, 162, 235, 0.7)' }] },
+    options: { responsive: true }
+});
+
+let graficoPizza = new Chart(ctxPizza, {
+    type: 'pie',
+    data: { labels: [], datasets: [{ label: 'Participantes', data: [], backgroundColor: ['#ff6384','#36a2eb','#ffcd56','#4bc0c0','#9966ff'] }] },
+    options: { responsive: true }
+});
+
+// Função para atualizar gráficos via AJAX
+function atualizarGraficos(params={}) {
+    const query = new URLSearchParams(params).toString();
+    fetch("{% url 'participantes_dados' %}?" + query)
+        .then(res => res.json())
+        .then(json => {
+            // Atualiza gráfico de barras
+            graficoMes.data.labels = json.labels_mes;
+            graficoMes.data.datasets[0].data = json.dados_mes;
+            graficoMes.update();
+
+            // Atualiza gráfico de pizza
+            graficoPizza.data.labels = json.labels_estado;
+            graficoPizza.data.datasets[0].data = json.dados_estado;
+            graficoPizza.update();
+        });
+}
+
+// Carregar gráficos inicialmente
+atualizarGraficos();
+
+// Filtrar via formulário
+document.getElementById('filtroForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const params = {};
+    formData.forEach((v,k)=>{ if(v) params[k]=v });
+    atualizarGraficos(params);
+});
+</script>
+
+{% endblock %}

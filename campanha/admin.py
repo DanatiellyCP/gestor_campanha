@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Soteios
+from .models import Sorteios
 
 # Register your models here.
-admin.site.register(Soteios)
+admin.site.register(Sorteios)

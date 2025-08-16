@@ -12,11 +12,118 @@ import re
 import json
 from dataclasses import asdict
 from django.core.files.storage import default_storage
-from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
 from django.db import IntegrityError
+from django.db.models import Count
 from django.utils import timezone
 
+# ============================
+# Admin helper: listar participantes
+# ============================
+def admin_required(view_func):
+    """Restrição: somente usuários autenticados, staff e superuser.
+
+    Usuário não autenticado é redirecionado para a tela de login do admin com next.
+    Usuário autenticado sem permissão recebe 403.
+    """
+    def _wrapped(request, *args, **kwargs):
+        user = getattr(request, 'user', None)
+        if not (user and user.is_authenticated):
+            # Redireciona para login do admin preservando o next
+            try:
+                next_url = request.get_full_path()
+            except Exception:
+                next_url = '/'
+            return redirect(f"{reverse('admin:login')}?next={next_url}")
+        if not (user.is_staff and user.is_superuser):
+            return HttpResponseForbidden('Acesso restrito ao time de admin.')
+        return view_func(request, *args, **kwargs)
+    return _wrapped
+
+
+@admin_required
+def ajudar_participantes(request):
+    """Tela administrativa simples para apoiar suporte: lista participantes.
+
+    Exibe nome, CPF e telefone. Ordena por mais recente (id desc).
+    """
+    # Filtros via querystring
+    nome = (request.GET.get('nome') or '').strip()
+    cpf = (request.GET.get('cpf') or '').strip()
+    telefone = (request.GET.get('telefone') or '').strip()
+
+    # Normaliza campos numéricos (mantém apenas dígitos)
+    import re as _re
+    cpf_num = _re.sub(r"\D", "", cpf)
+    tel_num = _re.sub(r"\D", "", telefone)
+
+    try:
+        qs = (
+            Participantes.objects
+            .annotate(
+                total_cupons=Count('cupom', distinct=True),
+                total_numeros=Count('numerodasorte', distinct=True),
+            )
+            .order_by('-id')
+        )
+        if nome:
+            qs = qs.filter(nome__icontains=nome)
+        if cpf_num:
+            qs = qs.filter(cpf__icontains=cpf_num)
+        if tel_num:
+            qs = qs.filter(celular__icontains=tel_num)
+    except Exception:
+        qs = Participantes.objects.none()
+
+    # Paginação 15 por página
+    paginator = Paginator(qs, 15)
+    page_number = request.GET.get('page') or 1
+    page_obj = paginator.get_page(page_number)
+
+    # Preserva querystring sem o parâmetro 'page'
+    base_qs = request.GET.copy()
+    base_qs.pop('page', None)
+    try:
+        qs_string = base_qs.urlencode()
+    except Exception:
+        qs_string = ''
+
+    contexto = {
+        'page_obj': page_obj,
+        'paginator': paginator,
+        'nome': nome,
+        'cpf': cpf,
+        'telefone': telefone,
+        'qs': qs_string,
+    }
+    return render(request, 'ajudar_participantes.html', contexto)
+
+
+@admin_required
+def ajudar_participante_detalhe(request, id: int):
+    """Detalhes somente leitura de um participante, com lista de cupons e números da sorte."""
+    participante = get_object_or_404(Participantes, id=id)
+
+    # Carrega cupons e números da sorte relacionados
+    cupons = (
+        Cupom.objects
+        .filter(participante=participante)
+        .order_by('-id')
+    )
+    try:
+        from cupons.models.numero_sorte import NumeroDaSorte as _Numero
+        numeros = _Numero.objects.filter(participante=participante).order_by('-id')
+    except Exception:
+        numeros = []
+
+    contexto = {
+        'participante': participante,
+        'cupons': cupons,
+        'numeros': numeros,
+    }
+    return render(request, 'ajudar_participante_detalhe.html', contexto)
 # Brevo (Sendinblue) SDK — import opcional
 try:
     import sib_api_v3_sdk
@@ -493,6 +600,110 @@ def painel_detalhes_cupom(request):
     return render(request, 'painel_detalhes_cupom.html', contexto)
 
 
+
+# ------------------------------------------------------------------------
+
+
+def cadastrar_cupom(request, id_participante):
+    participante = get_object_or_404(Participantes, id=id_participante)
+    contexto = {'id_participante': id_participante}
+
+    if request.method == 'POST':
+        chave_acesso = None
+        dados_ocr = ""
+        imagem_path = None
+        erro = None
+
+        try:
+            # --- Captura código manual ou via imagem ---
+            if 'submit_codigo' in request.POST:
+                chave_acesso = request.POST.get('cod_cupom')
+
+            elif 'submit_imagem' in request.FILES:
+                arquivo = request.FILES.get('img_cupom')
+                if not arquivo:
+                    erro = 'Nenhum arquivo de imagem foi selecionado.'
+                else:
+                    imagem_path = guardar_cupom(arquivo)
+                    imagem_local_path = default_storage.path(imagem_path)
+
+                    with open(imagem_local_path, "rb") as f_img:
+                        chave_acesso = extrai_codigo_qrcode(f_img)
+
+                    if not chave_acesso:
+                        dados_ocr = extrair_texto_ocr(imagem_local_path)
+                        chave_acesso = extrair_numero_cupom(dados_ocr)
+
+            if erro:
+                contexto['msg_erro'] = erro
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+            if not chave_acesso:
+                contexto['msg_erro'] = "Informe o código do cupom."
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+            # --- Consulta dados da nota ---
+            dados_nota = identificar_chave_detalhada(chave_acesso)
+            if not dados_nota.valida:
+                contexto['msg_erro'] = f"Chave inválida: {dados_nota.mensagem}"
+                return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+            status_nota = 'Em Análise'
+            validar = validar_cupom(dados_nota.chave, dados_nota.tipo_documento)
+
+            # pegar a data do retorno da api
+            primeiro_cupom = validar[0]
+            data_emissao = primeiro_cupom['data_hora_emissao']
+            print(data_emissao)
+
+
+
+            # Serializa dados originais
+            dados_cupom_json = json.dumps(asdict(dados_nota))
+           
+            novo_cupom = Cupom.objects.create(
+                participante=participante,
+                dados_cupom=dados_cupom_json,
+                tipo_envio='Codigo' if 'submit_codigo' in request.POST else 'Imagem',
+                status=status_nota,
+                numero_documento=dados_nota.codigo_numerico,
+                cnpj_loja=dados_nota.cnpj_emitente,
+                dados_json=validar,
+                tipo_documento=dados_nota.tipo_documento
+            )
+            novo_cupom.save()
+
+            msg_produto = cadastrar_produto(novo_cupom.id, id_participante)
+            contexto['msg_sucesso'] = f'Cupom cadastrado com sucesso! {msg_produto}'
+            msg_numeros = cadastrar_numeros_da_sorte(novo_cupom)
+            contexto['msg_numeros'] = msg_numeros
+
+            # --- Validação de regras ---
+            valido, msg_validacao = Validar_regras_cupom(
+                novo_cupom.data_cadastro,
+                dados_nota.chave,
+                id_participante
+            )
+
+            contexto['msg_erro'] = msg_validacao
+
+            if valido:
+                novo_cupom.status = 'Pendente'
+            else:
+               novo_cupom.status = 'Invalido'
+
+            novo_cupom.save() 
+
+        except Exception as e:
+            contexto['msg_erro'] = f'Erro ao processar o cadastro: {e}'
+
+    return render(request, 'painel_cadastrar_cupom.html', contexto)
+
+
+
+
+# comentei a função abaixo, vou colocar ela atualizada, para teste
+"""
 def cadastrar_cupom(request, id_participante):
     participante = get_object_or_404(Participantes, id=id_participante)
     contexto = {'id_participante': id_participante}
@@ -514,6 +725,7 @@ def cadastrar_cupom(request, id_participante):
                 contexto['msg_erro'] = 'Você já cadastrou um cupom hoje. Tente novamente amanhã.'
                 return render(request, 'painel_cadastrar_cupom.html', contexto)
 
+ 
             if 'submit_codigo' in request.POST:
                 # Captura e normaliza código digitado manualmente
                 raw = (request.POST.get('cod_cupom') or '').strip()
@@ -716,4 +928,5 @@ def cadastrar_cupom(request, id_participante):
             contexto['msg_erro'] = 'Não foi possível concluir o cadastro do seu cupom no momento. Tente novamente mais tarde.'
 
     return render(request, 'painel_cadastrar_cupom.html', contexto)
+    """
 
